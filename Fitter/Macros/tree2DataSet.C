@@ -210,7 +210,8 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 
     ////////////////////////////////////
     Long64_t nentries = theTree->GetEntries();
-    //nentries = 2000000;
+    nentries = 2000000;
+
     float normF = 0.;
     if (isMC && isPbPb)
     {

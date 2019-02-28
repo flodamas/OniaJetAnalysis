@@ -222,16 +222,16 @@ enum class CtauModel
     QuadrupleDecay=9
 };
 map< string , CtauModel > CtauModelDictionary = {
-  {"InvalidModel",             CtauModel::InvalidModel},
+  {"InvalidModel",                CtauModel::InvalidModel},
   {"QuadrupleGaussianResolution", CtauModel::QuadrupleGaussianResolution},
-  {"TripleGaussianResolution", CtauModel::TripleGaussianResolution},
-  {"DoubleGaussianResolution", CtauModel::DoubleGaussianResolution},
-  {"SingleGaussianResolution", CtauModel::SingleGaussianResolution},
-  {"TripleDecay",              CtauModel::TripleDecay},
-  {"QuadrupleDecay",           CtauModel::QuadrupleDecay},
-  {"DoubleSingleSidedDecay",   CtauModel::DoubleSingleSidedDecay},
-  {"SingleSidedDecay",         CtauModel::SingleSidedDecay},
-  {"Delta",                    CtauModel::Delta}
+  {"TripleGaussianResolution",    CtauModel::TripleGaussianResolution},
+  {"DoubleGaussianResolution",    CtauModel::DoubleGaussianResolution},
+  {"SingleGaussianResolution",    CtauModel::SingleGaussianResolution},
+  {"TripleDecay",                 CtauModel::TripleDecay},
+  {"QuadrupleDecay",              CtauModel::QuadrupleDecay},
+  {"DoubleSingleSidedDecay",      CtauModel::DoubleSingleSidedDecay},
+  {"SingleSidedDecay",            CtauModel::SingleSidedDecay},
+  {"Delta",                       CtauModel::Delta}
 };
 
 typedef struct CtauPNP {
@@ -380,7 +380,8 @@ bool isFitAlreadyFound(RooArgSet *newpars, string FileName, string pdfName)
     cout << "[INFO] FileName: " << FileName << " was not found" << endl;
     return false; // File was not found
   }
-  TFile *file = new TFile(FileName.c_str());
+  //TFile *file = new TFile(FileName.c_str());
+  TFile *file = TFile::Open(FileName.c_str());
   if (!file) return false;  
   RooWorkspace *ws = (RooWorkspace*) file->Get("workspace");
   if (!ws) {
@@ -399,7 +400,6 @@ bool isFitAlreadyFound(RooArgSet *newpars, string FileName, string pdfName)
   bool result = compareSnapshots(newpars, params);
   delete ws;
   file->Close(); delete file; 
-
   return result;
 };
 

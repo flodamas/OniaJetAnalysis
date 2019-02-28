@@ -35,7 +35,7 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
 {
 
   if (DSTAG.find("_")!=std::string::npos) DSTAG.erase(DSTAG.find("_"));
-  
+
   bool isMC = false;
   bool isNPrompt = false;
   if (DSTAG.find("MC")!=std::string::npos)
@@ -67,7 +67,7 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
   string pdfName  = Form("pdfMASS_Tot_%s", (isPbPb?"PbPb":"PP"));
   if (plotPureSMC) dsOSName = Form("dOS_%s_%s_NoBkg%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyJEC?"_JEC":""));
   if (plotPureSMC && applyWeight_Corr) dsOSName = Form("dOS_%s_%s_NoBkg_%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), corrName.Data(), (applyJEC?"_JEC":"")); 
-  
+
   bool isWeighted = myws.data(dsOSName.c_str())->isWeighted();
   string cutSB = parIni["BkgMassRange_FULL_Cut"];
   string cutSBLabel = parIni["BkgMassRange_FULL_Label"];
@@ -280,16 +280,14 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
     myws.pdf(pdfName.c_str())->plotOn(framezoom,Name("PDF"), Normalization(norm, RooAbsReal::NumEvent), NormRange("MassWindow"),
                                       LineColor(kBlack), LineStyle(1),Precision(1e-4));
   }			
-  
   // set the CMS style
   setTDRStyle();
-  
   // Create the main canvas
   TCanvas *cFig  = new TCanvas(Form("cMassFig_%s", (isPbPb?"PbPb":"PP")), "cMassFig",800,800);
   TPad    *pad1  = new TPad(Form("pad1_%s", (isPbPb?"PbPb":"PP")),"",0,paperStyle ? 0 : 0.23,1,1);
   TPad    *pad2  = new TPad(Form("pad2_%s", (isPbPb?"PbPb":"PP")),"",0,0,1,.228);
   TLine   *pline = new TLine(cut.dMuon.M.Min, 0.0, cut.dMuon.M.Max, 0.0);
-  
+
   // TPad *pad4 = new TPad("pad4","This is pad4",0.55,0.46,0.97,0.87);
   TPad *pad4 = new TPad("pad4","This is pad4",0.55,paperStyle ? 0.29 : 0.36,0.97,paperStyle ? 0.70 : 0.77);
   pad4->SetFillStyle(0);
@@ -318,6 +316,7 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
      frame->GetYaxis()->SetTitleSize(0.05);
   }
   setMassRange(myws, frame, dsOSName, setLogScale, cut.dMuon.AbsRap.Min, cut.dMuon.AbsRap.Max, plotPureSMC, SB);
+
   if (paperStyle) {
      double Ydown = 0.;//frame->GetMinimum();
      double Yup = 0.9*frame->GetMaximum();
@@ -352,6 +351,7 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
         t->DrawLatex(0.20, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=2.0*0.045;
      } 
   }
+
   if (cut.dMuon.Zed.Max<100) {t->DrawLatex(0.5175, 0.86-dy, Form("%g < z^{#mu#mu} #leq %g",cut.dMuon.Zed.Min,cut.dMuon.Zed.Max)); dy+=0.045;}
   if (cut.dMuon.AbsRap.Min>0.1) {t->DrawLatex(0.5175, 0.86-dy, Form("%.1f < |y^{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Min,cut.dMuon.AbsRap.Max)); dy+=0.045;}
   else {t->DrawLatex(0.5175, 0.86-dy, Form("|y^{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Max)); dy+=0.045;}
@@ -467,7 +467,6 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
      pline->Draw("same");
      pad2->Update();
   }
-
   // Save the plot in different formats
   gSystem->mkdir(Form("%smass%s/%s/plot/root/", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str()), kTRUE); 
   cFig->SaveAs(Form("%smass%s/%s/plot/root/PLOT_%s_%s_%s%s_z%.0f%.0f_pt%.0f%.0f_rap%.0f%.0f_cent%d%d.root", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str(), "MASS", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), plotLabel.c_str(), (cut.dMuon.Zed.Min*100.0), (cut.dMuon.Zed.Max*100.0), (cut.dMuon.Pt.Min*10.0), (cut.dMuon.Pt.Max*10.0), (cut.dMuon.AbsRap.Min*10.0), (cut.dMuon.AbsRap.Max*10.0), cut.Centrality.Start, cut.Centrality.End));
