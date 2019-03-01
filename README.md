@@ -9,7 +9,7 @@ Repository for code regarding Jpsi in jet in 5.02TeV data.
 * results2tree.C: parse an output directory and put the results into a TTree
  * results2tree("name of work dir","var1,var2,var3")
  * NB: the names of the variables ("var1", etc. in the example above) should be the actual name of the variable in the workspace, without "\_PP" or "\_PbPb". e.g. "sigma1\_Jpsi"
-* plotNjj.C: plot the results for fragmentation function (uses the trees from results2tree.C as input)
+* plotNJJ.C: plot the results for fragmentation function (uses the trees from results2tree.C as input)
 
 ## Efficiency
 * makeAccEff.C: make the histograms (acceptance and efficiency) from the onia trees
