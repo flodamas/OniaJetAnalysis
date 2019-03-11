@@ -549,7 +549,7 @@ void plotRAA(vector<anabin> thecats, string xaxis, string outputDir) {
                       + 2.*spp.correlpp*spp.dnpp_stat*spp.dbfracpp/(spp.npp*spp.bfracpp)
                       + pow(spp.dbfracpp/spp.bfracpp,2));
     }
-//    cout << "after prompt = " << naa << " ; " << npp << " ; " << dnaa << " ; " << dnpp << endl;
+    //cout << "after prompt = " << naa << " ; " << npp << " ; " << dnaa << " ; " << dnpp << endl;
     naa *= normfactoraa;
     npp *= normfactorpp;
     dnaa *= normfactoraa;
@@ -557,7 +557,7 @@ void plotRAA(vector<anabin> thecats, string xaxis, string outputDir) {
     
     double raa = npp>0 ? naa / npp : 0;
     double draa = raa>0 ? raa*sqrt(pow(dnaa/naa,2) + pow(dnpp/npp,2)) : 0;
-//    cout << it->first.ptbin().low() << " " << it->first.ptbin().high() << " -> " << raa << " " << s.naa << " " << spp.npp << " " << s.effaa << " "  << spp.effpp << " " << s.accaa << " " << s.accpp << ", " << s.bfracaa << " " << spp.bfracpp <<  " " << s.taa << endl;
+    //cout << it->first.ptbin().low() << " " << it->first.ptbin().high() << " -> " << raa << " " << s.naa << " " << spp.npp << " " << s.effaa << " "  << spp.effpp << " " << s.accaa << " " << s.accpp << ", " << s.bfracaa << " " << spp.bfracpp <<  " " << s.taa << endl;
     double syst_low = raa*sqrt(pow(spp.systpp,2)+pow(s.systaa,2));
     double syst_high = syst_low;
     
