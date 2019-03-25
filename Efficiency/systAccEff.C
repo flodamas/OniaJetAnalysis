@@ -968,13 +968,13 @@ void oniaTree::AccEffSyst_all() {
 
   for (int i=0; i<systN; i++) {
     cout<<"--------[INFO] Sarting TnpSyst for "<<systName[i]<<"----------"<<endl;
-    //TnpSyst(systName[i]);
+    TnpSyst(systName[i]);
     cout<<"--------[INFO] Sarting AccEffStat for "<<systName[i]<<"----------"<<endl;
     AccEffStat(systName[i]);
     cout<<"--------[INFO] Sarting TnpStat for "<<systName[i]<<"----------"<<endl;
-    //TnpStat(systName[i]);
+    TnpStat(systName[i]);
     cout<<"--------[INFO] Sarting AccEffMisMod for "<<systName[i]<<"----------"<<endl;
-    //AccEffMisMod(systName[i]);
+    AccEffMisMod(systName[i]);
     cout<<"--------[INFO] Sarting FullAccEffSyst for "<<systName[i]<<"----------"<<endl;
     FullAccEffSyst(systName[i]);
     cout<<"--------[INFO] All systematics done for "<<systName[i]<<"----------"<<endl;
