@@ -130,22 +130,22 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
     initTree(theTree);                         // Initialize the Tree
     iniBranch(theTree,isMC);                   // Initialize the Branches
 
-    RooRealVar* mass    = new RooRealVar("invMass","#mu#mu mass", 1.0, 6.0, "GeV/c^{2}");
-    RooRealVar* zed     = new RooRealVar("zed", "z_{J/#psi}", -0.1, 2);
-    RooRealVar* ctau    = new RooRealVar("ctau","c_{#tau}", -100000.0, 100000.0, "mm");
-    RooRealVar* ctauN    = new RooRealVar("ctauN","c_{#tau}", -100000.0, 100000.0, "");
-    RooRealVar* ctauTrue = new RooRealVar("ctauTrue","c_{#tau}", -100000.0, 100000.0, "mm");
-    RooRealVar* ctauNRes = new RooRealVar("ctauNRes","c_{#tau}", -100000.0, 100000.0, "");
-    RooRealVar* ctauRes = new RooRealVar("ctauRes","c_{#tau}", -100000.0, 100000.0, "");
-    RooRealVar* ctauErr = new RooRealVar("ctauErr","#sigma_{c#tau}", -100000.0, 100000.0, "mm");
-    RooRealVar* ptQQ    = new RooRealVar("pt","#mu#mu p_{T}", -1.0, 10000.0, "GeV/c");
-    RooRealVar* rapQQ   = new RooRealVar("rap","#mu#mu y", -2.5, 2.5, "");
-    RooRealVar* ptJet    = new RooRealVar("jetpt","Jet p_{T}", -1.0, 10000.0, "GeV/c");
-    RooRealVar* rapJet   = new RooRealVar("jetrap","Jet y", -2.5, 2.5, "");
-    RooRealVar* cent    = new RooRealVar("cent","centrality", -1.0, 1000.0, "");
-    RooRealVar* weight  = new RooRealVar("weight","MC weight", 0.0, 10000000.0, "");
+    RooRealVar* mass         = new RooRealVar("invMass","#mu#mu mass", 1.0, 6.0, "GeV/c^{2}");
+    RooRealVar* zed          = new RooRealVar("zed", "z_{J/#psi}", -0.1, 2);
+    RooRealVar* ctau         = new RooRealVar("ctau","c_{#tau}", -100000.0, 100000.0, "mm");
+    RooRealVar* ctauN        = new RooRealVar("ctauN","c_{#tau}", -100000.0, 100000.0, "");
+    RooRealVar* ctauTrue     = new RooRealVar("ctauTrue","c_{#tau}", -100000.0, 100000.0, "mm");
+    RooRealVar* ctauNRes     = new RooRealVar("ctauNRes","c_{#tau}", -100000.0, 100000.0, "");
+    RooRealVar* ctauRes      = new RooRealVar("ctauRes","c_{#tau}", -100000.0, 100000.0, "");
+    RooRealVar* ctauErr      = new RooRealVar("ctauErr","#sigma_{c#tau}", -100000.0, 100000.0, "mm");
+    RooRealVar* ptQQ         = new RooRealVar("pt","#mu#mu p_{T}", -1.0, 10000.0, "GeV/c");
+    RooRealVar* rapQQ        = new RooRealVar("rap","#mu#mu y", -2.5, 2.5, "");
+    RooRealVar* ptJet        = new RooRealVar("jetpt","Jet p_{T}", -1.0, 10000.0, "GeV/c");
+    RooRealVar* rapJet       = new RooRealVar("jetrap","Jet y", -2.5, 2.5, "");
+    RooRealVar* cent         = new RooRealVar("cent","centrality", -1.0, 1000.0, "");
+    RooRealVar* weight       = new RooRealVar("weight","MC weight", 0.0, 10000000.0, "");
     RooRealVar* weightCorr   = new RooRealVar("weightCorr","Data correction weight", 0.0, 10000000.0, "");
-    RooArgSet*  cols    = NULL;
+    RooArgSet*  cols         = NULL;
     
     if (applyWeight && !applyWeight_Corr)
     {
@@ -650,6 +650,7 @@ void iniBranch(TChain* fChain, bool isMC)
     if (fChain->GetBranch("Gen_QQ_ctau3D"))       { fChain->SetBranchStatus("Gen_QQ_ctau3D",1);         }
     if (fChain->GetBranch("Gen_QQ_ctau"))         { fChain->SetBranchStatus("Gen_QQ_ctau",1);           }
     if (fChain->GetBranch("Reco_QQ_whichGen"))    { fChain->SetBranchStatus("Reco_QQ_whichGen",1);      }
+    if (fChain->GetBranch("Gen_weight"))          { fChain->SetBranchStatus("Gen_weight",1);            }
     if (fChain->GetBranch("refpt"))               { fChain->SetBranchStatus("refpt",1);                 }
     if (fChain->GetBranch("refeta"))              { fChain->SetBranchStatus("refeta",1);                }
     if (fChain->GetBranch("refy"))                { fChain->SetBranchStatus("refy",1);                  }
@@ -699,7 +700,7 @@ bool isMatchedDiMuon(int iRecoDiMuon, double maxDeltaR)
   //TLorentzVector* RecoMuonpl = (TLorentzVector*) Reco_mu_4mom->At(Reco_QQ_mupl_idx[iRecoDiMuon]);
   //TLorentzVector* RecoMuonmi = (TLorentzVector*) Reco_mu_4mom->At(Reco_QQ_mumi_idx[iRecoDiMuon]);
   
-  bool isMatched(false);
+  //bool isMatched(false);
   //int iGenMuon(0);
   //while ( !isMatched && (iGenMuon < Gen_QQ_size) )
   //{
@@ -712,9 +713,8 @@ bool isMatchedDiMuon(int iRecoDiMuon, double maxDeltaR)
   //iGenMuon++;
   //}
 
-  if (Reco_QQ_whichGen[iRecoDiMuon] != -1) isMatched = true;
-
-  return isMatched;
+  if (Reco_QQ_whichGen[iRecoDiMuon] != -1) return true;
+  return false;
 };
 
 double getNColl(int centr, bool isPP)
@@ -807,7 +807,8 @@ double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP)
 {
   const char* collName = "PbPb";
   const char* massName = "Jpsi";
-  if (isPP) collName = "PP";
+  //if (isPP) 
+    collName = "PP";
   
     if (!fcorrArray)
     {

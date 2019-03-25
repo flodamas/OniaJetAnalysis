@@ -21,58 +21,6 @@
 
 Int_t           fCurrent; //!current Tree number in a TChain
 
-
-//////////////////////////////////////////
-// temporary solution for gen leaf type //
-//////////////////////////////////////////
-Int_t           Gen_QQ_size;
-Int_t           Gen_QQ_type[99];   //[Gen_QQ_size]
-TClonesArray    *Gen_QQ_4mom;
-Int_t           Gen_QQ_momId[99];   //[Gen_QQ_size]
-Float_t         Gen_QQ_ctau[99];   //[Gen_QQ_size]
-Float_t         Gen_QQ_ctau3D[99];   //[Gen_QQ_size]
-Int_t           Gen_mu_size;
-Int_t           Gen_mu_type[99];   //[Gen_mu_size]
-Int_t           Gen_mu_charge[99];   //[Gen_mu_size]
-TClonesArray    *Gen_mu_4mom;
-Int_t           Reco_QQ_whichGen[99];
-
-Float_t         pthat;
-Float_t         refpt[56];   //[nref]
-Float_t         refeta[56];   //[nref]
-Float_t         refy[56];   //[nref]
-Float_t         refphi[56];   //[nref]
-Float_t         refm[56];   //[nref]
-Float_t         refarea[56];   //[nref]
-Float_t         reftau1[56];   //[nref]
-Float_t         reftau2[56];   //[nref]
-Float_t         reftau3[56];   //[nref]
-Float_t         refdphijt[56];   //[nref]
-Float_t         refdrjt[56];   //[nref]
-Float_t         refparton_pt[56];   //[nref]
-Int_t           refparton_flavor[56];   //[nref]
-Int_t           refparton_flavorForB[56];   //[nref]
-Float_t         genChargedSum[56];   //[nref]
-Float_t         genHardSum[56];   //[nref]
-Float_t         signalChargedSum[56];   //[nref]
-Float_t         signalHardSum[56];   //[nref]
-Int_t           subid[56];   //[nref]
-Int_t           ngen;
-Int_t           genmatchindex[28];   //[ngen]
-Float_t         genpt[28];   //[ngen]
-Float_t         geneta[28];   //[ngen]
-Float_t         geny[28];   //[ngen]
-Float_t         gentau1[28];   //[ngen]
-Float_t         gentau2[28];   //[ngen]
-Float_t         gentau3[28];   //[ngen]
-Float_t         genphi[28];   //[ngen]
-Float_t         genm[28];   //[ngen]
-Float_t         gendphijt[28];   //[ngen]
-Float_t         gendrjt[28];   //[ngen]
-Int_t           gensubid[28];   //[ngen]
-
-//////////////////////////////////////////
-
 // Declaration of leaf types
 UInt_t          eventNb;
 UInt_t          runNb;
@@ -84,54 +32,73 @@ Int_t           Npix;
 Int_t           NpixelTracks;
 Int_t           Ntracks;
 Int_t           nTrig;
-Int_t           trigPrescale[30];
+Int_t           trigPrescale[26];   //[nTrig]
 ULong64_t       HLTriggers;
 Int_t           Reco_QQ_size;
-Int_t           Reco_QQ_type[30];
-Int_t           Reco_QQ_sign[30];
+Int_t           Reco_QQ_type[99];   //[Reco_QQ_size]
+Int_t           Reco_QQ_sign[99];   //[Reco_QQ_size]
 TClonesArray    *Reco_QQ_4mom;
-Int_t           Reco_QQ_mupl_idx[30];
-Int_t           Reco_QQ_mumi_idx[30];
-ULong64_t       Reco_QQ_trig[30];
-Bool_t          Reco_QQ_isCowboy[30];
-Float_t         Reco_QQ_ctau[30];
-Float_t         Reco_QQ_ctauErr[30];
-Float_t         Reco_QQ_cosAlpha[30];
-Float_t         Reco_QQ_ctau3D[30];
-Float_t         Reco_QQ_ctauErr3D[30];
-Float_t         Reco_QQ_cosAlpha3D[30];
-Float_t         Reco_QQ_VtxProb[30];
-Float_t         Reco_QQ_dca[30];
-Float_t         Reco_QQ_MassErr[30];
+Int_t           Reco_QQ_mupl_idx[99];   //[Reco_QQ_size]
+Int_t           Reco_QQ_mumi_idx[99];   //[Reco_QQ_size]
+ULong64_t       Reco_QQ_trig[99];   //[Reco_QQ_size]
+Bool_t          Reco_QQ_isCowboy[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_ctau[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_ctauErr[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_cosAlpha[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_ctau3D[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_ctauErr3D[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_cosAlpha3D[99];   //[Reco_QQ_size]
+Int_t           Reco_QQ_whichGen[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_VtxProb[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_dca[99];   //[Reco_QQ_size]
+Float_t         Reco_QQ_MassErr[99];   //[Reco_QQ_size]
 TClonesArray    *Reco_QQ_vtx;
-Int_t           Reco_QQ_Ntrk[30];
+Int_t           Reco_QQ_Ntrk[99];   //[Reco_QQ_size]
 Int_t           Reco_mu_size;
-Int_t           Reco_mu_type[20];
-Int_t           Reco_mu_SelectionType[20];
-Int_t           Reco_mu_charge[20];
+Int_t           Reco_mu_type[99];   //[Reco_mu_size]
+Int_t           Reco_mu_whichGen[99];   //[Reco_mu_size]
+Int_t           Reco_mu_SelectionType[99];   //[Reco_mu_size]
+Int_t           Reco_mu_charge[99];   //[Reco_mu_size]
 TClonesArray    *Reco_mu_4mom;
-ULong64_t       Reco_mu_trig[20];
-Bool_t          Reco_mu_highPurity[20];
-Bool_t          Reco_mu_TrkMuArb[20];
-Bool_t          Reco_mu_TMOneStaTight[20];
-Int_t           Reco_mu_nPixValHits[20];
-Int_t           Reco_mu_nMuValHits[20];
-Int_t           Reco_mu_nTrkHits[20];
-Float_t         Reco_mu_normChi2_inner[20];
-Float_t         Reco_mu_normChi2_global[20];
-Int_t           Reco_mu_nPixWMea[20];
-Int_t           Reco_mu_nTrkWMea[20];
-Int_t           Reco_mu_StationsMatched[20];
-Float_t         Reco_mu_dxy[20];
-Float_t         Reco_mu_dxyErr[20];
-Float_t         Reco_mu_dz[20];
-Float_t         Reco_mu_dzErr[20];
-Float_t         Reco_mu_pt_inner[20];
-Float_t         Reco_mu_pt_global[20];
-Float_t         Reco_mu_ptErr_inner[20];
-Float_t         Reco_mu_ptErr_global[20];
+ULong64_t       Reco_mu_trig[99];   //[Reco_mu_size]
+Bool_t          Reco_mu_highPurity[99];   //[Reco_mu_size]
+Bool_t          Reco_mu_TrkMuArb[99];   //[Reco_mu_size]
+Bool_t          Reco_mu_TMOneStaTight[99];   //[Reco_mu_size]
+Int_t           Reco_mu_nPixValHits[99];   //[Reco_mu_size]
+Int_t           Reco_mu_nMuValHits[99];   //[Reco_mu_size]
+Int_t           Reco_mu_nTrkHits[99];   //[Reco_mu_size]
+Float_t         Reco_mu_normChi2_inner[99];   //[Reco_mu_size]
+Float_t         Reco_mu_normChi2_global[99];   //[Reco_mu_size]
+Int_t           Reco_mu_nPixWMea[99];   //[Reco_mu_size]
+Int_t           Reco_mu_nTrkWMea[99];   //[Reco_mu_size]
+Int_t           Reco_mu_StationsMatched[99];   //[Reco_mu_size]
+Float_t         Reco_mu_dxy[99];   //[Reco_mu_size]
+Float_t         Reco_mu_dxyErr[99];   //[Reco_mu_size]
+Float_t         Reco_mu_dz[99];   //[Reco_mu_size]
+Float_t         Reco_mu_dzErr[99];   //[Reco_mu_size]
+Float_t         Reco_mu_pt_inner[99];   //[Reco_mu_size]
+Float_t         Reco_mu_pt_global[99];   //[Reco_mu_size]
+Float_t         Reco_mu_ptErr_inner[99];   //[Reco_mu_size]
+Float_t         Reco_mu_ptErr_global[99];   //[Reco_mu_size]
+Float_t         Gen_weight;
+Float_t         Gen_pthat;
+Int_t           Gen_QQ_size;
+Int_t           Gen_QQ_type[10];   //[Gen_QQ_size]
+TClonesArray    *Gen_QQ_4mom;
+Int_t           Gen_QQ_momId[10];   //[Gen_QQ_size]
+Float_t         Gen_QQ_ctau[10];   //[Gen_QQ_size]
+Float_t         Gen_QQ_ctau3D[10];   //[Gen_QQ_size]
+Int_t           Gen_QQ_mupl_idx[10];   //[Gen_QQ_size]
+Int_t           Gen_QQ_mumi_idx[10];   //[Gen_QQ_size]
+Int_t           Gen_QQ_whichRec[10];   //[Gen_QQ_size]
+Int_t           Gen_mu_size;
+Int_t           Gen_mu_type[20];   //[Gen_mu_size]
+Int_t           Gen_mu_charge[20];   //[Gen_mu_size]
+TClonesArray    *Gen_mu_4mom;
+Int_t           Gen_mu_whichRec[20];   //[Gen_mu_size]
 
-//Int_t           evt;
+
+Int_t           evt;
 Float_t         b;
 Int_t           nref;
 Float_t         rawpt[10];   //[nref]
@@ -184,6 +151,40 @@ Int_t           eN[10];   //[nref]
 Float_t         muMax[10];   //[nref]
 Float_t         muSum[10];   //[nref]
 Int_t           muN[10];   //[nref]
+Float_t         pthat;
+Float_t         refpt[10];   //[nref]
+Float_t         refeta[10];   //[nref]
+Float_t         refy[10];   //[nref]
+Float_t         refphi[10];   //[nref]
+Float_t         refm[10];   //[nref]
+Float_t         refarea[10];   //[nref]
+Float_t         reftau1[10];   //[nref]
+Float_t         reftau2[10];   //[nref]
+Float_t         reftau3[10];   //[nref]
+Float_t         refdphijt[10];   //[nref]
+Float_t         refdrjt[10];   //[nref]
+Float_t         refparton_pt[10];   //[nref]
+Int_t           refparton_flavor[10];   //[nref]
+Int_t           refparton_flavorForB[10];   //[nref]
+Float_t         genChargedSum[10];   //[nref]
+Float_t         genHardSum[10];   //[nref]
+Float_t         signalChargedSum[10];   //[nref]
+Float_t         signalHardSum[10];   //[nref]
+Int_t           subid[10];   //[nref]
+Int_t           ngen;
+Int_t           genmatchindex[99];   //[ngen]
+Float_t         genpt[99];   //[ngen]
+Float_t         geneta[99];   //[ngen]
+Float_t         geny[99];   //[ngen]
+Float_t         gentau1[99];   //[ngen]
+Float_t         gentau2[99];   //[ngen]
+Float_t         gentau3[99];   //[ngen]
+Float_t         genphi[99];   //[ngen]
+Float_t         genm[99];   //[ngen]
+Float_t         gendphijt[99];   //[ngen]
+Float_t         gendrjt[99];   //[ngen]
+Int_t           gensubid[99];   //[ngen]
+
 
 Int_t           Onia2MuMuPAT;
 Int_t           ana_step;
@@ -220,11 +221,36 @@ Int_t           HBHEIsoNoiseFilterResult;
 Int_t           superFilterPath;
 
 UInt_t          run;
-ULong64_t       evt;
+//ULong64_t       evt;
 //UInt_t          lumi;
 Float_t         vx;
 Float_t         vy;
 Float_t         vz;
+Float_t         Npart;
+Float_t         Ncoll;
+Float_t         Nhard;
+Float_t         phi0;
+//Float_t         b;
+Int_t           ProcessID;
+//Float_t         pthat;
+Float_t         weight;
+Float_t         alphaQCD;
+Float_t         alphaQED;
+Float_t         qScale;
+Int_t           nMEPartons;
+Int_t           nMEPartonsFiltered;
+//pair<int,int>   *pdfID;
+Int_t           pdfID_first;
+Int_t           pdfID_second;
+//pair<float,float> *pdfX;
+Float_t         pdfX_first;
+Float_t         pdfX_second;
+//pair<float,float> *pdfXpdf;
+Float_t         pdfXpdf_first;
+Float_t         pdfXpdf_second;
+vector<float>   *ttbar_w;
+vector<int>     *npus;
+vector<float>   *tnpus;
 Int_t           hiBin;
 Float_t         hiHF;
 Int_t           hiNevtPlane;
@@ -258,6 +284,7 @@ TBranch        *b_Reco_QQ_cosAlpha;   //!
 TBranch        *b_Reco_QQ_ctau3D;   //!
 TBranch        *b_Reco_QQ_ctauErr3D;   //!
 TBranch        *b_Reco_QQ_cosAlpha3D;   //!
+TBranch        *b_Reco_QQ_whichGen;   //!
 TBranch        *b_Reco_QQ_VtxProb;   //!
 TBranch        *b_Reco_QQ_dca;   //!
 TBranch        *b_Reco_QQ_MassErr;   //!
@@ -265,6 +292,7 @@ TBranch        *b_Reco_QQ_vtx;   //!
 TBranch        *b_Reco_QQ_Ntrk;   //!
 TBranch        *b_Reco_mu_size;   //!
 TBranch        *b_Reco_mu_type;   //!
+TBranch        *b_Reco_mu_whichGen;   //!
 TBranch        *b_Reco_mu_SelectionType;   //!
 TBranch        *b_Reco_mu_charge;   //!
 TBranch        *b_Reco_mu_4mom;   //!
@@ -288,8 +316,25 @@ TBranch        *b_Reco_mu_pt_inner;   //!
 TBranch        *b_Reco_mu_pt_global;   //!
 TBranch        *b_Reco_mu_ptErr_inner;   //!
 TBranch        *b_Reco_mu_ptErr_global;   //!
+TBranch        *b_Gen_weight;   //!
+TBranch        *b_Gen_pthat;   //!
+TBranch        *b_Gen_QQ_size;   //!
+TBranch        *b_Gen_QQ_type;   //!
+TBranch        *b_Gen_QQ_4mom;   //!
+TBranch        *b_Gen_QQ_momId;   //!
+TBranch        *b_Gen_QQ_ctau;   //!
+TBranch        *b_Gen_QQ_ctau3D;   //!
+TBranch        *b_Gen_QQ_mupl_idx;   //!
+TBranch        *b_Gen_QQ_mumi_idx;   //!
+TBranch        *b_Gen_QQ_whichRec;   //!
+TBranch        *b_Gen_mu_size;   //!
+TBranch        *b_Gen_mu_type;   //!
+TBranch        *b_Gen_mu_charge;   //!
+TBranch        *b_Gen_mu_4mom;   //!
+TBranch        *b_Gen_mu_whichRec;   //!
 
-//TBranch        *b_evt;   //!
+
+TBranch        *b_evt;   //!
 TBranch        *b_b;   //!
 TBranch        *b_nref;   //!
 TBranch        *b_rawpt;   //!
@@ -342,6 +387,40 @@ TBranch        *b_eN;   //!
 TBranch        *b_muMax;   //!
 TBranch        *b_muSum;   //!
 TBranch        *b_muN;   //!
+TBranch        *b_pthat;   //!
+TBranch        *b_refpt;   //!
+TBranch        *b_refeta;   //!
+TBranch        *b_refy;   //!
+TBranch        *b_refphi;   //!
+TBranch        *b_refm;   //!
+TBranch        *b_refarea;   //!
+TBranch        *b_reftau1;   //!
+TBranch        *b_reftau2;   //!
+TBranch        *b_reftau3;   //!
+TBranch        *b_refdphijt;   //!
+TBranch        *b_refdrjt;   //!
+TBranch        *b_refparton_pt;   //!
+TBranch        *b_refparton_flavor;   //!
+TBranch        *b_refparton_flavorForB;   //!
+TBranch        *b_genChargedSum;   //!
+TBranch        *b_genHardSum;   //!
+TBranch        *b_signalChargedSum;   //!
+TBranch        *b_signalHardSum;   //!
+TBranch        *b_subid;   //!
+TBranch        *b_ngen;   //!
+TBranch        *b_genmatchindex;   //!
+TBranch        *b_genpt;   //!
+TBranch        *b_geneta;   //!
+TBranch        *b_geny;   //!
+TBranch        *b_gentau1;   //!
+TBranch        *b_gentau2;   //!
+TBranch        *b_gentau3;   //!
+TBranch        *b_genphi;   //!
+TBranch        *b_genm;   //!
+TBranch        *b_gendphijt;   //!
+TBranch        *b_gendrjt;   //!
+TBranch        *b_gensubid;   //!
+
 
 TBranch        *b_Onia2MuMuPAT;   //!
 TBranch        *b_ana_step;   //!
@@ -378,11 +457,33 @@ TBranch        *b_HBHEIsoNoiseFilterResult;   //!
 TBranch        *b_superFilterPath;   //!
 
 TBranch        *b_run;   //!
-TBranch        *b_evt;   //!
+//TBranch        *b_evt;   //!
 //TBranch        *b_lumi;   //!
 TBranch        *b_vx;   //!
 TBranch        *b_vy;   //!
 TBranch        *b_vz;   //!
+TBranch        *b_Npart;   //!
+TBranch        *b_Ncoll;   //!
+TBranch        *b_Nhard;   //!
+TBranch        *b_NPhi0;   //!
+//TBranch        *b_b;   //!
+TBranch        *b_ProcessID;   //!
+//TBranch        *b_pthat;   //!
+TBranch        *b_weight;   //!
+TBranch        *b_alphaQCD;   //!
+TBranch        *b_alphaQED;   //!
+TBranch        *b_qScale;   //!
+TBranch        *b_nMEPartons;   //!
+TBranch        *b_nMEPartonsFiltered;   //!
+TBranch        *b_pdfID_first;   //!
+TBranch        *b_pdfID_second;   //!
+TBranch        *b_pdfX_first;   //!
+TBranch        *b_pdfX_second;   //!
+TBranch        *b_pdfXpdf_first;   //!
+TBranch        *b_pdfXpdf_second;   //!
+TBranch        *b_ttbar_w;   //!
+TBranch        *b_npus;   //!
+TBranch        *b_tnpus;   //!
 TBranch        *b_hiBin;   //!
 TBranch        *b_hiHF;   //!
 TBranch        *b_hiNevtPlane;   //!
@@ -402,13 +503,6 @@ TTree *ctr;
 void initTree(TChain *tree)
 {
   std::cout << "[INFO] Initializing TTree " << TreeName.c_str() << std::endl;
-  // The Init() function is called when the selector needs to initialize
-  // a new tree or chain. Typically here the branch addresses and branch
-  // pointers of the tree will be set.
-  // It is normally not necessary to make changes to the generated
-  // code, but the routine can be extended by the user if needed.
-  // Init() will be called many times when running on PROOF
-  // (once per file to be processed). 
 
   TChain   *fChain;   //!pointer to the analyzed TTree or TChain
 
@@ -450,6 +544,7 @@ void initTree(TChain *tree)
   if (fChain->GetBranch("Reco_QQ_ctau3D")) fChain->SetBranchAddress("Reco_QQ_ctau3D", Reco_QQ_ctau3D, &b_Reco_QQ_ctau3D);
   if (fChain->GetBranch("Reco_QQ_ctauErr3D")) fChain->SetBranchAddress("Reco_QQ_ctauErr3D", Reco_QQ_ctauErr3D, &b_Reco_QQ_ctauErr3D);
   if (fChain->GetBranch("Reco_QQ_cosAlpha3D")) fChain->SetBranchAddress("Reco_QQ_cosAlpha3D", Reco_QQ_cosAlpha3D, &b_Reco_QQ_cosAlpha3D);
+  if (fChain->GetBranch("Reco_QQ_whichGen")) fChain->SetBranchAddress("Reco_QQ_whichGen", Reco_QQ_whichGen, &b_Reco_QQ_whichGen);
   if (fChain->GetBranch("Reco_QQ_VtxProb")) fChain->SetBranchAddress("Reco_QQ_VtxProb", Reco_QQ_VtxProb, &b_Reco_QQ_VtxProb);
   if (fChain->GetBranch("Reco_QQ_dca")) fChain->SetBranchAddress("Reco_QQ_dca", Reco_QQ_dca, &b_Reco_QQ_dca);
   if (fChain->GetBranch("Reco_QQ_MassErr")) fChain->SetBranchAddress("Reco_QQ_MassErr", Reco_QQ_MassErr, &b_Reco_QQ_MassErr);
@@ -457,6 +552,7 @@ void initTree(TChain *tree)
   if (fChain->GetBranch("Reco_QQ_Ntrk")) fChain->SetBranchAddress("Reco_QQ_Ntrk", Reco_QQ_Ntrk, &b_Reco_QQ_Ntrk);
   if (fChain->GetBranch("Reco_mu_size")) fChain->SetBranchAddress("Reco_mu_size", &Reco_mu_size, &b_Reco_mu_size);
   if (fChain->GetBranch("Reco_mu_type")) fChain->SetBranchAddress("Reco_mu_type", Reco_mu_type, &b_Reco_mu_type);
+  if (fChain->GetBranch("Reco_mu_whichGen")) fChain->SetBranchAddress("Reco_mu_whichGen", Reco_mu_whichGen, &b_Reco_mu_whichGen);
   if (fChain->GetBranch("Reco_mu_SelectionType")) fChain->SetBranchAddress("Reco_mu_SelectionType", Reco_mu_SelectionType, &b_Reco_mu_SelectionType);
   if (fChain->GetBranch("Reco_mu_charge")) fChain->SetBranchAddress("Reco_mu_charge", Reco_mu_charge, &b_Reco_mu_charge);
   if (fChain->GetBranch("Reco_mu_4mom")) fChain->SetBranchAddress("Reco_mu_4mom", &Reco_mu_4mom, &b_Reco_mu_4mom);
@@ -480,8 +576,24 @@ void initTree(TChain *tree)
   if (fChain->GetBranch("Reco_mu_pt_global")) fChain->SetBranchAddress("Reco_mu_pt_global", Reco_mu_pt_global, &b_Reco_mu_pt_global);
   if (fChain->GetBranch("Reco_mu_ptErr_inner")) fChain->SetBranchAddress("Reco_mu_ptErr_inner", Reco_mu_ptErr_inner, &b_Reco_mu_ptErr_inner);
   if (fChain->GetBranch("Reco_mu_ptErr_global")) fChain->SetBranchAddress("Reco_mu_ptErr_global", Reco_mu_ptErr_global, &b_Reco_mu_ptErr_global);
+  if (fChain->GetBranch("Gen_weight")) fChain->SetBranchAddress("Gen_weight", &Gen_weight, &b_Gen_weight);
+  if (fChain->GetBranch("Gen_pthat")) fChain->SetBranchAddress("Gen_pthat", &Gen_pthat, &b_Gen_pthat);
+  if (fChain->GetBranch("Gen_QQ_size")) fChain->SetBranchAddress("Gen_QQ_size", &Gen_QQ_size, &b_Gen_QQ_size);
+  if (fChain->GetBranch("Gen_QQ_type")) fChain->SetBranchAddress("Gen_QQ_type", Gen_QQ_type, &b_Gen_QQ_type);
+  if (fChain->GetBranch("Gen_QQ_4mom")) fChain->SetBranchAddress("Gen_QQ_4mom", &Gen_QQ_4mom, &b_Gen_QQ_4mom);
+  if (fChain->GetBranch("Gen_QQ_momId")) fChain->SetBranchAddress("Gen_QQ_momId", Gen_QQ_momId, &b_Gen_QQ_momId);
+  if (fChain->GetBranch("Gen_QQ_ctau")) fChain->SetBranchAddress("Gen_QQ_ctau", Gen_QQ_ctau, &b_Gen_QQ_ctau);
+  if (fChain->GetBranch("Gen_QQ_ctau3D")) fChain->SetBranchAddress("Gen_QQ_ctau3D", Gen_QQ_ctau3D, &b_Gen_QQ_ctau3D);
+  if (fChain->GetBranch("Gen_QQ_mupl_idx")) fChain->SetBranchAddress("Gen_QQ_mupl_idx", Gen_QQ_mupl_idx, &b_Gen_QQ_mupl_idx);
+  if (fChain->GetBranch("Gen_QQ_mumi_idx")) fChain->SetBranchAddress("Gen_QQ_mumi_idx", Gen_QQ_mumi_idx, &b_Gen_QQ_mumi_idx);
+  if (fChain->GetBranch("Gen_QQ_whichRec")) fChain->SetBranchAddress("Gen_QQ_whichRec", Gen_QQ_whichRec, &b_Gen_QQ_whichRec);
+  if (fChain->GetBranch("Gen_mu_size")) fChain->SetBranchAddress("Gen_mu_size", &Gen_mu_size, &b_Gen_mu_size);
+  if (fChain->GetBranch("Gen_mu_type")) fChain->SetBranchAddress("Gen_mu_type", Gen_mu_type, &b_Gen_mu_type);
+  if (fChain->GetBranch("Gen_mu_charge")) fChain->SetBranchAddress("Gen_mu_charge", Gen_mu_charge, &b_Gen_mu_charge);
+  if (fChain->GetBranch("Gen_mu_4mom")) fChain->SetBranchAddress("Gen_mu_4mom", &Gen_mu_4mom, &b_Gen_mu_4mom);
+  if (fChain->GetBranch("Gen_mu_whichRec")) fChain->SetBranchAddress("Gen_mu_whichRec", Gen_mu_whichRec, &b_Gen_mu_whichRec);
   
-  //if (fChain->GetBranch("evt")) fChain->SetBranchAddress("evt", &evt, &b_evt);
+  if (fChain->GetBranch("evt")) fChain->SetBranchAddress("evt", &evt, &b_evt);
   if (fChain->GetBranch("b")) fChain->SetBranchAddress("b", &b, &b_b);
   if (fChain->GetBranch("nref")) fChain->SetBranchAddress("nref", &nref, &b_nref);
   if (fChain->GetBranch("rawpt")) fChain->SetBranchAddress("rawpt", rawpt, &b_rawpt);
@@ -534,7 +646,40 @@ void initTree(TChain *tree)
   if (fChain->GetBranch("muMax")) fChain->SetBranchAddress("muMax", muMax, &b_muMax);
   if (fChain->GetBranch("muSum")) fChain->SetBranchAddress("muSum", muSum, &b_muSum);
   if (fChain->GetBranch("muN")) fChain->SetBranchAddress("muN", muN, &b_muN);
-  
+  if (fChain->GetBranch("pthat")) fChain->SetBranchAddress("pthat", &pthat, &b_pthat);
+  if (fChain->GetBranch("refpt")) fChain->SetBranchAddress("refpt", refpt, &b_refpt);
+  if (fChain->GetBranch("refeta")) fChain->SetBranchAddress("refeta", refeta, &b_refeta);
+  if (fChain->GetBranch("refy")) fChain->SetBranchAddress("refy", refy, &b_refy);
+  if (fChain->GetBranch("refphi")) fChain->SetBranchAddress("refphi", refphi, &b_refphi);
+  if (fChain->GetBranch("refm")) fChain->SetBranchAddress("refm", refm, &b_refm);
+  if (fChain->GetBranch("refarea")) fChain->SetBranchAddress("refarea", refarea, &b_refarea);
+  if (fChain->GetBranch("reftau1")) fChain->SetBranchAddress("reftau1", reftau1, &b_reftau1);
+  if (fChain->GetBranch("reftau2")) fChain->SetBranchAddress("reftau2", reftau2, &b_reftau2);
+  if (fChain->GetBranch("reftau3")) fChain->SetBranchAddress("reftau3", reftau3, &b_reftau3);
+  if (fChain->GetBranch("refdphijt")) fChain->SetBranchAddress("refdphijt", refdphijt, &b_refdphijt);
+  if (fChain->GetBranch("refdrjt")) fChain->SetBranchAddress("refdrjt", refdrjt, &b_refdrjt);
+  if (fChain->GetBranch("refparton_pt")) fChain->SetBranchAddress("refparton_pt", refparton_pt, &b_refparton_pt);
+  if (fChain->GetBranch("refparton_flavor")) fChain->SetBranchAddress("refparton_flavor", refparton_flavor, &b_refparton_flavor);
+  if (fChain->GetBranch("refparton_flavorForB")) fChain->SetBranchAddress("refparton_flavorForB", refparton_flavorForB, &b_refparton_flavorForB);
+  if (fChain->GetBranch("genChargedSum")) fChain->SetBranchAddress("genChargedSum", genChargedSum, &b_genChargedSum);
+  if (fChain->GetBranch("genHardSum")) fChain->SetBranchAddress("genHardSum", genHardSum, &b_genHardSum);
+  if (fChain->GetBranch("signalChargedSum")) fChain->SetBranchAddress("signalChargedSum", signalChargedSum, &b_signalChargedSum);
+  if (fChain->GetBranch("signalHardSum")) fChain->SetBranchAddress("signalHardSum", signalHardSum, &b_signalHardSum);
+  if (fChain->GetBranch("subid")) fChain->SetBranchAddress("subid", subid, &b_subid);
+  if (fChain->GetBranch("ngen")) fChain->SetBranchAddress("ngen", &ngen, &b_ngen);
+  if (fChain->GetBranch("genmatchindex")) fChain->SetBranchAddress("genmatchindex", genmatchindex, &b_genmatchindex);
+  if (fChain->GetBranch("genpt")) fChain->SetBranchAddress("genpt", genpt, &b_genpt);
+  if (fChain->GetBranch("geneta")) fChain->SetBranchAddress("geneta", geneta, &b_geneta);
+  if (fChain->GetBranch("geny")) fChain->SetBranchAddress("geny", geny, &b_geny);
+  if (fChain->GetBranch("gentau1")) fChain->SetBranchAddress("gentau1", gentau1, &b_gentau1);
+  if (fChain->GetBranch("gentau2")) fChain->SetBranchAddress("gentau2", gentau2, &b_gentau2);
+  if (fChain->GetBranch("gentau3")) fChain->SetBranchAddress("gentau3", gentau3, &b_gentau3);
+  if (fChain->GetBranch("genphi")) fChain->SetBranchAddress("genphi", genphi, &b_genphi);
+  if (fChain->GetBranch("genm")) fChain->SetBranchAddress("genm", genm, &b_genm);
+  if (fChain->GetBranch("gendphijt")) fChain->SetBranchAddress("gendphijt", gendphijt, &b_gendphijt);
+  if (fChain->GetBranch("gendrjt")) fChain->SetBranchAddress("gendrjt", gendrjt, &b_gendrjt);
+  if (fChain->GetBranch("gensubid")) fChain->SetBranchAddress("gensubid", gensubid, &b_gensubid);
+
   if (fChain->GetBranch("Onia2MuMuPAT")) fChain->SetBranchAddress("Onia2MuMuPAT", &Onia2MuMuPAT, &b_Onia2MuMuPAT);
   if (fChain->GetBranch("ana_step")) fChain->SetBranchAddress("ana_step", &ana_step, &b_ana_step);
   if (fChain->GetBranch("pclusterCompatibilityFilter")) fChain->SetBranchAddress("pclusterCompatibilityFilter", &pclusterCompatibilityFilter, &b_pclusterCompatibilityFilter);
@@ -570,11 +715,33 @@ void initTree(TChain *tree)
   if (fChain->GetBranch("superFilterPath")) fChain->SetBranchAddress("superFilterPath", &superFilterPath, &b_superFilterPath);
   
   if (fChain->GetBranch("run")) fChain->SetBranchAddress("run", &run, &b_run);
-  if (fChain->GetBranch("evt")) fChain->SetBranchAddress("evt", &evt, &b_evt);
+  //if (fChain->GetBranch("evt")) fChain->SetBranchAddress("evt", &evt, &b_evt);
   //if (fChain->GetBranch("lumi")) fChain->SetBranchAddress("lumi", &lumi, &b_lumi);
   if (fChain->GetBranch("vx")) fChain->SetBranchAddress("vx", &vx, &b_vx);
   if (fChain->GetBranch("vy")) fChain->SetBranchAddress("vy", &vy, &b_vy);
   if (fChain->GetBranch("vz")) fChain->SetBranchAddress("vz", &vz, &b_vz);
+  if (fChain->GetBranch("Npart")) fChain->SetBranchAddress("Npart", &Npart, &b_Npart);
+  if (fChain->GetBranch("Ncoll")) fChain->SetBranchAddress("Ncoll", &Ncoll, &b_Ncoll);
+  if (fChain->GetBranch("Nhard")) fChain->SetBranchAddress("Nhard", &Nhard, &b_Nhard);
+  if (fChain->GetBranch("phi0")) fChain->SetBranchAddress("phi0", &phi0, &b_NPhi0);
+  //if (fChain->GetBranch("b")) fChain->SetBranchAddress("b", &b, &b_b);
+  if (fChain->GetBranch("ProcessID")) fChain->SetBranchAddress("ProcessID", &ProcessID, &b_ProcessID);
+  //if (fChain->GetBranch("pthat")) fChain->SetBranchAddress("pthat", &pthat, &b_pthat);
+  if (fChain->GetBranch("weight")) fChain->SetBranchAddress("weight", &weight, &b_weight);
+  if (fChain->GetBranch("alphaQCD")) fChain->SetBranchAddress("alphaQCD", &alphaQCD, &b_alphaQCD);
+  if (fChain->GetBranch("alphaQED")) fChain->SetBranchAddress("alphaQED", &alphaQED, &b_alphaQED);
+  if (fChain->GetBranch("qScale")) fChain->SetBranchAddress("qScale", &qScale, &b_qScale);
+  if (fChain->GetBranch("nMEPartons")) fChain->SetBranchAddress("nMEPartons", &nMEPartons, &b_nMEPartons);
+  if (fChain->GetBranch("nMEPartonsFiltered")) fChain->SetBranchAddress("nMEPartonsFiltered", &nMEPartonsFiltered, &b_nMEPartonsFiltered);
+  if (fChain->GetBranch("first")) fChain->SetBranchAddress("first", &pdfID_first, &b_pdfID_first);
+  if (fChain->GetBranch("second")) fChain->SetBranchAddress("second", &pdfID_second, &b_pdfID_second);
+//   if (fChain->GetBranch("first")) fChain->SetBranchAddress("first", &first, &b_pdfX_first);
+//   if (fChain->GetBranch("second")) fChain->SetBranchAddress("second", &second, &b_pdfX_second);
+//   if (fChain->GetBranch("first")) fChain->SetBranchAddress("first", &first, &b_pdfXpdf_first);
+//   if (fChain->GetBranch("second")) fChain->SetBranchAddress("second", &second, &b_pdfXpdf_second);
+  if (fChain->GetBranch("ttbar_w")) fChain->SetBranchAddress("ttbar_w", &ttbar_w, &b_ttbar_w);
+  if (fChain->GetBranch("npus")) fChain->SetBranchAddress("npus", &npus, &b_npus);
+  if (fChain->GetBranch("tnpus")) fChain->SetBranchAddress("tnpus", &tnpus, &b_tnpus);
   if (fChain->GetBranch("hiBin")) fChain->SetBranchAddress("hiBin", &hiBin, &b_hiBin);
   if (fChain->GetBranch("hiHF")) fChain->SetBranchAddress("hiHF", &hiHF, &b_hiHF);
   if (fChain->GetBranch("hiNevtPlane")) fChain->SetBranchAddress("hiNevtPlane", &hiNevtPlane, &b_hiNevtPlane);

@@ -429,8 +429,8 @@ namespace RecoQQ {
   {
     return (fabs(Muon->Eta()) < 2.4 &&
             ((fabs(Muon->Eta()) < 1.2 && Muon->Pt() >= 3.5) ||
-             (1.2 <= fabs(Muon->Eta()) && fabs(Muon->Eta()) < 2.1 && Muon->Pt() >= 5.77-1.89*fabs(Muon->Eta())) ||
-             (2.1 <= fabs(Muon->Eta()) && Muon->Pt() >= 1.8)));
+             (1.2 <= fabs(Muon->Eta()) && fabs(Muon->Eta()) < 2.1 && Muon->Pt() >= 5.47-1.89*fabs(Muon->Eta())) ||
+             (2.1 <= fabs(Muon->Eta()) && Muon->Pt() >= 1.5)));
   };
   
   Bool_t areMuonsInAcceptance2019 (Int_t iRecoQQ)
@@ -443,7 +443,6 @@ namespace RecoQQ {
   
   Bool_t passQualityCuts2019 (Int_t iRecoQQ)
   {
-    Bool_t cond = true;
     int iMupl = Reco_QQ_mupl_idx[iRecoQQ];
     int iMumi = Reco_QQ_mumi_idx[iRecoQQ];
 

@@ -137,6 +137,20 @@ void doAllplots() {
   printOptions();
   plotAll("DataFits_ctauCut/DataFits_midJtPt");
 
+  ///////////////////////////////////////////////////////
+  //       PbPb, prompt, mid and fwd, ctauCut          //
+  ///////////////////////////////////////////////////////
+  setOptions(true, false, true, false, true, true, false, "", 0, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_midJtPt");
+
+  ///////////////////////////////////////////////////////
+  //      PbPb/pp, prompt, mid and fwd, ctauCut        //
+  ///////////////////////////////////////////////////////
+  setOptions(true, true, true, false, true, true, false, "", 0, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_midJtPt");
+
 };
 
 /////////////////////
@@ -808,64 +822,96 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
 
   if (xaxis=="z" && plotMid)
     {
-      TLatex *tex = new TLatex(0.2,0.78,"|y_{J/#psi}| < 1.6");
-      tex->SetNDC();
-      tex->SetTextSize(0.044);
-      tex->SetTextFont(42);
-      tex->SetLineWidth(2);
-      tex->Draw();
-
-      TLatex *tex0 = new TLatex(0.2,0.66,"|y_{jet}| < 2.4");
-      tex0->SetNDC();
-      tex0->SetTextSize(0.044);
-      tex0->SetTextFont(42);
-      tex0->SetLineWidth(2);
-      tex0->Draw();
-
-      TLatex *tex1 = new TLatex(0.2,0.72,"6.5 < p_{T,J/#psi} < 35 GeV");
-      tex1->SetNDC();
-      tex1->SetTextSize(0.044);
-      tex1->SetTextFont(42);
-      tex1->SetLineWidth(2);
-      tex1->Draw();
-
-      TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 25:(jtPtRange == -1? 15:35), jtPtRange == 0? 35:(jtPtRange == -1? 25:45)));
-      tex2->SetNDC();
-      tex2->SetTextSize(0.044);
-      tex2->SetTextFont(42);
-      tex2->SetLineWidth(2);
-      tex2->Draw();
-    }
-
-  if (xaxis=="z" && !plotMid)
-    {
-      TLatex *tex = new TLatex(0.2,0.78,"1.6 < |y_{J/#psi}| < 2.4");
-      tex->SetNDC();
-      tex->SetTextSize(0.044);
-      tex->SetTextFont(42);
-      tex->SetLineWidth(2);
-      tex->Draw();
-
-      TLatex *tex0 = new TLatex(0.2,0.66,"|y_{jet}| < 2.4");
-      tex0->SetNDC();
-      tex0->SetTextSize(0.044);
-      tex0->SetTextFont(42);
-      tex0->SetLineWidth(2);
-      tex0->Draw();
-
-      TLatex *tex1 = new TLatex(0.2,0.72,"3 < p_{T,J/#psi} < 35 GeV");
-      tex1->SetNDC();
-      tex1->SetTextSize(0.044);
-      tex1->SetTextFont(42);
-      tex1->SetLineWidth(2);
-      tex1->Draw();
-
-      TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 25:(jtPtRange == -1? 15:35), jtPtRange == 0? 35:(jtPtRange == -1? 25:45)));
-      tex2->SetNDC();
-      tex2->SetTextSize(0.044);
-      tex2->SetTextFont(42);
-      tex2->SetLineWidth(2);
-      tex2->Draw();
+      if (plotMid && plotFwd)
+	{
+	  TLatex *tex = new TLatex(0.2,0.78,"|y_{J/#psi}| < 2.4");
+	  tex->SetNDC();
+	  tex->SetTextSize(0.044);
+	  tex->SetTextFont(42);
+	  tex->SetLineWidth(2);
+	  tex->Draw();
+	  
+	  TLatex *tex0 = new TLatex(0.2,0.66,"|y_{jet}| < 2.4");
+	  tex0->SetNDC();
+	  tex0->SetTextSize(0.044);
+	  tex0->SetTextFont(42);
+	  tex0->SetLineWidth(2);
+	  tex0->Draw();
+	  
+	  TLatex *tex1 = new TLatex(0.2,0.72,"6.5 < p_{T,J/#psi} < 35 GeV");
+	  tex1->SetNDC();
+	  tex1->SetTextSize(0.044);
+	  tex1->SetTextFont(42);
+	  tex1->SetLineWidth(2);
+	  tex1->Draw();
+	  
+	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 25:(jtPtRange == -1? 15:35), jtPtRange == 0? 35:(jtPtRange == -1? 25:45)));
+	  tex2->SetNDC();
+	  tex2->SetTextSize(0.044);
+	  tex2->SetTextFont(42);
+	  tex2->SetLineWidth(2);
+	  tex2->Draw();
+	}
+      else if (plotMid && !plotFwd) 
+	{
+	  TLatex *tex = new TLatex(0.2,0.78,"|y_{J/#psi}| < 1.6");
+	  tex->SetNDC();
+	  tex->SetTextSize(0.044);
+	  tex->SetTextFont(42);
+	  tex->SetLineWidth(2);
+	  tex->Draw();
+	  
+	  TLatex *tex0 = new TLatex(0.2,0.66,"|y_{jet}| < 2.4");
+	  tex0->SetNDC();
+	  tex0->SetTextSize(0.044);
+	  tex0->SetTextFont(42);
+	  tex0->SetLineWidth(2);
+	  tex0->Draw();
+	  
+	  TLatex *tex1 = new TLatex(0.2,0.72,"6.5 < p_{T,J/#psi} < 35 GeV");
+	  tex1->SetNDC();
+	  tex1->SetTextSize(0.044);
+	  tex1->SetTextFont(42);
+	  tex1->SetLineWidth(2);
+	  tex1->Draw();
+	  
+	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 25:(jtPtRange == -1? 15:35), jtPtRange == 0? 35:(jtPtRange == -1? 25:45)));
+	  tex2->SetNDC();
+	  tex2->SetTextSize(0.044);
+	  tex2->SetTextFont(42);
+	  tex2->SetLineWidth(2);
+	  tex2->Draw();
+	}
+      else if (plotFwd)
+	{
+	  TLatex *tex = new TLatex(0.2,0.78,"1.6 < |y_{J/#psi}| < 2.4");
+	  tex->SetNDC();
+	  tex->SetTextSize(0.044);
+	  tex->SetTextFont(42);
+	  tex->SetLineWidth(2);
+	  tex->Draw();
+	  
+	  TLatex *tex0 = new TLatex(0.2,0.66,"|y_{jet}| < 2.4");
+	  tex0->SetNDC();
+	  tex0->SetTextSize(0.044);
+	  tex0->SetTextFont(42);
+	  tex0->SetLineWidth(2);
+	  tex0->Draw();
+	  
+	  TLatex *tex1 = new TLatex(0.2,0.72,"3 < p_{T,J/#psi} < 35 GeV");
+	  tex1->SetNDC();
+	  tex1->SetTextSize(0.044);
+	  tex1->SetTextFont(42);
+	  tex1->SetLineWidth(2);
+	  tex1->Draw();
+	  
+	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 25:(jtPtRange == -1? 15:35), jtPtRange == 0? 35:(jtPtRange == -1? 25:45)));
+	  tex2->SetNDC();
+	  tex2->SetTextSize(0.044);
+	  tex2->SetTextFont(42);
+	  tex2->SetLineWidth(2);
+	  tex2->Draw();
+	}
     }
   
   TLatex tl;
