@@ -148,7 +148,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
     RooRealVar* weightCorr   = new RooRealVar("weightCorr","Data correction weight", 0.0, 10000000.0, "");
     RooArgSet*  cols         = NULL;
     
-    if (applyWeight) setCentralityMap(Form("%s/Input/CentralityMap_PbPb2018.txt",gSystem->ExpandPathName(gSystem->pwd())));
+    if (applyWeight && isPbPb) setCentralityMap(Form("%s/Input/CentralityMap_PbPb2018.txt",gSystem->ExpandPathName(gSystem->pwd())));
 
     if (applyWeight && !applyWeight_Corr)
     {
