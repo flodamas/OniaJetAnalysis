@@ -161,7 +161,18 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX, TString label , bool writeExtraText
       // lumiText2 += " #sqrt{s_{NN}} = 5.02 TeV";
       lumiText2 += lumi_PbPb2015_OR + " (5.02 TeV)";
     }
-   
+  else if (iPeriod==109)
+    {
+      lumiText2 += lumi_pp2017 + " (5.02 TeV)";
+    }
+  else if (iPeriod==110)
+    {
+      lumiText2 += lumi_PbPb2018 + " (5.02 TeV)";
+    }
+  else if (iPeriod==111)
+    {lumiText2 += lumi_PbPb2018 + ", " + lumi_pp2017 + " (5.02 TeV)";
+    }
+
   cout << lumiText << endl;
 
   TLatex latex;

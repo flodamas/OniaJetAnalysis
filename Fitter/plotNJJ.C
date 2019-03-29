@@ -113,12 +113,12 @@ void plotZ(string workDirName) {
   vector<anabin> theCats;
   if (plotMid){
     if (plotFwd)
-      theCats.push_back(anabin(0.0, 1.0, 0, 2.4, 6.5, 35, 0, 200));
+      theCats.push_back(anabin(0.0, 1.0, 0, 2.4, 6.5, 100, 0, 200));
     else
-      theCats.push_back(anabin(0.0, 1.0, 0, 1.6, 6.5, 35, 0, 200));
+      theCats.push_back(anabin(0.0, 1.0, 0, 1.6, 6.5, 100, 0, 200));
   }
   else if (plotFwd)
-    theCats.push_back(anabin(0.0, 1.0, 1.6, 2.4, 3.0, 35, 0, 200));
+    theCats.push_back(anabin(0.0, 1.0, 1.6, 2.4, 3.0, 100, 0, 200));
 
   plotNJJ(theCats,xaxis,workDirName);
 };
@@ -137,6 +137,14 @@ void doAllplots() {
   printOptions();
   plotAll("DataFits_ctauCut/DataFits_midJtPt");
 
+  setOptions(false, true, true, false, true, true, false, "", 1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_highJtPt");
+
+  setOptions(false, true, true, false, true, true, false, "", -1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_lowJtPt");
+
   ///////////////////////////////////////////////////////
   //       PbPb, prompt, mid and fwd, ctauCut          //
   ///////////////////////////////////////////////////////
@@ -144,12 +152,28 @@ void doAllplots() {
   printOptions();
   plotAll("DataFits_ctauCut/DataFits_midJtPt");
 
+  setOptions(true, false, true, false, true, true, false, "", 1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_highJtPt");
+
+  setOptions(true, false, true, false, true, true, false, "", -1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_lowJtPt");
+
   ///////////////////////////////////////////////////////
   //      PbPb/pp, prompt, mid and fwd, ctauCut        //
   ///////////////////////////////////////////////////////
   setOptions(true, true, true, false, true, true, false, "", 0, false, false, false, false, true);
   printOptions();
   plotAll("DataFits_ctauCut/DataFits_midJtPt");
+
+  setOptions(true, true, true, false, true, true, false, "", 1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_highJtPt");
+
+  setOptions(true, true, true, false, true, true, false, "", -1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_lowJtPt");
 
 };
 
@@ -305,9 +329,9 @@ void plotNJJ(vector<anabin> thecats, string xaxis, string outputDir) {
     if (thebinOrig == binToSkip && underflowOff) continue;
     anabin thebinPP = it->first; thebinPP.setcentbin(binI(0,200));
     njj_input spp = theVars_inputs[thebinPP];
-    //cout << "Result: " << endl;
-    //thebinOrig.print();
-    //cout <<  spp.npp << " +- " << spp.dnpp_stat << " ; " << spp.bfracpp << endl;
+    cout << "Result: " << endl;
+    thebinOrig.print();
+    cout <<  spp.npp << " +- " << spp.dnpp_stat << " ; " << spp.bfracpp << endl;
     //if (spp.npp <= 0) continue;
     //if ((doprompt || dononprompt) && spp.bfracpp<=0) continue;
 
@@ -838,14 +862,14 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
 	  tex0->SetLineWidth(2);
 	  tex0->Draw();
 	  
-	  TLatex *tex1 = new TLatex(0.2,0.72,"6.5 < p_{T,J/#psi} < 35 GeV");
+	  TLatex *tex1 = new TLatex(0.2,0.72,"6.5 < p_{T,J/#psi} < 100 GeV");
 	  tex1->SetNDC();
 	  tex1->SetTextSize(0.044);
 	  tex1->SetTextFont(42);
 	  tex1->SetLineWidth(2);
 	  tex1->Draw();
 	  
-	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 25:(jtPtRange == -1? 15:35), jtPtRange == 0? 35:(jtPtRange == -1? 25:45)));
+	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 30:(jtPtRange == -1? 20:40), jtPtRange == 0? 40:(jtPtRange == -1? 30:50)));
 	  tex2->SetNDC();
 	  tex2->SetTextSize(0.044);
 	  tex2->SetTextFont(42);
@@ -868,14 +892,14 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
 	  tex0->SetLineWidth(2);
 	  tex0->Draw();
 	  
-	  TLatex *tex1 = new TLatex(0.2,0.72,"6.5 < p_{T,J/#psi} < 35 GeV");
+	  TLatex *tex1 = new TLatex(0.2,0.72,"6.5 < p_{T,J/#psi} < 100 GeV");
 	  tex1->SetNDC();
 	  tex1->SetTextSize(0.044);
 	  tex1->SetTextFont(42);
 	  tex1->SetLineWidth(2);
 	  tex1->Draw();
 	  
-	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 25:(jtPtRange == -1? 15:35), jtPtRange == 0? 35:(jtPtRange == -1? 25:45)));
+	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 30:(jtPtRange == -1? 20:40), jtPtRange == 0? 40:(jtPtRange == -1? 30:50)));
 	  tex2->SetNDC();
 	  tex2->SetTextSize(0.044);
 	  tex2->SetTextFont(42);
@@ -898,14 +922,14 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
 	  tex0->SetLineWidth(2);
 	  tex0->Draw();
 	  
-	  TLatex *tex1 = new TLatex(0.2,0.72,"3 < p_{T,J/#psi} < 35 GeV");
+	  TLatex *tex1 = new TLatex(0.2,0.72,"3 < p_{T,J/#psi} < 100 GeV");
 	  tex1->SetNDC();
 	  tex1->SetTextSize(0.044);
 	  tex1->SetTextFont(42);
 	  tex1->SetLineWidth(2);
 	  tex1->Draw();
 	  
-	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 25:(jtPtRange == -1? 15:35), jtPtRange == 0? 35:(jtPtRange == -1? 25:45)));
+	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",jtPtRange == 0? 30:(jtPtRange == -1? 20:40), jtPtRange == 0? 40:(jtPtRange == -1? 30:50)));
 	  tex2->SetNDC();
 	  tex2->SetTextSize(0.044);
 	  tex2->SetTextFont(42);
@@ -924,8 +948,11 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
   tl.SetTextSize(0.046);
   
   int iPos = 33;
-  if (xaxis=="cent") CMS_lumi( (TPad*) gPad, 1061, iPos, "", isPreliminary );
-  else CMS_lumi( (TPad*) gPad, 107, iPos, "", isPreliminary );
+  //if (xaxis=="cent") CMS_lumi( (TPad*) gPad, 1061, iPos, "", isPreliminary );
+  //else CMS_lumi( (TPad*) gPad, 107, iPos, "", isPreliminary );
+  if ( dopp && doPbPb ) CMS_lumi( (TPad*) gPad, 111, iPos, "", isPreliminary );
+  else if ( dopp ) CMS_lumi( (TPad*) gPad, 109, iPos, "", isPreliminary );
+  else if ( doPbPb ) CMS_lumi( (TPad*) gPad, 110, iPos, "", isPreliminary );
   
   c1->cd();
   c1->Update();

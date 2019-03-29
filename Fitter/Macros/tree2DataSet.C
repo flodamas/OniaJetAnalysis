@@ -62,15 +62,16 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
   }
   
   bool applyWeight = false;
-  //if (isMC && isPbPb) applyWeight = true;
-  if (isMC && DSName.find("JPSIPR")!=std::string::npos) applyWeight = true;  
+
+  if (isMC && isPbPb) applyWeight = true;
+  else if (isMC && !isPbPb && DSName.find("JPSIPR")!=std::string::npos) applyWeight = true;
 
   bool isPureSDataset = false;
   if (OutputFileName.find("_PureS")!=std::string::npos) isPureSDataset = true;
 
   bool applyWeight_Corr = false;
   if ( (OutputFileName.find("_AccEff")!=std::string::npos) || (OutputFileName.find("_lJpsiEff")!=std::string::npos) ) applyWeight_Corr = true;
-  //if(applyWeight == true) applyWeight_Corr = false;
+
   TString corrName = "";
   TString corrFileName = "";
   if (OutputFileName.find("_AccEff")!=std::string::npos)
@@ -115,7 +116,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
     }
     DBFile->Close(); delete DBFile;
   }
-  //cout<< "FileName: "<< OutputFileName << " DSName: " << DSName.c_str() << " CorrName: " << corrName.Data() << " or " <<corrName << endl;
+
   if (createDS) {
     cout << "[INFO] Creating " << (isPureSDataset ? "pure signal " : "") << "RooDataSet for " << DSName << endl;
     TreeName = findMyTree(InputFileNames[0]); if(TreeName==""){return false;}
@@ -147,9 +148,10 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
     RooRealVar* weightCorr   = new RooRealVar("weightCorr","Data correction weight", 0.0, 10000000.0, "");
     RooArgSet*  cols         = NULL;
     
+    if (applyWeight) setCentralityMap(Form("%s/Input/CentralityMap_PbPb2018.txt",gSystem->ExpandPathName(gSystem->pwd())));
+
     if (applyWeight && !applyWeight_Corr)
     {
-      setCentralityMap(Form("%s/Input/CentralityMap_PbPb2019.txt",gSystem->ExpandPathName(gSystem->pwd())));
       if (isMC) {
         cols = new RooArgSet(*mass, *zed, *ctau, *ctauErr, *ctauTrue, *ptQQ, *rapQQ, *cent, *weight);
         cols->add(*ctauNRes);
@@ -184,7 +186,6 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
       dataOS = new RooDataSet(Form("dOS_%s_%s%s", DSName.c_str(),corrName.Data(), (applyJEC?"_JEC":"")), "dOS", *cols, WeightVar(*weightCorr), StoreAsymError(*mass));
       if (isMC && isPureSDataset)
 	dataOSNoBkg = new RooDataSet(Form("dOS_%s_NoBkg_%s%s", DSName.c_str(),corrName.Data(),(applyJEC?"_JEC":"")), "dOSNoBkg", *cols, WeightVar(*weightCorr), StoreAsymError(*mass));
-      //      dataSS = new RooDataSet(Form("dSS_%s", DSName.c_str()), "dSS", *cols, WeightVar(*weightCorr), StoreAsymError(*mass));
       cout<<"[INFO] "<<corrName<<" applied!"<<endl;
     }
     else
@@ -207,49 +208,48 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
     }
     if (applyWeight) cout<<"[INFO] pt weights applied!"<<endl;
 
-
     ////////////////////////////////////
     Long64_t nentries = theTree->GetEntries();
     //nentries = 2000000;
 
     float normF = 0.;
-    if (isMC && isPbPb)
-    {
-      cout << "[INFO] Computing sum of weights for " << nentries << " nentries" << endl;
-      
-      for (Long64_t jentry=0; jentry<nentries;jentry++) {
-        
-        if (jentry%1000000==0) cout << "[INFO] " << jentry << "/" << nentries << endl;
-        
-        if (theTree->LoadTree(jentry)<0) break;
-        if (theTree->GetTreeNumber()!=fCurrent) {
-          fCurrent = theTree->GetTreeNumber();
-          cout << "[INFO] Processing Root File: " << InputFileNames[fCurrent] << endl;
-        }
-        
-        theTree->GetEntry(jentry);
-       // normF += theTree->GetWeight()*getNColl(hiBin,!isPbPb);
-        normF += theTree->GetWeight();  
-    }
-      
-      normF = nentries/normF;
-    }
+    
+    if (isMC && isPbPb) 
+      {
+	cout << "[INFO] Computing sum of weights for " << nentries << " nentries" << endl;
+	
+	for (Long64_t jentry=0; jentry<nentries;jentry++) {
+	  
+	  if (jentry%1000000==0) cout << "[INFO] " << jentry << "/" << nentries << endl;
+	  
+	  if (theTree->LoadTree(jentry)<0) break;
+	  if (theTree->GetTreeNumber()!=fCurrent) {
+	    fCurrent = theTree->GetTreeNumber();
+	    cout << "[INFO] Processing Root File: " << InputFileNames[fCurrent] << endl;
+	  }
+	  
+	  theTree->GetEntry(jentry);
+	  normF += Gen_weight*getNColl(hiBin,!isPbPb);
+	}
+	normF = nentries/normF;
+      }
+    
     // creating the tree to use in the unfolding
     string fl = InputFileNames[0];
-    //cout<<"[INFO] nb of files "<<InputFileNames.size()<<endl;
     if (fl.find("ext")!=std::string::npos && InputFileNames.size()>1) fl = "";
     else if (fl.find("ext")!=std::string::npos && InputFileNames.size()==1) fl = "_ext";
     else if (fl.find("pthat15")!=std::string::npos) fl = "_pthat15";
     else if (fl.find("pthat25")!=std::string::npos) fl = "_pthat25";
     else if (fl.find("pthat35")!=std::string::npos) fl = "_pthat35";
     else if (fl.find("pthat45")!=std::string::npos) fl = "_pthat45";
+    else fl = "";
 
     gSystem->mkdir("TreesForUnfolding");
     string trUnfFileName = Form("TreesForUnfolding/tree_%s%s%s%s%s.root", DSName.c_str(), (isPureSDataset?"_NoBkg":""), (applyWeight_Corr?Form("_%s",corrName.Data()):""), (applyJEC?"_JEC":""), (applyWeight? fl.c_str():""));
 
     TFile * trUnfFile = new TFile (trUnfFileName.c_str(),"RECREATE");
     //trUnfFile->cd();
-    TTree* trUnf = new TTree ("trUnf","tree used for the unfolding");
+    TTree* trUnf = new TTree ("treeForUnfolding","tree used for the unfolding");
     Int_t evtNb; Float_t jp_pt; Float_t jp_rap; Float_t jp_eta; Float_t jp_mass; Float_t jp_phi; Float_t jp_l; 
     Float_t jp_gen_pt; Float_t jp_gen_rap; Float_t jp_gen_eta; Float_t jp_gen_phi; 
     Float_t jt_pt; Float_t jt_rap; Float_t jt_eta; Float_t jt_phi; Float_t jt_CHF; Float_t jt_NHF; Float_t jt_CEF; Float_t jt_NEF; Float_t jt_MUF; Float_t jt_CHM; Float_t jt_NHM; Float_t jt_CEM; Float_t jt_NEM; Float_t jt_MUM; 
@@ -412,30 +412,31 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 	}
 	
         if (applyWeight && !applyWeight_Corr){
-	  double w = theTree->GetWeight();
-	  if (isMC && isPbPb) w = w*normF;//*getNColl(hiBin,!isPbPb)*normF;
+	  double w = Gen_weight;
+	  if (isMC && isPbPb) w = w*getNColl(hiBin,!isPbPb)*normF;
 	  weight->setVal(w);
         }
-        else if (applyWeight_Corr)
-	  { double Corr = 1;
-	    Corr = getCorr(RecoQQ4mom->Rapidity(),RecoQQ4mom->Pt(),RecoQQ4mom->M(),!isPbPb);
-	    double wCorr = 1/Corr;
-	    //// add pt weights for prompt MC
-	    if (applyWeight)
-	      {
-		if (pthat >= 15 && pthat < 25)  corr_ptw = 0.168329;
-		else if (pthat >= 25 && pthat < 35) corr_ptw = 0.0238285;
-		else if (pthat >= 35 && pthat < 45) corr_ptw = 0.00517143;
-		else if (pthat >= 45) corr_ptw = 0.00150836;
-	      }
-	    corr_AccEff = wCorr;
-	    weightCorr->setVal(wCorr*corr_ptw);
+        else if (applyWeight_Corr) {
+	  double wCorr = 1.0/getCorr(RecoQQ4mom->Rapidity(),RecoQQ4mom->Pt(),RecoQQ4mom->M(),!isPbPb);
+	  //// add pt weights for prompt MC
+	  if (applyWeight) {
+	    if (isPbPb){
+	      corr_ptw = Gen_weight*getNColl(hiBin,!isPbPb)*normF;
+	    }
+	    else {
+	      if (pthat >= 15 && pthat < 25)  corr_ptw = 0.168329;
+	      else if (pthat >= 25 && pthat < 35) corr_ptw = 0.0238285;
+	      else if (pthat >= 35 && pthat < 45) corr_ptw = 0.00517143;
+	      else if (pthat >= 45) corr_ptw = 0.00150836;
+	    }
 	  }
+	  corr_AccEff = wCorr;
+	  weightCorr->setVal(wCorr*corr_ptw);
+	}
         if (
             ( RecoQQ::areMuonsInAcceptance2019(iQQ) ) &&  // 2019 Global Muon Acceptance Cuts
             ( RecoQQ::passQualityCuts2019(iQQ)) &&  // 2019 Soft Global Muon Quality Cuts
-            ( isPbPb ? (RecoQQ::isTriggerMatch(iQQ,triggerIndex_PbPb) /*|| (usePeriPD ? RecoQQ::isTriggerMatch(iQQ,HI::HLT_HIL1DoubleMu0_2HF0_Cent30100_v1) : (RecoQQ::isTriggerMatch(iQQ,HI::HLT_HIL1DoubleMu0_2HF_v1) || RecoQQ::isTriggerMatch(iQQ,HI::HLT_HIL1DoubleMu0_2HF0_v1)))*/) :
-              RecoQQ::isTriggerMatch(iQQ, triggerIndex_PP) )  &&   // if PbPb && !periPD then (HLT_HIL1DoubleMu0_v1 || HLT_HIL1DoubleMu0_2HF_v1)
+            ( isPbPb ? RecoQQ::isTriggerMatch(iQQ,triggerIndex_PbPb) : RecoQQ::isTriggerMatch(iQQ, triggerIndex_PP) )  && 
 	    (isPbPb ? (pprimaryVertexFilter && pBeamScrapingFilter && phfCoincFilter2Th4) : (pPAprimaryVertexFilter && pBeamScrapingFilter))
             )
 	  {
