@@ -61,7 +61,7 @@ bool  bffON             = false;
 bool  ctauCut           = false;
 string nameTag_base     = "";    // can put here e.g. "_prompt", "_nonprompt", ...
 
-const bool useNcoll = false; // false -> use TAA / NMB, true -> use Ncoll / lumiPbPb
+const bool useNcoll = true; // false -> use TAA / NMB, true -> use Ncoll / lumiPbPb
 
 double histMax = 0;
 //////////////////
@@ -145,6 +145,10 @@ void doAllplots() {
   printOptions();
   plotAll("DataFits_ctauCut/DataFits_lowJtPt");
 
+  setOptions(false, true, true, false, true, true, false, "", -1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_lowerJtPt");
+
   ///////////////////////////////////////////////////////
   //       PbPb, prompt, mid and fwd, ctauCut          //
   ///////////////////////////////////////////////////////
@@ -160,6 +164,10 @@ void doAllplots() {
   printOptions();
   plotAll("DataFits_ctauCut/DataFits_lowJtPt");
 
+  setOptions(true, false, true, false, true, true, false, "", -1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_lowerJtPt");
+
   ///////////////////////////////////////////////////////
   //      PbPb/pp, prompt, mid and fwd, ctauCut        //
   ///////////////////////////////////////////////////////
@@ -174,6 +182,10 @@ void doAllplots() {
   setOptions(true, true, true, false, true, true, false, "", -1, false, false, false, false, true);
   printOptions();
   plotAll("DataFits_ctauCut/DataFits_lowJtPt");
+
+  setOptions(true, true, true, false, true, true, false, "", -1, false, false, false, false, true);
+  printOptions();
+  plotAll("DataFits_ctauCut/DataFits_lowerJtPt");
 
 };
 
@@ -342,7 +354,7 @@ void plotNJJ(vector<anabin> thecats, string xaxis, string outputDir) {
 
     double normfactorpp = 1., normfactoraa = 1.;
 
-    normfactorpp = 1./spp.lumipp;
+    normfactorpp = 1./spp.lumipp; cout <<"normfactorpp = 1/lumi = 1/" << spp.lumipp << " = "<<normfactorpp<<endl;
     if (useNcoll) {
       normfactoraa = 1./s.lumiaa;
       normfactoraa *= 1./(208.*208.*(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)));
@@ -352,6 +364,7 @@ void plotNJJ(vector<anabin> thecats, string xaxis, string outputDir) {
     }
     normfactoraa *= 200./(it->first.centbin().high()-it->first.centbin().low());
 
+    cout <<"normfactoraa = "<<normfactoraa<<" ; lumiaa = "<<s.lumiaa<< endl;
     double naa = s.naa;
     double npp = spp.npp;
     double dnaa = s.dnaa_stat;

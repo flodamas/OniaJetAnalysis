@@ -53,7 +53,8 @@ public :
    Float_t deta;
    Float_t drmin;
    Float_t z=100;
-   int triggerIndex_PP = 9;
+   int triggerIndex_PP = 0;
+   int triggerIndex_PbPb = 9;
 
    Float_t weight;
    Float_t tnp_weight;

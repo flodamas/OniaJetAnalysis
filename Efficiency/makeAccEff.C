@@ -228,7 +228,8 @@ void oniaTree::EffCalc () {
 
 	  if (!areMuonsInAcceptance2019(whichRec)) continue;
 	  if (!passQualityCuts2019(whichRec)) continue;
-	  if (!isTriggerMatch(whichRec, triggerIndex_PP)) continue;
+	  if (isPbPb && !isTriggerMatch(whichRec, triggerIndex_PbPb)) continue;
+	  if (!isPbPb && !isTriggerMatch(whichRec, triggerIndex_PP)) continue;
 	  if (Reco_QQ_sign[whichRec]!=0) continue;
 	  if (RecoQQ4mom->Pt()<3 || RecoQQ4mom->Pt()>50) continue;
 	  if (fabs(RecoQQ4mom->Rapidity())>=2.4) continue;
