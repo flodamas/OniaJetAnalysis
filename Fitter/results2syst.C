@@ -148,7 +148,7 @@ void results2syst(const char* workDirNames, const char* systFileName, const char
   cout << "Done parsing files. Now computing the systematic." << endl;
   
   map<anabin,double> mapsyst;
-  
+  gSystem->mkdir("Systematics/csv", kTRUE);
   string fullSystFileName = string("Systematics/csv/") + systFileName;
   ofstream file(fullSystFileName.c_str());
   file << systHeader << endl;
