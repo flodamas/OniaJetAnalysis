@@ -4,7 +4,7 @@
 //#include "compAccEff.C"
 //#include "systAccEff.C"
 
-Double_t ptbins []= {3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5, 4.75, 5.0, 5.25, 5.5, 5.75, 6.0, 6.25, 6.5, 6.75, 7.0, 7.25, 7.5, 7.75, 8.0, 8.5, 9.0, 9.5, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 20.0, 25.0, 30.0, 40.0, 50};
+Double_t ptbins []= {3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5, 4.75, 5.0, 5.25, 5.5, 5.75, 6.0, 6.25, 6.5, 6.75, 7.0, 7.25, 7.5, 7.75, 8.0, 8.5, 9.0, 9.5, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 20.0, 25.0, 30.0, 100.0};
 Double_t ybins []= {-2.4, -2.0, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4};
 
 
@@ -17,74 +17,80 @@ void oniaTree::AccEffCalc()
   TFile*prAccFile_pbpb = TFile::Open("FilesAccxEff/Acc/prAccHists_PbPb.root");
   if (!prAccFile_pbpb) {
     cout<<"[ERROR] pbpb prompt acceptance file not found!"<<endl;
-    if (isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
-    AccCalc();
-    prAccFile_pbpb = TFile::Open("FilesAccxEff/Acc/prAccHists_PbPb.root");
+    if (isAcc && isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+      AccCalc();
+      prAccFile_pbpb = TFile::Open("FilesAccxEff/Acc/prAccHists_PbPb.root");
     }
-    else
+    else {
       cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
   }
-
+  
   TFile*nprAccFile_pbpb = TFile::Open("FilesAccxEff/Acc/nprAccHists_PbPb.root");
   if (!nprAccFile_pbpb) {
-  cout<<"[ERROR] pbpb nonprompt acceptance file not found!"<<endl;
-  if (isPbPb && !isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
-  AccCalc();
-  nprAccFile_pbpb = TFile::Open("FilesAccxEff/Acc/nprAccHists_PbPb.root");
+    cout<<"[ERROR] pbpb nonprompt acceptance file not found!"<<endl;
+    if (isAcc && isPbPb && !isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+      AccCalc();
+      nprAccFile_pbpb = TFile::Open("FilesAccxEff/Acc/nprAccHists_PbPb.root");
+    }
+    else {
+      cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
   }
-  else 
-  cout<<"[ERROR] Please change your settings and retry."<<endl; return;
-  }
-
+  
   TFile*prEffFile_pbpb = TFile::Open("FilesAccxEff/Eff/prEffHists_PbPb.root");
   if (!prEffFile_pbpb) {
     cout<<"[ERROR] pbpb prompt efficiency file not found!"<<endl;
-    if (isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+    if (!isAcc && isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
       EffCalc();
       prEffFile_pbpb = TFile::Open("FilesAccxEff/Eff/prEffHists_PbPb.root");
     }
-    else 
+    else {
       cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
   }
 
   TFile*nprEffFile_pbpb = TFile::Open("FilesAccxEff/Eff/nprEffHists_PbPb.root");
   if (!nprEffFile_pbpb) {
     cout<<"[ERROR] pbpb nonprompt Eff file not found!"<<endl;
-    if (isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+    if (!isAcc && isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
       EffCalc();
       nprEffFile_pbpb = TFile::Open("FilesAccxEff/Eff/nprEffHists_PbPb.root");
     }
-    else 
+    else {
       cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
   }
 
   ////////////////////////////////////pp/////////////////////////////////
   TFile*prAccFile_pp = TFile::Open("FilesAccxEff/Acc/prAccHists_PP.root");
   if (!prAccFile_pp) {
     cout<<"[ERROR] pp prompt acceptance file not found!"<<endl;
-    if (!isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+    if (isAcc && !isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
     AccCalc();
     prAccFile_pp = TFile::Open("FilesAccxEff/Acc/prAccHists_PP.root");
     }
-    else
+    else {
       cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
   }
 
   TFile*nprAccFile_pp = TFile::Open("FilesAccxEff/Acc/nprAccHists_PP.root");
   if (!nprAccFile_pp) {
     cout<<"[ERROR] pp nonprompt acceptance file not found!"<<endl;
-    if (!isPbPb && !isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+    if (isAcc && !isPbPb && !isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
       AccCalc();
       nprAccFile_pp = TFile::Open("FilesAccxEff/Acc/nprAccHists_PP.root");
     }
-    else 
+    else {
       cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
   }
 
   TFile*prEffFile_pp = TFile::Open("FilesAccxEff/Eff/prEffHists_PP.root");
   if (!prEffFile_pp) {
     cout<<"[ERROR] pp prompt efficiency file not found!"<<endl;
-    if (!isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+    if (!isAcc && !isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
       EffCalc();
       prEffFile_pp = TFile::Open("FilesAccxEff/Eff/prEffHists_PP.root");
     }
@@ -95,12 +101,13 @@ void oniaTree::AccEffCalc()
   TFile*nprEffFile_pp = TFile::Open("FilesAccxEff/Eff/nprEffHists_PP.root");
   if (!nprEffFile_pp) {
     cout<<"[ERROR] pp nonprompt Eff file not found!"<<endl;
-    if (!isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+    if (!isAcc && !isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
       EffCalc();
       nprEffFile_pp = TFile::Open("FilesAccxEff/Eff/nprEffHists_PP.root");
     }
-    else 
+    else {
       cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
   }
 
 
@@ -165,6 +172,7 @@ void oniaTree::AccEffCalc()
 }
 
 void oniaTree::EffCalc () {  
+  if (isAcc) {cout<<"[ERROR] you're trying to make Efficiency with Acceptance trees."<<endl; return;}
   int nptbins = sizeof(ptbins)/sizeof(double)-1;
   int nybins = sizeof(ybins)/sizeof(double)-1;
   
@@ -210,7 +218,7 @@ void oniaTree::EffCalc () {
 	  jpsi_pt = GenQQ4mom->Pt();
 	  jpsi_rap = GenQQ4mom->Rapidity();
 
-	  if (jpsi_pt<3 || jpsi_pt>50) continue;
+	  if (jpsi_pt<3 || jpsi_pt>150) continue;
 	  if (fabs(jpsi_rap)>=2.4) continue;
 
 	  if (!areGenMuonsInAcceptance2019(iQQ)) continue;
@@ -231,7 +239,7 @@ void oniaTree::EffCalc () {
 	  if (isPbPb && !isTriggerMatch(whichRec, triggerIndex_PbPb)) continue;
 	  if (!isPbPb && !isTriggerMatch(whichRec, triggerIndex_PP)) continue;
 	  if (Reco_QQ_sign[whichRec]!=0) continue;
-	  if (RecoQQ4mom->Pt()<3 || RecoQQ4mom->Pt()>50) continue;
+	  if (RecoQQ4mom->Pt()<3 || RecoQQ4mom->Pt()>150) continue;
 	  if (fabs(RecoQQ4mom->Rapidity())>=2.4) continue;
 	  if (RecoQQ4mom->M()<2.6 || RecoQQ4mom->M()>3.5) continue;
 	  if (isPbPb && !(pprimaryVertexFilter && pBeamScrapingFilter && phfCoincFilter2Th4)) continue;
@@ -339,7 +347,7 @@ void oniaTree::EffCalc () {
 
 
 void oniaTree::AccCalc () {
-
+  if (!isAcc) {cout<<"[ERROR] you're trying to make Acceptance with Efficiency trees."<<endl; return;}
   int nptbins = sizeof(ptbins)/sizeof(double)-1;
   int nybins = sizeof(ybins)/sizeof(double)-1;
   
@@ -349,7 +357,6 @@ void oniaTree::AccCalc () {
   TH1F* hnum_y = new TH1F ("hnum_y","N_{reco} vs y; y; N_{reco}", nybins, ybins); hnum_y->Sumw2();
 
   TH2F* hdeno_pty = new TH2F ("hdeno_pty", "N_{gen} vs p_{T} and y; y; p_{T}; N_{total}", nybins, ybins, nptbins, ptbins); hdeno_pty->Sumw2();
-  TH2F* hnum_noweights = new TH2F ("hnum_noweights", "N_{reco} vs p_{T} and y; y; p_{T}; N_{reco}", nybins, ybins, nptbins, ptbins); hnum_noweights->Sumw2();
   TH2F* hnum_nominal = new TH2F ("hnum_nominal", "N_{reco} vs p_{T} and y; y; p_{T}; N_{reco}", nybins, ybins, nptbins, ptbins); hnum_nominal->Sumw2();
   
   
@@ -370,7 +377,7 @@ void oniaTree::AccCalc () {
 	  jpsi_pt = GenQQ4mom->Pt();
 	  jpsi_rap = GenQQ4mom->Rapidity();
 	    
-	  if (jpsi_pt<3 || jpsi_pt>50) continue;
+	  if (jpsi_pt<3 || jpsi_pt>150) continue;
 	  if (fabs(jpsi_rap)>2.4) continue;
 	  hdeno_pty->Fill(jpsi_rap, jpsi_pt);
 
@@ -378,9 +385,13 @@ void oniaTree::AccCalc () {
 	  if (jpsi_pt>6.5)
 	    hdeno_y->Fill(fabs(jpsi_rap));
 
-	  if (!areGenMuonsInAcceptance2019(iQQ)) continue;
-
-	  hnum_noweights->Fill(jpsi_rap, jpsi_pt);
+	  //if (!areGenMuonsInAcceptance2019(iQQ)) continue;
+	  TLorentzVector *GenQQmupl4mom = (TLorentzVector*) Gen_QQ_mupl_4mom->At(iQQ);
+	  TLorentzVector *GenQQmumi4mom = (TLorentzVector*) Gen_QQ_mumi_4mom->At(iQQ);
+	  ////////mupl in acc 
+	  if (!isGlobalMuonInAccept2019(GenQQmupl4mom)) continue;
+	  if (!isGlobalMuonInAccept2019(GenQQmumi4mom)) continue;
+ 
 	  hnum_nominal->Fill(jpsi_rap, jpsi_pt);
 	    
 	  //if (jpsi_pt<6.5) continue;
@@ -395,14 +406,13 @@ void oniaTree::AccCalc () {
   TFile* fsave = new TFile (Form("FilesAccxEff/Acc/%sAccHists_%s.root", isPr?"pr":"npr", isPbPb?"PbPb":"PP"), "RECREATE");
   hdeno_pty->Write("hdeno_2d");
   hnum_nominal->Write("hnum_2d_nominal");
-  hnum_noweights->Write("hnum_2d_noweights");
   hdeno_pt->Write("hdeno_pt");
   hnum_pt->Write("hnum_pt");
   hdeno_y->Write("hdeno_y");
   hnum_y->Write("hnum_y");
   fsave->Close();
   
-  delete fsave; delete hdeno_pt; delete hnum_pt; delete hdeno_y; delete hnum_y; delete hdeno_pty; delete hnum_noweights; delete hnum_nominal;
+  delete fsave; delete hdeno_pt; delete hnum_pt; delete hdeno_y; delete hnum_y; delete hdeno_pty; delete hnum_nominal;
 }//end of AccCalc function
 
 void oniaTree::ClosureTest()

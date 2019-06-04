@@ -54,7 +54,7 @@ public :
    Float_t drmin;
    Float_t z=100;
    int triggerIndex_PP = 0;
-   int triggerIndex_PbPb = 9;
+   int triggerIndex_PbPb = 12;
 
    Float_t weight;
    Float_t tnp_weight;
@@ -121,20 +121,24 @@ public :
    Float_t         Gen_weight;
    Float_t         Gen_pthat;
    Int_t           Gen_QQ_size;
-   Int_t           Gen_QQ_type[10];   //[Gen_QQ_size]
+   Int_t           Gen_QQ_type[99];   //[Gen_QQ_size]
    TClonesArray    *Gen_QQ_4mom;
-   Int_t           Gen_QQ_momId[10];   //[Gen_QQ_size]
-   Float_t         Gen_QQ_ctau[10];   //[Gen_QQ_size]
-   Float_t         Gen_QQ_ctau3D[10];   //[Gen_QQ_size]
-   Int_t           Gen_QQ_mupl_idx[10];   //[Gen_QQ_size]
-   Int_t           Gen_QQ_mumi_idx[10];   //[Gen_QQ_size]
-   Int_t           Gen_QQ_whichRec[10];   //[Gen_QQ_size]
+   Int_t           Gen_QQ_momId[99];   //[Gen_QQ_size]
+   Float_t         Gen_QQ_ctau[99];   //[Gen_QQ_size]
+   Float_t         Gen_QQ_ctau3D[99];   //[Gen_QQ_size]
+   Int_t           Gen_QQ_mupl_idx[99];   //[Gen_QQ_size]
+   Int_t           Gen_QQ_mumi_idx[99];   //[Gen_QQ_size]
+   Int_t           Gen_QQ_whichRec[99];   //[Gen_QQ_size]
    Int_t           Gen_mu_size;
-   Int_t           Gen_mu_type[20];   //[Gen_mu_size]
-   Int_t           Gen_mu_charge[20];   //[Gen_mu_size]
+   Int_t           Gen_mu_type[99];   //[Gen_mu_size]
+   Int_t           Gen_mu_charge[99];   //[Gen_mu_size]
    TClonesArray    *Gen_mu_4mom;
-   Int_t           Gen_mu_whichRec[20];   //[Gen_mu_size]
+   Int_t           Gen_mu_whichRec[99];   //[Gen_mu_size]
 
+
+   ////////////////////////// for Acc calculation
+   TClonesArray    *Gen_QQ_mupl_4mom;
+   TClonesArray    *Gen_QQ_mumi_4mom; 
 
    Int_t           pclusterCompatibilityFilter;
    Int_t           pprimaryVertexFilter;   // for PbPb
@@ -244,6 +248,10 @@ public :
    TBranch        *b_Gen_mu_4mom;   //!
    TBranch        *b_Gen_mu_whichRec;   //!
 
+   ////////////////////////// for Acc calculation
+   TBranch        *b_Gen_QQ_mupl_4mom;
+   TBranch        *b_Gen_QQ_mumi_4mom; 
+
 
    TBranch        *b_pclusterCompatibilityFilter;   //!
    TBranch        *b_pprimaryVertexFilter;   //!
@@ -278,7 +286,7 @@ public :
 
 
 
-   oniaTree(Bool_t pbpb = true, Bool_t pr = false);
+   oniaTree(Bool_t pbpb = true, Bool_t pr = false, Bool_t acc = false);
    virtual ~oniaTree();
 
    virtual Int_t    Cut(Long64_t entry);
@@ -316,12 +324,39 @@ public :
 #endif
 
 #ifdef makeAccEff_cxx
-oniaTree::oniaTree(Bool_t pbpb, Bool_t pr) : fChain(0)
+oniaTree::oniaTree(Bool_t pbpb, Bool_t pr, Bool_t acc) : fChain(0)
 {
   TFile* f(0x0);
   isPbPb = pbpb;
   isPr = pr;
-  f = TFile::Open("/data_CMS/cms/diab/JpsiJet/MC/PbPb/prompt/v2/HiForestAOD_merged.root");
+  isAcc = acc;
+
+  TString inputFiles [8] = {
+    //Acc files
+    "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_JpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //pp prompt 
+    "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_BJpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //pp nonprompt
+    "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_JpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb prompt
+    "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_BJpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb  nonprompt
+    //Eff files
+    "/data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v1/HiForestAOD_ext_merged.root", //pp prompt
+    "/data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v1/HiForestAOD_ext_merged.root", //pp nonprompt //set as prompt for now since we don't have trees yet
+    "/data_CMS/cms/diab/JpsiJet/MC/PbPb/prompt/v5/HiForestAOD_merged.root", //PbPb prompt
+    "/data_CMS/cms/diab/JpsiJet/MC/PbPb/nonprompt/v2/HiForestAOD_merged.root" //PbPb nonprompt
+  };
+
+  int inin = 0; // inin = input index
+
+  if (isAcc && !isPbPb && isPr) inin = 0;
+  else if (isAcc && !isPbPb && !isPr) inin = 1;
+  else if (isAcc && isPbPb && isPr) inin = 2;
+  else if (isAcc && isPbPb && !isPr) inin = 3;
+  else if (!isAcc && !isPbPb && isPr) inin = 4;
+  else if (!isAcc && !isPbPb && !isPr) inin = 5;
+  else if (!isAcc && isPbPb && isPr) inin = 6;
+  else if (!isAcc && isPbPb && !isPr) inin = 7;
+
+
+  f = TFile::Open(inputFiles[inin]);
 
   cout<<Form("[INFO] %s %s tree in file ",(isPbPb?"PbPb":"pp"),(isPr?"prompt MC":"nonprompt MC"))<<f->GetName()<<endl;
   
@@ -332,11 +367,10 @@ oniaTree::oniaTree(Bool_t pbpb, Bool_t pr) : fChain(0)
     cout <<"[ERROR] Cannot find the onia tree"<<endl;
     return;
   }
-  if(!skimtree){
-    cout <<"[ERROR] Cannot find the skimanalysis tree"<<endl;
-    return;
-  }
-  tree->AddFriend(skimtree);
+  if(!skimtree)
+    cout <<"[WARNING] Cannot find the skimanalysis tree"<<endl;
+  else
+    tree->AddFriend(skimtree);
   Init(tree);
 }
 
@@ -375,6 +409,8 @@ void oniaTree::Init(TTree *tree)
    Gen_QQ_4mom = 0;
    Gen_mu_4mom = 0;
 
+   Gen_QQ_mupl_4mom = 0;
+   Gen_QQ_mumi_4mom = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -457,6 +493,10 @@ void oniaTree::Init(TTree *tree)
    if (fChain->GetBranch("Gen_mu_4mom")) fChain->SetBranchAddress("Gen_mu_4mom", &Gen_mu_4mom, &b_Gen_mu_4mom);
    if (fChain->GetBranch("Gen_mu_whichRec")) fChain->SetBranchAddress("Gen_mu_whichRec", Gen_mu_whichRec, &b_Gen_mu_whichRec);
 
+   /////////////////for Acc calc
+   if (fChain->GetBranch("Gen_QQ_mupl_4mom")) fChain->SetBranchAddress("Gen_QQ_mupl_4mom", &Gen_QQ_mupl_4mom, &b_Gen_QQ_mupl_4mom);
+   if (fChain->GetBranch("Gen_QQ_mumi_4mom")) fChain->SetBranchAddress("Gen_QQ_mumi_4mom", &Gen_QQ_mumi_4mom, &b_Gen_QQ_mumi_4mom);
+
 
    if (fChain->GetBranch("pclusterCompatibilityFilter")) fChain->SetBranchAddress("pclusterCompatibilityFilter", &pclusterCompatibilityFilter, &b_pclusterCompatibilityFilter);
    if (fChain->GetBranch("pprimaryVertexFilter")) fChain->SetBranchAddress("pprimaryVertexFilter", &pprimaryVertexFilter, &b_pprimaryVertexFilter);
@@ -495,6 +535,8 @@ void oniaTree::Init(TTree *tree)
    if (fChain->GetBranch("Reco_mu_4mom")) fChain->GetBranch("Reco_mu_4mom")->SetAutoDelete(false);
    if (fChain->GetBranch("Gen_QQ_4mom")) fChain->GetBranch("Gen_QQ_4mom")->SetAutoDelete(false);
    if (fChain->GetBranch("Gen_mu_4mom")) fChain->GetBranch("Gen_mu_4mom")->SetAutoDelete(false);
+   if (fChain->GetBranch("Gen_QQ_mupl_4mom")) fChain->GetBranch("Gen_QQ_mupl_4mom")->SetAutoDelete(false);
+   if (fChain->GetBranch("Gen_QQ_mumi_4mom")) fChain->GetBranch("Gen_QQ_mumi_4mom")->SetAutoDelete(false);
 
    fChain->SetBranchStatus("*",0);
    if (fChain->GetBranch("HLTriggers")) fChain->SetBranchStatus("HLTriggers",1);
@@ -541,6 +583,8 @@ void oniaTree::Init(TTree *tree)
    if (fChain->GetBranch("Gen_QQ_whichRec")) fChain->SetBranchStatus("Gen_QQ_whichRec",1); 
    if (fChain->GetBranch("Gen_mu_4mom")) fChain->SetBranchStatus("Gen_mu_4mom",1);
    if (fChain->GetBranch("Gen_mu_size")) fChain->SetBranchStatus("Gen_mu_size",1);
+   if (fChain->GetBranch("Gen_QQ_mupl_4mom")) fChain->SetBranchStatus("Gen_QQ_mupl_4mom",1);
+   if (fChain->GetBranch("Gen_QQ_mumi_4mom")) fChain->SetBranchStatus("Gen_QQ_mumi_4mom",1);
    Notify();
 }
 
@@ -570,10 +614,6 @@ Bool_t oniaTree::isTriggerMatch (Int_t iRecoQQ, Int_t TriggerBit)
 
 Bool_t oniaTree::isGlobalMuonInAccept2019 (TLorentzVector* Muon)
 {
-  //return (fabs(Muon->Eta()) < 2.4 &&
-  //((fabs(Muon->Eta()) < 1.2 && Muon->Pt() >= 3.5) ||
-  //(1.2 <= fabs(Muon->Eta()) && fabs(Muon->Eta()) < 2.1 && Muon->Pt() >= 5.77-1.89*fabs(Muon->Eta())) ||
-  //(2.1 <= fabs(Muon->Eta()) && Muon->Pt() >= 1.8)));
   return ( fabs(Muon->Eta()) < 2.4 &&
 	   ((fabs(Muon->Eta()) < 1.2 && Muon->Pt() >= 3.5) ||
 	    (1.2 <= fabs(Muon->Eta()) && fabs(Muon->Eta()) < 2.1 && Muon->Pt() >= 5.47-1.89*fabs(Muon->Eta())) ||
