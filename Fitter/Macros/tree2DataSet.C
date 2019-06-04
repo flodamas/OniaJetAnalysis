@@ -1,4 +1,4 @@
-// -*- C++ -*-%isMatchedReco
+// -*- C++ -*-
 
 //
 // Package:    Fitter
@@ -27,7 +27,7 @@ TH2F*              corrHist = NULL;
 double drmin = 0.5;
 int matchGR = 0;
 string  findMyTree(string FileName);
-string  findJetTree(string FileName);
+string  findJetTree(string FileName, double jetR);
 string  findSkimTree(string FileName);
 string  findCentTree(string FileName);
 bool    getTChain(TChain* fChain, TChain* jChain, TChain* sChain, TChain* cChain, vector<string> FileNames);
@@ -40,8 +40,8 @@ double  getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP);
 bool    readCorrection(const char* file);
 void    setCentralityMap(const char* file);
 float   jecCorr(double jtPt, double rawPt, double jpsiPt);
-
-bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string DSName, string OutputFileName, bool UpdateDS=false)
+bool    jetsInHCALHole(double jtEta, double jtPhi);
+bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string DSName, string OutputFileName, bool UpdateDS=false)
 {
   RooDataSet* dataOS = NULL; RooDataSet* dataSS = NULL; RooDataSet* dataOSNoBkg = NULL;
   bool isMC = false;
@@ -50,15 +50,14 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
   bool isPbPb = false;
   if (DSName.find("PbPb")!=std::string::npos) isPbPb =true;
   int triggerIndex_PP   = PP::HLT_HIL1DoubleMuOpen_v1;
-  int triggerIndex_PbPb = HI::HLT_HIL3DoubleMuOpen_JpsiPsi_v1;
+  int triggerIndex_PbPb = HI::HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1;
   int CentFactor = 1;
   
   bool usePeriPD = false;
   if (InputFileNames[0].find("HIOniaPeripheral30100")!=std::string::npos) {
     cout << "[INFO] Working with Peripheral PbPb PD" << endl;
     usePeriPD = true;
-    //    triggerIndex_PbPb = HI::HLT_HIL1DoubleMu0_2HF_Cent30100_v1;
-    triggerIndex_PbPb = HI::HLT_HIL3DoubleMuOpen_JpsiPsi_v1;
+    triggerIndex_PbPb = HI::HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1;
   }
   
   bool applyWeight = false;
@@ -88,6 +87,10 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
   bool applyJEC = false;
   if (OutputFileName.find("_JEC")!=std::string::npos) applyJEC = true;
 
+  double jetR = 0.4;
+  if (OutputFileName.find("_jetR3")!=std::string::npos) jetR = 0.3;
+  if (OutputFileName.find("_jetR5")!=std::string::npos) jetR = 0.5;
+
   bool createDS = ( gSystem->AccessPathName(OutputFileName.c_str()) || UpdateDS );
 
   if ( !gSystem->AccessPathName(OutputFileName.c_str()) ) {
@@ -96,22 +99,22 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
     TFile *DBFile = TFile::Open(OutputFileName.c_str(),"READ");
     if (isMC && isPureSDataset) {
       if (applyWeight_Corr) {
-	dataOSNoBkg = (RooDataSet*)DBFile->Get(Form("dOS_%s_NoBkg_%s%s", DSName.c_str(),corrName.Data(), (applyJEC?"_JEC":"")));
+	dataOSNoBkg = (RooDataSet*)DBFile->Get(Form("dOS_%s_NoBkg_jetR%d_%s%s", DSName.c_str(),(int)(jetR*10), corrName.Data(), (applyJEC?"_JEC":"")));
 	if (checkDS(dataOSNoBkg, DSName)==false) { createDS = true; }
       }
       else {
-	dataOSNoBkg = (RooDataSet*)DBFile->Get(Form("dOS_%s_NoBkg%s", DSName.c_str(), (applyJEC?"_JEC":"")));
+	dataOSNoBkg = (RooDataSet*)DBFile->Get(Form("dOS_%s_NoBkg_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")));
 	if (checkDS(dataOSNoBkg, DSName)==false) { createDS = true; }
       }  
     } 
     else if (applyWeight_Corr) {
-      dataOS = (RooDataSet*)DBFile->Get(Form("dOS_%s_%s%s", DSName.c_str(),corrName.Data(), (applyJEC?"_JEC":"")));
+      dataOS = (RooDataSet*)DBFile->Get(Form("dOS_%s_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(), (applyJEC?"_JEC":"")));
       if (checkDS(dataOS, DSName)==false) { createDS = true; }
     }
     else {
-      dataOS = (RooDataSet*)DBFile->Get(Form("dOS_%s%s", DSName.c_str(),(applyJEC?"_JEC":"")));
+      dataOS = (RooDataSet*)DBFile->Get(Form("dOS_%s_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")));
       if (checkDS(dataOS, DSName)==false) { createDS = true; }
-      dataSS = (RooDataSet*)DBFile->Get(Form("dSS_%s%s", DSName.c_str(),(applyJEC?"_JEC":"")));
+      dataSS = (RooDataSet*)DBFile->Get(Form("dSS_%s_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")));
       if (checkDS(dataSS, DSName)==false) { createDS = true; }
     }
     DBFile->Close(); delete DBFile;
@@ -120,7 +123,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
   if (createDS) {
     cout << "[INFO] Creating " << (isPureSDataset ? "pure signal " : "") << "RooDataSet for " << DSName << endl;
     TreeName = findMyTree(InputFileNames[0]); if(TreeName==""){return false;}
-    jetTreeName = findJetTree(InputFileNames[0]); if(jetTreeName==""){return false;}
+    jetTreeName = findJetTree(InputFileNames[0], jetR); if(jetTreeName==""){return false;}
     skimTreeName = findSkimTree(InputFileNames[0]); if(skimTreeName==""){return false;}
     centTreeName = findCentTree(InputFileNames[0]); if(centTreeName==""){return false;}
     TChain* theTree = new TChain(TreeName.c_str(),"");
@@ -164,9 +167,9 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 	cols->add(*ptJet);
 	cols->add(*rapJet);
       }
-      dataOS = new RooDataSet(Form("dOS_%s%s", DSName.c_str(), (applyJEC?"_JEC":"")), "dOS", *cols, WeightVar(*weight), StoreAsymError(*mass));
-      dataSS = new RooDataSet(Form("dSS_%s%s", DSName.c_str(), (applyJEC?"_JEC":"")), "dSS", *cols, WeightVar(*weight), StoreAsymError(*mass));
-      if (isPureSDataset) dataOSNoBkg = new RooDataSet(Form("dOS_%s_NoBkg%s", DSName.c_str(), (applyJEC?"_JEC":"")), "dOSNoBkg", *cols, WeightVar(*weight), StoreAsymError(*mass));
+      dataOS = new RooDataSet(Form("dOS_%s_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")), "dOS", *cols, WeightVar(*weight), StoreAsymError(*mass));
+      dataSS = new RooDataSet(Form("dSS_%s_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")), "dSS", *cols, WeightVar(*weight), StoreAsymError(*mass));
+      if (isPureSDataset) dataOSNoBkg = new RooDataSet(Form("dOS_%s_NoBkg_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")), "dOSNoBkg", *cols, WeightVar(*weight), StoreAsymError(*mass));
     }
     else if (applyWeight_Corr)
     {
@@ -183,9 +186,9 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 	cols->add(*rapJet);
       }
       if (!readCorrection(Form("%s/Input/%s",gSystem->ExpandPathName(gSystem->pwd()),corrFileName.Data()))){ return false; }
-      dataOS = new RooDataSet(Form("dOS_%s_%s%s", DSName.c_str(),corrName.Data(), (applyJEC?"_JEC":"")), "dOS", *cols, WeightVar(*weightCorr), StoreAsymError(*mass));
+      dataOS = new RooDataSet(Form("dOS_%s_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(), (applyJEC?"_JEC":"")), "dOS", *cols, WeightVar(*weightCorr), StoreAsymError(*mass));
       if (isMC && isPureSDataset)
-	dataOSNoBkg = new RooDataSet(Form("dOS_%s_NoBkg_%s%s", DSName.c_str(),corrName.Data(),(applyJEC?"_JEC":"")), "dOSNoBkg", *cols, WeightVar(*weightCorr), StoreAsymError(*mass));
+	dataOSNoBkg = new RooDataSet(Form("dOS_%s_NoBkg_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(),(applyJEC?"_JEC":"")), "dOSNoBkg", *cols, WeightVar(*weightCorr), StoreAsymError(*mass));
       cout<<"[INFO] "<<corrName<<" applied!"<<endl;
     }
     else
@@ -202,9 +205,9 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 	cols->add(*ptJet);
 	cols->add(*rapJet);
       }  
-      dataOS = new RooDataSet(Form("dOS_%s%s", DSName.c_str(),(applyJEC?"_JEC":"")), "dOS", *cols, StoreAsymError(*mass));
-      dataSS = new RooDataSet(Form("dSS_%s%s", DSName.c_str(), (applyJEC?"_JEC":"")), "dSS", *cols, StoreAsymError(*mass));
-      if (isMC && isPureSDataset) dataOSNoBkg = new RooDataSet(Form("dOS_%s_NoBkg%s", DSName.c_str(),(applyJEC?"_JEC":"")), "dOSNoBkg", *cols, StoreAsymError(*mass));
+      dataOS = new RooDataSet(Form("dOS_%s_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")), "dOS", *cols, StoreAsymError(*mass));
+      dataSS = new RooDataSet(Form("dSS_%s_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")), "dSS", *cols, StoreAsymError(*mass));
+      if (isMC && isPureSDataset) dataOSNoBkg = new RooDataSet(Form("dOS_%s_NoBkg_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")), "dOSNoBkg", *cols, StoreAsymError(*mass));
     }
     if (applyWeight) cout<<"[INFO] pt weights applied!"<<endl;
 
@@ -245,12 +248,12 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
     else fl = "";
 
     gSystem->mkdir("TreesForUnfolding");
-    string trUnfFileName = Form("TreesForUnfolding/tree_%s%s%s%s%s.root", DSName.c_str(), (isPureSDataset?"_NoBkg":""), (applyWeight_Corr?Form("_%s",corrName.Data()):""), (applyJEC?"_JEC":""), (applyWeight? fl.c_str():""));
+    string trUnfFileName = Form("TreesForUnfolding/tree_%s%s_jetR%d%s%s%s.root", DSName.c_str(), (isPureSDataset?"_NoBkg":""), (int)(jetR*10), (applyWeight_Corr?Form("_%s",corrName.Data()):""), (applyJEC?"_JEC":""), (applyWeight? fl.c_str():""));
 
     TFile * trUnfFile = new TFile (trUnfFileName.c_str(),"RECREATE");
     //trUnfFile->cd();
     TTree* trUnf = new TTree ("treeForUnfolding","tree used for the unfolding");
-    Int_t evtNb; Float_t jp_pt; Float_t jp_rap; Float_t jp_eta; Float_t jp_mass; Float_t jp_phi; Float_t jp_l; 
+    Int_t evtNb; Int_t centr; Float_t jp_pt; Float_t jp_rap; Float_t jp_eta; Float_t jp_mass; Float_t jp_phi; Float_t jp_l; 
     Float_t jp_gen_pt; Float_t jp_gen_rap; Float_t jp_gen_eta; Float_t jp_gen_phi; 
     Float_t jt_pt; Float_t jt_rap; Float_t jt_eta; Float_t jt_phi; Float_t jt_CHF; Float_t jt_NHF; Float_t jt_CEF; Float_t jt_NEF; Float_t jt_MUF; Float_t jt_CHM; Float_t jt_NHM; Float_t jt_CEM; Float_t jt_NEM; Float_t jt_MUM; 
     Float_t jt_ref_pt; Float_t jt_ref_rap; Float_t jt_ref_eta; Float_t jt_ref_phi; Float_t jt_gen_chargedSum; Float_t jt_gen_hardSum; Float_t jt_signal_chargedSum; Float_t jt_signal_hardSum;
@@ -259,6 +262,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 
     cout<< "[INFO] Creating the tree to use in the unfolding" << endl;
     trUnf->Branch("evtNb", &evtNb, "evtNb/I");
+    trUnf->Branch("centr", &centr, "centr/I");
     trUnf->Branch("jp_pt", &jp_pt, "jp_pt/F");
     trUnf->Branch("jp_rap", &jp_rap, "jp_rap/F");
     trUnf->Branch("jp_eta", &jp_eta, "jp_eta/F");
@@ -341,6 +345,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
         ptQQ->setVal(RecoQQ4mom->Pt());
         rapQQ->setVal(RecoQQ4mom->Rapidity());
         cent->setVal(hiBin*CentFactor);
+	centr = hiBin;
 	jp_pt = RecoQQ4mom->Pt();
 	jp_rap = RecoQQ4mom->Rapidity();
 	jp_eta = RecoQQ4mom->Eta();
@@ -352,6 +357,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 
 	for (Long64_t ijet=0; ijet<nref; ijet++)
 	{
+	  if (jetsInHCALHole(jteta[ijet],jtphi[ijet])) continue;
 	    TLorentzVector v_jet;
 	    v_jet.SetPtEtaPhiM(jtpt[ijet], jteta[ijet], jtphi[ijet], jtm[ijet]);
 	    if (RecoQQ4mom->DeltaR (v_jet)<=drmin)
@@ -424,10 +430,10 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 	      corr_ptw = Gen_weight*getNColl(hiBin,!isPbPb)*normF;
 	    }
 	    else {
-	      if (pthat >= 15 && pthat < 25)  corr_ptw = 0.168329;
-	      else if (pthat >= 25 && pthat < 35) corr_ptw = 0.0238285;
-	      else if (pthat >= 35 && pthat < 45) corr_ptw = 0.00517143;
-	      else if (pthat >= 45) corr_ptw = 0.00150836;
+	      if (pthat >= 15 && pthat < 25)  corr_ptw = 0.0247699;
+	      else if (pthat >= 25 && pthat < 35) corr_ptw = 0.00311931;
+	      else if (pthat >= 35 && pthat < 45) corr_ptw = 0.000693027;
+	      else if (pthat >= 45) corr_ptw = 0.000212618;
 	    }
 	  }
 	  corr_AccEff = wCorr;
@@ -484,19 +490,21 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
     // Save all the datasets
     TFile *DBFile = TFile::Open(OutputFileName.c_str(),"RECREATE");
     DBFile->cd();
-    if (isMC && isPureSDataset &&  applyWeight_Corr) {
-      dataOSNoBkg->Write(Form("dOS_%s_NoBkg_%s%s", DSName.c_str(),corrName.Data(),(applyJEC?"_JEC":"")));
+    if (isMC && isPureSDataset && applyWeight_Corr) {
+      cout<<"[INFO] saving name = "<<Form("dOS_%s_NoBkg_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(),(applyJEC?"_JEC":""))<<endl;
+      dataOSNoBkg->Write(Form("dOS_%s_NoBkg_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(),(applyJEC?"_JEC":"")));
     }
     else if (isMC && isPureSDataset && !applyWeight_Corr) {
-      dataOSNoBkg->Write(Form("dOS_%s_NoBkg%s", DSName.c_str(),(applyJEC?"_JEC":"")));
+      cout<<"[INFO] saving name = "<<Form("dOS_%s_NoBkg_jetR%d%s", DSName.c_str(),(int)(jetR*10), (applyJEC?"_JEC":""))<<endl;
+      dataOSNoBkg->Write(Form("dOS_%s_NoBkg_jetR%d%s", DSName.c_str(),(int)(jetR*10), (applyJEC?"_JEC":"")));
     }
     else if (!isPureSDataset && applyWeight_Corr) {
-      dataOS->Write(Form("dOS_%s_%s%s", DSName.c_str(),corrName.Data(),(applyJEC?"_JEC":"")));
+      dataOS->Write(Form("dOS_%s_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(),(applyJEC?"_JEC":"")));
     }
     else 
     {
-      dataOS->Write(Form("dOS_%s%s", DSName.c_str(),(applyJEC?"_JEC":"")));
-      dataSS->Write(Form("dSS_%s%s", DSName.c_str(),(applyJEC?"_JEC":"")));
+      dataOS->Write(Form("dOS_%s_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")));
+      dataSS->Write(Form("dSS_%s_jetR%d%s", DSName.c_str(), (int)(jetR*10), (applyJEC?"_JEC":"")));
     }
     DBFile->Write(); DBFile->Close(); delete DBFile;
   }
@@ -538,14 +546,28 @@ string findMyTree(string FileName)
   return name;
 };
 
-string  findJetTree(string FileName)
+string  findJetTree(string FileName, double jetR)
 {
   TFile *f = TFile::Open(FileName.c_str(), "READ");
   string name = "";
+  if (jetR == 0.4){
   if(f->GetListOfKeys()->Contains("ak4PFJetAnalyzer")) name = "ak4PFJetAnalyzer/t";
   else if (f->GetListOfKeys()->Contains("akCs4PFJetAnalyzer")) name = "akCs4PFJetAnalyzer/t";
   else if(f->GetListOfKeys()->Contains("t")) name = "t";
   else { cout << "[ERROR] t was not found in: " << FileName << endl; }
+  }
+  else if (jetR == 0.3){
+    if(f->GetListOfKeys()->Contains("ak3PFJetAnalyzer")) name = "ak3PFJetAnalyzer/t";
+    else if (f->GetListOfKeys()->Contains("akCs3PFJetAnalyzer")) name = "akCs3PFJetAnalyzer/t";
+    else if(f->GetListOfKeys()->Contains("t")) name = "t";
+    else { cout << "[ERROR] t was not found in: " << FileName << endl; }
+  }
+  else if (jetR == 0.5){
+    if(f->GetListOfKeys()->Contains("ak5PFJetAnalyzer")) name = "ak4PFJetAnalyzer/t";
+    else if (f->GetListOfKeys()->Contains("akCs5PFJetAnalyzer")) name = "akCs5PFJetAnalyzer/t";
+    else if(f->GetListOfKeys()->Contains("t")) name = "t";
+    else { cout << "[ERROR] t was not found in: " << FileName << endl; }
+  }
   f->Close(); delete f;
   return name;
 };
@@ -718,13 +740,13 @@ bool isMatchedDiMuon(int iRecoDiMuon, double maxDeltaR)
   return false;
 };
 
-double getNColl(int centr, bool isPP)
+double getNColl(int cen, bool isPP)
 {
-  // Returns the corresponding Ncoll value to the "centr" centrality bin
+  // Returns the corresponding Ncoll value to the "cen" centrality bin
   
   if ( isPP ) return 1.;
   
-  int normCent = TMath::Nint(centr/2.);
+  int normCent = TMath::Nint(cen/2.);
   
   int lcent = 0;
   int ucent = 0;
@@ -844,7 +866,7 @@ double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP)
 	  std::cout << "[Error] pr or npr histogram not provided for correction of " << collName << " " << massName << ". Weight set to 1." << std::endl;
 	  return 1.;
 	}
-      if (pt > 3 && pt < 35 && fabs(rapidity) < 2.4){
+      if (pt > 3 && pt < 50 && fabs(rapidity) < 2.4){
 	prEff = prcorrHisto->GetEfficiency(prcorrHisto->FindFixBin(rapidity, pt));
 	nprEff = nprcorrHisto->GetEfficiency(nprcorrHisto->FindFixBin(rapidity, pt));
 	bf = bfrac->Eval(pt);
@@ -858,4 +880,10 @@ double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP)
 float jecCorr(double jtPt, double rawPt, double jpsiPt)
 {
   return ( (1-(jpsiPt/rawPt))*jtPt + ((jpsiPt/rawPt)/(jtPt/rawPt))*jtPt );
+}
+
+bool jetsInHCALHole(double jtEta, double jtPhi)
+{
+  if ((jtEta > -3.0) && (jtEta < -1.392) && (jtPhi > -1.57) &&  (jtPhi < -0.87)) return true;
+  return false;
 }

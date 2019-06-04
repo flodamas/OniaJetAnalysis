@@ -39,6 +39,10 @@ void drawCtauRecoPlot(RooWorkspace& myws,   // Local workspace
     if(DSTAG.find("NOPR")!=std::string::npos) isNPrompt = true;
   }
 
+  double jetR = 0.4;
+  if (plotLabel.find("jetR3")!=std::string::npos) jetR = 0.3;
+  else if (plotLabel.find("jetR5")!=std::string::npos) jetR = 0.5;
+
   bool applyCorr = false;
   if ( (plotLabel.find("AccEff")!=std::string::npos) || (plotLabel.find("_lJpsiEff")!=std::string::npos) ) applyCorr = true;
   else applyCorr = false;
@@ -52,11 +56,11 @@ void drawCtauRecoPlot(RooWorkspace& myws,   // Local workspace
     else if (plotLabel.find("_lJpsiEff")!=std::string::npos) corrName = "lJpsiEff";
   }
 
-  string dsOSName = Form("dOS_%s_%s%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
-  string dsSSName = Form("dSS_%s_%s%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
+  string dsOSName = Form("dOS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
+  string dsSSName = Form("dSS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
   string pdfName  = "pdfCTAU";
   string pdfTotName  = Form("%s_%s_%s", pdfName.c_str(), incJpsi?"JpsiNoPR":"Psi2SNoPR", (isPbPb?"PbPb":"PP"));
-  if (plotPureSMC) dsOSName = Form("dOS_%s_%s_NoBkg%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
+  if (plotPureSMC) dsOSName = Form("dOS_%s_%s_NoBkg_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
 
   bool isWeighted = myws.data(dsOSName.c_str())->isWeighted();
   // Create the main plot of the fit
@@ -116,11 +120,11 @@ void drawCtauRecoPlot(RooWorkspace& myws,   // Local workspace
   float dy = 0; 
   
   t->SetTextSize(0.03);
-  t->DrawLatex(0.21, 0.86-dy, "2015 HI Soft Muon ID"); dy+=0.045;
+  t->DrawLatex(0.21, 0.86-dy, "2018 HI Soft Muon ID"); dy+=0.045;
   if (isPbPb) {
-    t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=0.045;
+    t->DrawLatex(0.21, 0.86-dy, "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1"); dy+=0.045;
   } else {
-    t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=0.045;
+    t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMuOpen_v1"); dy+=0.045;
   } 
   if (isPbPb) {t->DrawLatex(0.21, 0.86-dy, Form("Cent. %d-%d%%", (int)(cut.Centrality.Start/2), (int)(cut.Centrality.End/2))); dy+=0.045;}
   if (cut.dMuon.Zed.Max<100) {t->DrawLatex(0.21, 0.86-dy, Form("%.2f < z^{#mu#mu} #leq %.2f",cut.dMuon.Zed.Min,cut.dMuon.Zed.Max)); dy+=0.045;}

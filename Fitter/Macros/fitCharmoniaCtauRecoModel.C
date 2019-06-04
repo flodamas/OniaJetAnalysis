@@ -24,6 +24,7 @@ bool fitCharmoniaCtauRecoModel( RooWorkspace& myws,             // Local Workspa
                                 // Select the type of object to fit
                                 bool incJpsi       = true,      // Includes Jpsi model
                                 bool incPsi2S      = true,      // Includes Psi(2S) model
+				double jetR        = 0.4,
                                 // Select the fitting options
                                 bool doCtauRecoPdf = true,      // Flag to indicate if we want to perform the fit
                                 bool wantPureSMC   = false,     // Flag to indicate if we want to fit pure signal MC
@@ -59,7 +60,7 @@ bool fitCharmoniaCtauRecoModel( RooWorkspace& myws,             // Local Workspa
   double numEntries = 1000000;
   string label = ((DSTAG.find(COLL.c_str())!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s", DSTAG.c_str(), COLL.c_str()));
   if (wantPureSMC) label = Form("%s_NoBkg", label.c_str());
-  label = label + (strcmp(applyCorr,"")?Form("_%s",applyCorr):"") + (applyJEC?"_JEC":"");
+  label = label + Form("_jetR%d",(int)(jetR*10)) + (strcmp(applyCorr,"")?Form("_%s",applyCorr):"") + (applyJEC?"_JEC":"");
   string dsName = Form("dOS_%s", label.c_str());
   if (importDS) {
     if ( !(myws.data(dsName.c_str())) ) {
@@ -79,6 +80,7 @@ bool fitCharmoniaCtauRecoModel( RooWorkspace& myws,             // Local Workspa
   string plotLabel = "";
   if (incJpsi || incPsi2S) { plotLabel = plotLabel + "_CtauReco";}// Form("_CtauReco_%s", parIni[Form("Model_CtauReco_%s", COLL.c_str())].c_str());        }
   if (wantPureSMC)         { plotLabel = plotLabel + "_NoBkg"; }
+  plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10));
   if (strcmp(applyCorr,"")) {plotLabel = plotLabel + "_" + applyCorr;}
   if (applyJEC) {plotLabel = plotLabel + "_JEC";}
   // check if we have already done this fit. If yes, do nothing and return true.

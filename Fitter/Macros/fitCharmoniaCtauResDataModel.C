@@ -29,6 +29,7 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
 				   bool incJpsi       = true,      // Includes Jpsi model
 				   bool incPsi2S      = true,      // Includes Psi(2S) model
 				   bool incBkg        = true,      // Includes Bkg model
+				   double jetR        = 0.4,
 				   // Select the fitting options
 				   bool useSPlot      = true,      // If yes, then use SPlot technique, if no, use mass range
 				   bool useTotctauErrPdf = false,  // If yes use the total ctauErr PDF instead of Jpsi and bkg ones
@@ -58,7 +59,7 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
   }
   
   string COLL = (isPbPb ? "PbPb" : "PP" );
-  string label = ((DSTAG.find(COLL.c_str())!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s%s%s", DSTAG.c_str(), COLL.c_str(), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
+  string label = ((DSTAG.find(COLL.c_str())!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s_jetR%d%s%s", DSTAG.c_str(), COLL.c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
 
   if (importDS) {
     setMassCutParameters(cut, incJpsi, incPsi2S, false, false);
@@ -72,7 +73,7 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
       bool fitSideBand = false;
       if (incJpsi)  { plotLabel = plotLabel + "_Jpsi";     }
       if (incPsi2S) { plotLabel = plotLabel + "_Psi2S";    }
-      plotLabel = plotLabel + "_Bkg" + (strcmp(applyCorr,"")?Form("_%s", applyCorr):"")+ (applyJEC?"_JEC":"");
+      plotLabel = plotLabel + "_Bkg" + Form("_jetR%d",(int)(jetR*10)) + (strcmp(applyCorr,"")?Form("_%s", applyCorr):"")+ (applyJEC?"_JEC":"");
 
       setCtauErrFileName(FileName, (inputFitDir["CTAUERR"]=="" ? outputDir : inputFitDir["CTAUERR"]), "DATA", plotLabel, cut, isPbPb, fitSideBand);
       bool foundFit = false;
@@ -137,7 +138,7 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
     
     if ( !fitCharmoniaMassModel( myws, inputWorkspace, cut, parIni, opt, outputDir,
                                  DSTAG, isPbPb, importDS,
-                                 true, incPsi2S, true,
+                                 true, incPsi2S, true, jetR,
                                  doMassFit, cutCtau, doConstrFit, doSimulFit, false, applyCorr, applyJEC, loadMassFitResult, iMassFitDir, numCores,
                                  setLogScale, incSS, zoomPsi, ibWidth, getMeanPT
                                  )
@@ -182,7 +183,7 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
   
       if ( !fitCharmoniaCtauErrModel( myws, inputWorkspace, cut, parIni, opt, outputDir, 
                                       DSTAG, isPbPb, importDS, 
-                                      incJpsi, incPsi2S, incBkg, 
+                                      incJpsi, incPsi2S, incBkg, jetR,
                                       doCtauErrFit, false, applyCorr, applyJEC, loadCtauErrFitResult, inputFitDir, numCores,
                                       setLogScale, incSS, binWidth
                                       ) 

@@ -449,7 +449,7 @@ namespace RecoQQ {
     if ( ! (Reco_mu_SelectionType[iMumi]&((ULong64_t)pow(2, 1))) ) return false; // require the muons to be global muons
     if ( ! (Reco_mu_SelectionType[iMumi]&((ULong64_t)pow(2, 3))) ) return false; // require the muons to be tracker muons
     // if ( ! (Reco_mu_highPurity[iMumi]) ) return false;
-    if ( ! (Reco_mu_TMOneStaTight[iMumi]==1) ) return false; // = isGoodMuon
+    //if ( ! (Reco_mu_TMOneStaTight[iMumi]==1) ) return false; // = isGoodMuon
     if ( ! (Reco_mu_nTrkWMea[iMumi] > 5) ) return false;
     if ( ! (Reco_mu_nPixWMea[iMumi] > 0) ) return false;
     if ( ! (fabs(Reco_mu_dxy[iMumi]) < 0.3) ) return false;
@@ -458,7 +458,7 @@ namespace RecoQQ {
     if ( ! (Reco_mu_SelectionType[iMupl]&((ULong64_t)pow(2, 1))) ) return false; // require the muons to be global muons
     if ( ! (Reco_mu_SelectionType[iMupl]&((ULong64_t)pow(2, 3))) ) return false; // require the muons to be tracker muons
     // if ( ! (Reco_mu_highPurity[iMupl]) ) return false;
-    if ( ! (Reco_mu_TMOneStaTight[iMupl]==1) ) return false; // = isGoodMuon
+    //if ( ! (Reco_mu_TMOneStaTight[iMupl]==1) ) return false; // = isGoodMuon
     if ( ! (Reco_mu_nTrkWMea[iMupl] > 5) ) return false;
     if ( ! (Reco_mu_nPixWMea[iMupl] > 0) ) return false;
     if ( ! (fabs(Reco_mu_dxy[iMupl]) < 0.3) ) return false;

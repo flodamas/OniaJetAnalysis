@@ -38,11 +38,14 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
 
   bool isMC = false;
   bool isNPrompt = false;
-  if (DSTAG.find("MC")!=std::string::npos)
-  {
+  if (DSTAG.find("MC")!=std::string::npos){
     isMC = true;
     if(DSTAG.find("NOPR")!=std::string::npos) isNPrompt = true;
   }
+
+  double jetR = 0.4;
+  if (plotLabel.find("jetR3")!=std::string::npos) jetR = 0.3;
+  else if (plotLabel.find("jetR5")!=std::string::npos) jetR = 0.5;
 
   bool applyWeight_Corr = false;
   if ( (plotLabel.find("AccEff")!=std::string::npos) || (plotLabel.find("_lJpsiEff")!=std::string::npos) ) applyWeight_Corr = true;
@@ -54,19 +57,19 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
 
   bool SB = (incBkg&&(!incPsi2S&&!incJpsi));
   
-  string dsOSName = Form("dOS_%s_%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyJEC?"_JEC":""));
-  string dsSSName = Form("dSS_%s_%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyJEC?"_JEC":""));
+  string dsOSName = Form("dOS_%s_%s_jetR%d%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyJEC?"_JEC":""));
+  string dsSSName = Form("dSS_%s_%s_jetR%d%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyJEC?"_JEC":""));
   TString corrName = "";
   if(applyWeight_Corr)
     {
       if (plotLabel.find("AccEff")!=std::string::npos) corrName = "AccEff";
       else if (plotLabel.find("_lJpsiEff")!=std::string::npos) corrName = "lJpsiEff";
-      dsOSName = Form("dOS_%s_%s_%s%s", DSTAG.c_str(),(isPbPb?"PbPb":"PP"),corrName.Data(), (applyJEC?"_JEC":""));
+      dsOSName = Form("dOS_%s_%s_jetR%d_%s%s", DSTAG.c_str(),(isPbPb?"PbPb":"PP"), (int) (jetR*10), corrName.Data(), (applyJEC?"_JEC":""));
     }
 
   string pdfName  = Form("pdfMASS_Tot_%s", (isPbPb?"PbPb":"PP"));
-  if (plotPureSMC) dsOSName = Form("dOS_%s_%s_NoBkg%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyJEC?"_JEC":""));
-  if (plotPureSMC && applyWeight_Corr) dsOSName = Form("dOS_%s_%s_NoBkg_%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), corrName.Data(), (applyJEC?"_JEC":"")); 
+  if (plotPureSMC) dsOSName = Form("dOS_%s_%s_NoBkg_jetR%d%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"),(int) (jetR*10), (applyJEC?"_JEC":""));
+  if (plotPureSMC && applyWeight_Corr) dsOSName = Form("dOS_%s_%s_NoBkg_jetR%d_%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), corrName.Data(), (applyJEC?"_JEC":"")); 
 
   bool isWeighted = myws.data(dsOSName.c_str())->isWeighted();
   string cutSB = parIni["BkgMassRange_FULL_Cut"];
@@ -343,19 +346,20 @@ void drawMassPlot(RooWorkspace& myws,   // Local workspace
   
   t->SetTextSize(0.03);
   if (!paperStyle) { // do not print selection details for paper style
-     t->DrawLatex(0.20, 0.86-dy, "2015 HI Soft Muon ID"); dy+=0.045;
+     t->DrawLatex(0.20, 0.86-dy, "2018 HI Soft Muon ID"); dy+=0.045;
      if (cutCtau) { t->DrawLatex(0.21, 0.86-dy, "#font[12]{l}_{J/#psi} cuts applied"); dy+=0.045; }
      if (isPbPb) {
-        t->DrawLatex(0.20, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=2.0*0.045;
+        t->DrawLatex(0.20, 0.86-dy, "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1"); dy+=2.0*0.045;
      } else {
-        t->DrawLatex(0.20, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=2.0*0.045;
+        t->DrawLatex(0.20, 0.86-dy, "HLT_HIL1DoubleMuOpen_v1"); dy+=2.0*0.045;
      } 
   }
 
   if (cut.dMuon.Zed.Max<100) {t->DrawLatex(0.5175, 0.86-dy, Form("%g < z^{#mu#mu} #leq %g",cut.dMuon.Zed.Min,cut.dMuon.Zed.Max)); dy+=0.045;}
   if (cut.dMuon.AbsRap.Min>0.1) {t->DrawLatex(0.5175, 0.86-dy, Form("%.1f < |y^{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Min,cut.dMuon.AbsRap.Max)); dy+=0.045;}
   else {t->DrawLatex(0.5175, 0.86-dy, Form("|y^{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Max)); dy+=0.045;}
-  t->DrawLatex(0.5175, 0.86-dy, Form("%g < p_{T}^{#mu#mu} < %g GeV/c",cut.dMuon.Pt.Min,cut.dMuon.Pt.Max)); dy+=0.045;
+  if (cut.dMuon.Pt.Max<100){t->DrawLatex(0.5175, 0.86-dy, Form("p_{T}^{#mu#mu} > %g GeV/c",cut.dMuon.Pt.Max)); dy+=0.045;} 
+  else {t->DrawLatex(0.5175, 0.86-dy, Form("%g < p_{T}^{#mu#mu} < %g GeV/c",cut.dMuon.Pt.Min,cut.dMuon.Pt.Max)); dy+=0.045;}
   if (cut.jet.Pt.Max<1000) {t->DrawLatex(0.5175, 0.86-dy, Form("%g < p_{T}^{jet} < %g GeV/c",cut.jet.Pt.Min,cut.jet.Pt.Max)); dy+=0.045;}
   if (isPbPb) {t->DrawLatex(0.5175, 0.86-dy, Form("Cent. %d-%d%%", (int)(cut.Centrality.Start/2), (int)(cut.Centrality.End/2))); dy+=0.045;}
   if (getMeanPT){

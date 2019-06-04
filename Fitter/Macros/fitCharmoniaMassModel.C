@@ -26,6 +26,7 @@ bool fitCharmoniaMassModel( RooWorkspace& myws,            // Local Workspace
                             bool incJpsi     = true,       // Includes Jpsi model
                             bool incPsi2S    = true,       // Includes Psi(2S) model
                             bool incBkg      = true,       // Includes Background model
+			    double jetR      = 0.4,
                             // Select the fitting options
                             bool doFit       = true,       // Flag to indicate if we want to perform the fit
                             bool cutCtau     = false,      // Apply prompt ctau cuts
@@ -78,6 +79,7 @@ bool fitCharmoniaMassModel( RooWorkspace& myws,            // Local Workspace
     double numEntries = 1000000;
     string label = ((DSTAG.find("PP")!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s", DSTAG.c_str(), "PP"));
     if (wantPureSMC) label += "_NoBkg";
+    label += Form("_jetR%d",(int)(jetR*10));
     if (applyWeight_Corr) label += Form("_%s",applyCorr);
     if (applyJEC) label += "_JEC";
     string dsName = Form("dOS_%s", label.c_str());
@@ -103,10 +105,11 @@ bool fitCharmoniaMassModel( RooWorkspace& myws,            // Local Workspace
     if (incPsi2S) { plotLabelPP += Form("_Psi2S_%s", parIni["Model_Psi2S_PP"].c_str()); }
     if (incBkg)   { plotLabelPP += Form("_Bkg_%s", parIni["Model_Bkg_PP"].c_str());     }
     if (wantPureSMC) plotLabelPP +="_NoBkg";
+    plotLabelPP += Form("_jetR%d",(int)(jetR*10));
     if (applyWeight_Corr) plotLabelPP +=Form("_%s",applyCorr);
     if (applyJEC) plotLabelPP += "_JEC";
   }
-
+  
   if (doSimulFit || isPbPb) {
     // Set models based on initial parameters
     struct OniaModel model;
@@ -116,6 +119,7 @@ bool fitCharmoniaMassModel( RooWorkspace& myws,            // Local Workspace
     double numEntries = 1000000;
     string label = ((DSTAG.find("PbPb")!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s", DSTAG.c_str(), "PbPb"));
     if (wantPureSMC) label += "_NoBkg";
+    label +=Form("_jetR%d",(int)(jetR*10));
     if (applyWeight_Corr) label += Form("_%s",applyCorr);
     if (applyJEC) label += "_JEC";
     string dsName = Form("dOS_%s", label.c_str());
@@ -141,6 +145,7 @@ bool fitCharmoniaMassModel( RooWorkspace& myws,            // Local Workspace
     if (incPsi2S) { plotLabelPbPb += Form("_Psi2S_%s", parIni["Model_Psi2S_PbPb"].c_str()); }
     if (incBkg)   { plotLabelPbPb += Form("_Bkg_%s", parIni["Model_Bkg_PbPb"].c_str());     }
     if (wantPureSMC) plotLabelPbPb += "_NoBkg";
+    plotLabelPbPb += Form("_jetR%d",(int)(jetR*10));
     if (applyWeight_Corr) plotLabelPbPb += Form("_%s",applyCorr);
     if (applyJEC) plotLabelPbPb +="_JEC";
   }
@@ -206,6 +211,7 @@ bool fitCharmoniaMassModel( RooWorkspace& myws,            // Local Workspace
     // Import the local datasets
     string label = ((DSTAG.find(COLL.c_str())!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s", DSTAG.c_str(), COLL.c_str()));
     if (wantPureSMC) label += "_NoBkg";
+    label += Form("_jetR%d",(int)(jetR*10));
     if (applyWeight_Corr) label += Form("_%s",applyCorr);
     if (applyJEC) label+= "_JEC";
     string dsName = Form("dOS_%s", label.c_str());

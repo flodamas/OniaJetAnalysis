@@ -39,6 +39,10 @@ void drawMassFrom2DPlot(RooWorkspace& myws,   // Local workspace
   
   if (DSTAG.find("_")!=std::string::npos) DSTAG.erase(DSTAG.find("_"));
   int nBins = min(int( round((cut.dMuon.M.Max - cut.dMuon.M.Min)/binWidth) ), 1000);
+
+  double jetR = 0.4;
+  if (plotLabel.find("jetR3")!=std::string::npos) jetR = 0.3;
+  else if (plotLabel.find("jetR5")!=std::string::npos) jetR = 0.5;
   
   bool applyCorr = false;
   if ( (plotLabel.find("AccEff")!=std::string::npos) || (plotLabel.find("_lJpsiEff")!=std::string::npos) ) applyCorr = true;
@@ -58,9 +62,9 @@ void drawMassFrom2DPlot(RooWorkspace& myws,   // Local workspace
   string pdfJpsiNoPRName  = Form("pdfCTAUMASS_JpsiNoPR_%s", (isPbPb?"PbPb":"PP"));
   string pdfPsi2SPRName  = Form("pdfCTAUMASS_Psi2SPR_%s", (isPbPb?"PbPb":"PP"));
   string pdfPsi2SNoPRName  = Form("pdfCTAUMASS_Psi2SNoPR_%s", (isPbPb?"PbPb":"PP"));
-  string dsOSName = Form("dOS_%s_%s%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
+  string dsOSName = Form("dOS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
   string dsOSNameCut = dsOSName+"_CTAUCUT";
-  string dsSSName = Form("dSS_%s_%s%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
+  string dsSSName = Form("dSS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
 
   bool isWeighted = myws.data(dsOSName.c_str())->isWeighted();
   bool isMC = (DSTAG.find("MC")!=std::string::npos);
@@ -201,11 +205,11 @@ void drawMassFrom2DPlot(RooWorkspace& myws,   // Local workspace
   if (pasStyle) t->SetTextFont(42);
 
   if (!paperStyle && !pasStyle) { // do not print selection details for paper style
-     t->DrawLatex(0.20, 0.86-dy, "2015 HI Soft Muon ID"); dy+=0.045;
+     t->DrawLatex(0.20, 0.86-dy, "2018 HI Soft Muon ID"); dy+=0.045;
      if (isPbPb) {
-        t->DrawLatex(0.20, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=2.0*0.045;
+        t->DrawLatex(0.20, 0.86-dy, "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1"); dy+=2.0*0.045;
      } else {
-        t->DrawLatex(0.20, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=2.0*0.045;
+        t->DrawLatex(0.20, 0.86-dy, "HLT_HIL1DoubleMuOpen_v1"); dy+=2.0*0.045;
      } 
   }
   if (pasStyle) {

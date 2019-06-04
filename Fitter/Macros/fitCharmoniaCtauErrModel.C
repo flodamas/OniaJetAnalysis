@@ -27,6 +27,7 @@ bool fitCharmoniaCtauErrModel( RooWorkspace& myws,             // Local Workspac
                                bool incJpsi        = true,     // Includes Jpsi model
                                bool incPsi2S       = true,     // Includes Psi(2S) model
                                bool incBkg         = true,     // Includes Background model
+			       double jetR         = 0.4,
                                // Select the fitting options
                                bool doCtauErrPdf   = true,     // Flag to indicate if we want to make the ctau Error Pdf
                                bool wantPureSMC    = false,    // Flag to indicate if we want to use pure signal MC
@@ -69,6 +70,7 @@ bool fitCharmoniaCtauErrModel( RooWorkspace& myws,             // Local Workspac
   if (incPsi2S) { plotLabel = plotLabel + "_Psi2S";  pdfNames.push_back(Form("%s_Psi2S_%s", pdfType.c_str(), COLL.c_str())); }
   if (!isMC)    { plotLabel = plotLabel + "_Bkg";    pdfNames.push_back(Form("%s_Bkg_%s", pdfType.c_str(), COLL.c_str()));   }
   if (wantPureSMC) { plotLabel = plotLabel + "_NoBkg"; }
+  plotLabel = Form("_jetR%d",(int)(jetR*10));
   if (strcmp(applyCorr,"")) {plotLabel = plotLabel + "_" + string(applyCorr);}
   if (applyJEC) {plotLabel = plotLabel + "_JEC";}
 
@@ -95,6 +97,7 @@ bool fitCharmoniaCtauErrModel( RooWorkspace& myws,             // Local Workspac
   double numEntries = 1000000;
   string label = ((DSTAG.find(COLL.c_str())!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s", DSTAG.c_str(), COLL.c_str()));
   if (wantPureSMC) label = Form("%s_NoBkg", label.c_str());
+  label += Form("_jetR%d",(int)(jetR*10));
   if (strcmp(applyCorr,"")) label = Form("%s_%s", label.c_str(), applyCorr);
   if (applyJEC) label = Form("%s_JEC", label.c_str());
   string dsName = Form("dOS_%s", label.c_str());
@@ -126,7 +129,7 @@ bool fitCharmoniaCtauErrModel( RooWorkspace& myws,             // Local Workspac
 
     if ( !fitCharmoniaMassModel( myws, inputWorkspace, cut, parIni, opt, outputDir, 
                                  DSTAG, isPbPb, importDS,
-                                 incJpsi, incPsi2S, true, 
+                                 incJpsi, incPsi2S, true, jetR, 
                                  doMassFit, cutCtau, doConstrFit, doSimulFit, wantPureSMC, applyCorr, applyJEC, loadMassFitResult, iMassFitDir, numCores, 
                                  setLogScale, incSS, zoomPsi, ibWidth, getMeanPT
                                  ) 

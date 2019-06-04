@@ -26,6 +26,7 @@ bool fitCharmoniaCtauResModel( RooWorkspace& myws,             // Local Workspac
                                // Select the type of object to fit
                                bool incJpsi       = true,      // Includes Jpsi model
                                bool incPsi2S      = true,      // Includes Psi(2S) model
+			       double jetR        = 0.4,
                                // Select the fitting options
                                bool useTotctauErrPdf = false,  // If yes use the total ctauErr PDF instead of Jpsi and bkg ones
                                bool doFit         = true,      // Flag to indicate if we want to perform the fit
@@ -71,6 +72,7 @@ bool fitCharmoniaCtauResModel( RooWorkspace& myws,             // Local Workspac
       if (incJpsi)  { plotLabel = plotLabel + "_Jpsi";     }
       if (incPsi2S) { plotLabel = plotLabel + "_Psi2S";    }
       plotLabel = plotLabel + "_Bkg";
+      plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10));
       if (strcmp(applyCorr,"")) plotLabel = plotLabel + "_" + applyCorr;
       if (applyJEC) plotLabel = plotLabel + "_JEC";
       setCtauErrFileName(FileName, (inputFitDir["CTAUERR"]=="" ? outputDir : inputFitDir["CTAUERR"]), "DATA", plotLabel, cut, isPbPb, fitSideBand);
@@ -86,6 +88,7 @@ bool fitCharmoniaCtauResModel( RooWorkspace& myws,             // Local Workspac
   double numEntries = 1000000;
   string label = ((DSTAG.find(COLL.c_str())!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s", DSTAG.c_str(), COLL.c_str()));
   if (wantPureSMC) label = Form("%s_NoBkg", label.c_str());
+  label = label +Form("_jetR%d",(int)(jetR*10));
   if (strcmp(applyCorr,"")) label = label + "_" + applyCorr;
   if (applyJEC) label = label + "_JEC";
   string dsName = Form("dOS_%s", label.c_str());
@@ -123,7 +126,7 @@ bool fitCharmoniaCtauResModel( RooWorkspace& myws,             // Local Workspac
   
       if ( !fitCharmoniaCtauErrModel( myws, inputWorkspace, cut, parIni, opt, outputDir, 
                                       DSTAG, isPbPb, importDS, 
-                                      incJpsi, incPsi2S, incBkg, 
+                                      incJpsi, incPsi2S, incBkg, jetR,
                                       doCtauErrFit, wantPureSMC, applyCorr, applyJEC, loadCtauErrFitResult, inputFitDir, numCores, 
                                       setLogScale, incSS, binWidth
                                       ) 
@@ -144,6 +147,7 @@ bool fitCharmoniaCtauResModel( RooWorkspace& myws,             // Local Workspac
   string plotLabel = "";
   if (incJpsi || incPsi2S) { plotLabel = plotLabel + Form("_CtauRes_%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str()); }
   if (wantPureSMC)         { plotLabel = plotLabel + "_NoBkg"; }
+  plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10));
   if (strcmp(applyCorr,"")){ plotLabel = plotLabel + "_" + applyCorr;}
   if (applyJEC)            { plotLabel = plotLabel + "_JEC";}
 

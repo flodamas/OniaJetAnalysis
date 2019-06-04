@@ -26,6 +26,7 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
                                 // Select the type of object to fit
                                 bool incJpsi       = true,      // Includes Jpsi model
                                 bool incPsi2S      = false,     // Includes Psi(2S) model
+				double jetR        = 0.4,
                                 // Select the fitting options
                                 bool useTotctauErrPdf = false,  // If yes use the total ctauErr PDF instead of Jpsi and bkg ones
                                 bool usectauBkgTemplate = false,// If yes use a template for Bkg ctau instead of the fitted Pdf
@@ -76,7 +77,7 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
     bool fitSideBand = false;
     if (incJpsi)  { plotLabel = plotLabel + "_Jpsi";     }
     if (incPsi2S) { plotLabel = plotLabel + "_Psi2S";    }
-    plotLabel = plotLabel + "_Bkg"+ (strcmp(applyCorr,"")?Form("_%s", applyCorr):"")+ (applyJEC?"_JEC":"");
+    plotLabel = plotLabel + "_Bkg"+ Form("_jetR%d",(int)(jetR*10))+(strcmp(applyCorr,"")?Form("_%s", applyCorr):"")+ (applyJEC?"_JEC":"");
     setCtauErrFileName(FileName, (inputFitDir["CTAUERR"]=="" ? outputDir : inputFitDir["CTAUERR"]), "DATA", plotLabel, cut, isPbPb, fitSideBand);
     bool foundFit = false;
     if ( loadCtauErrRange(FileName, cut) ) { foundFit = true; }
@@ -129,6 +130,7 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
       plotLabel = plotLabel + Form("_%s_%s", obj.c_str(), parIni[Form("Model_%s_%s", obj.c_str(), COLL.c_str())].c_str());
     }
   }
+  plotLabel = plotLabel +Form("_jetR%d",(int)(jetR*10));
   if (strcmp(applyCorr,"")) plotLabel = plotLabel + "_" + applyCorr;
   if (applyJEC) plotLabel = plotLabel + "_JEC";
   string FileName = "";
@@ -150,7 +152,7 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
 
     if ( !fitCharmoniaMassModel( myws, inputWorkspace, cut, parIni, opt, outputDir, 
                                  DSTAG, isPbPb, importDS,
-                                 incJpsi, incPsi2S, true, 
+                                 incJpsi, incPsi2S, true, jetR,
                                  doMassFit, cutCtau, doConstrFit, doSimulFit, wantPureSMC, applyCorr, applyJEC, loadMassFitResult, iMassFitDir, numCores, 
                                  setLogScale, incSS, zoomPsi, ibWidth, getMeanPT
                                  ) 
@@ -191,7 +193,7 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
     
     if ( !fitCharmoniaCtauErrModel( myws, inputWorkspace, cut, parIni, opt, outputDir, 
                                     DSTAG, isPbPb, importDS, 
-                                    incJpsi, incPsi2S, incBkg, 
+                                    incJpsi, incPsi2S, incBkg, jetR,
                                     doCtauErrFit, wantPureSMC, applyCorr, applyJEC, loadCtauErrFitResult, inputFitDir, numCores, 
                                     setLogScale, incSS, binWidth
                                     ) 
@@ -203,7 +205,7 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
     // check if we have already done the sideband fits. If yes, load their results
     string FileName = "";
     bool fitSB = true;
-    string plotLabel = Form("_BkgNoPR_%s_CtauRes_%s%s%s", parIni[Form("Model_BkgNoPR_%s", COLL.c_str())].c_str(), parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":""));
+    string plotLabel = Form("_BkgNoPR_%s_CtauRes_%s_jetR%d%s%s", parIni[Form("Model_BkgNoPR_%s", COLL.c_str())].c_str(), parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":""));
     string DSTAG = Form("DATA_%s", (isPbPb?"PbPb":"PP"));
     setCtauFileName(FileName, (inputFitDir["CTAUSB"]=="" ? outputDir : inputFitDir["CTAUSB"]), DSTAG, plotLabel, cut, isPbPb, fitSB, usectauBkgTemplate);
     bool found = false;
@@ -238,18 +240,21 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
       bool found = false;
       if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAURECO"]!="") {
         plotLabel = "_CtauReco_NoBkg";
+	plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10)); 
 	if (strcmp(applyCorr,"")) plotLabel = plotLabel + "_" + applyCorr;
         if (applyJEC) plotLabel = plotLabel +"_JEC";
         setCtauRecoFileName(FileName, (inputFitDir["CTAURECO"]=="" ? outputDir : inputFitDir["CTAURECO"]), DSTAG, plotLabel, cut, isPbPb);
       } else if (inputFitDir["CTAURECO"]!="") { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAURECO"]!="") {
         plotLabel = "_CtauReco";
+	plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10));
 	if (strcmp(applyCorr,"")) plotLabel = plotLabel + "_" + applyCorr;
 	if (applyJEC) plotLabel = plotLabel +"_JEC";
         setCtauRecoFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
       } else if (inputFitDir["CTAURECO"]!="") { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str())) {
         plotLabel = "_CtauReco_NoBkg";
+	plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10));
         if (strcmp(applyCorr,"")) plotLabel = plotLabel + "_" + applyCorr;
         if (applyJEC) plotLabel = plotLabel +"_JEC";
         setCtauRecoFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
@@ -280,19 +285,20 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
     if (inputFitDir["CTAURES"].find("prompt")!=std::string::npos) DSTAG = Form("MCJPSIPR_%s", (isPbPb?"PbPb":"PP"));
     setCtauResFileName(FileName, (inputFitDir["CTAURES"]=="" ? outputDir : inputFitDir["CTAURES"]), DSTAG, plotLabel, cut, isPbPb);
     if (wantPureSMC) { plotLabel = plotLabel + "_NoBkg"; }
+    plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10));
     if (strcmp(applyCorr, "")) { plotLabel = plotLabel + "_" + applyCorr;}
     if (applyJEC) { plotLabel = plotLabel + "_JEC";}
     bool found = false;
     if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAURES"]!="") {
-      plotLabel = string(Form("_CtauRes_%s_NoBkg%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""), (applyJEC?"_JEC":"")));
+      plotLabel = string(Form("_CtauRes_%s_NoBkg_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""), (applyJEC?"_JEC":"")));
       setCtauResFileName(FileName, (inputFitDir["CTAURES"]=="" ? outputDir : inputFitDir["CTAURES"]), DSTAG, plotLabel, cut, isPbPb);
     } else if (inputFitDir["CTAURES"]!="") { found = true; }
     if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAURES"]!="") {
-      plotLabel = Form("_CtauRes_%s%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""), (applyJEC?"_JEC":""));
+      plotLabel = Form("_CtauRes_%s_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""), (applyJEC?"_JEC":""));
       setCtauResFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
     } else if (inputFitDir["CTAURES"]!="") { found = true; }
     if (!found && gSystem->AccessPathName(FileName.c_str())) {
-      plotLabel = string(Form("_CtauRes_%s_NoBkg%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""), (applyJEC?"_JEC":"")));
+      plotLabel = string(Form("_CtauRes_%s_NoBkg_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""), (applyJEC?"_JEC":"")));
       setCtauResFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
     } else { found = true; }
     if (!found && gSystem->AccessPathName(FileName.c_str())) {
@@ -313,7 +319,7 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
     // check if we have already done the sideband fits. If yes, load their results
     string FileName = "";
     bool fitSB = true;
-    string plotLabel = Form("_BkgNoPR_%s_CtauRes_%s%s%s", parIni[Form("Model_BkgNoPR_%s", COLL.c_str())].c_str(), parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":""));
+    string plotLabel = Form("_BkgNoPR_%s_CtauRes_%s_jetR%d%s%s", parIni[Form("Model_BkgNoPR_%s", COLL.c_str())].c_str(), parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":""));
     string DSTAG = Form("DATA_%s", (isPbPb?"PbPb":"PP"));
     setCtauFileName(FileName, (inputFitDir["CTAUSB"]=="" ? outputDir : inputFitDir["CTAUSB"]), DSTAG, plotLabel, cut, isPbPb, fitSB, usectauBkgTemplate);
     bool found = false;
@@ -350,20 +356,20 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
       // check if we have already done the ctau true fits. If yes, load their results
       string FileName = "";
       string ModelName = Form("Model_JpsiNoPR_%s", COLL.c_str());
-      string plotLabel = Form("_CtauTrue_%s%s%s", parIni[ModelName.c_str()].c_str(), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""), (applyJEC?"_JEC":""));
+      string plotLabel = Form("_CtauTrue_%s_jetR%d%s%s", parIni[ModelName.c_str()].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""), (applyJEC?"_JEC":""));
       string DSTAG = Form("MCJPSINOPR_%s", (isPbPb?"PbPb":"PP"));
       setCtauTrueFileName(FileName, (inputFitDir["CTAUTRUE"]=="" ? outputDir : inputFitDir["CTAUTRUE"]), DSTAG, plotLabel, cut, isPbPb);
       bool found = false;
       if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAUTRUE"]!="") {
-        plotLabel = string(Form("_CtauTrue_%s_NoBkg%s%s", parIni[ModelName.c_str()].c_str(), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
+        plotLabel = string(Form("_CtauTrue_%s_NoBkg_jetR%d%s%s", parIni[ModelName.c_str()].c_str(),(int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
         setCtauTrueFileName(FileName, (inputFitDir["CTAUTRUE"]=="" ? outputDir : inputFitDir["CTAUTRUE"]), DSTAG, plotLabel, cut, isPbPb);
       } else if (inputFitDir["CTAUTRUE"]!="") { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAUTRUE"]!="") {
-        plotLabel = string(Form("_CtauTrue_%s%s%s", parIni[ModelName.c_str()].c_str(), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
+        plotLabel = string(Form("_CtauTrue_%s_jetR%d%s%s", parIni[ModelName.c_str()].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
         setCtauTrueFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
       } else if (inputFitDir["CTAUTRUE"]!="") { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str())) {
-        plotLabel = string(Form("_CtauTrue_%s_NoBkg%s%s", parIni[ModelName.c_str()].c_str(), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
+        plotLabel = string(Form("_CtauTrue_%s_NoBkg_jetR%d%s%s", parIni[ModelName.c_str()].c_str(),(int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
         setCtauTrueFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
       } else { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str())) {

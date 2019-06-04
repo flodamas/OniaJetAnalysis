@@ -39,6 +39,10 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
 
   if (DSTAG.find("_")!=std::string::npos) DSTAG.erase(DSTAG.find("_"));
 
+  double jetR = 0.4;
+  if (plotLabel.find("jetR3")!=std::string::npos) jetR = 0.3;
+  else if (plotLabel.find("jetR5")!=std::string::npos) jetR = 0.5;
+
   bool applyCorr = false;
   if ( (plotLabel.find("AccEff")!=std::string::npos) || (plotLabel.find("_lJpsiEff")!=std::string::npos) ) applyCorr = true;
   else applyCorr = false;
@@ -54,13 +58,13 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
 
 
   string pdfTotName  = Form("pdfCTAUMASS_Tot_%s", (isPbPb?"PbPb":"PP"));
-  string dsOSName = Form("dOS_%s_%s%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
+  string dsOSName = Form("dOS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int)(jetR*10), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
   string dsOSNameCut = dsOSName + "_CTAUCUT";
   string hOSName = Form("dhCTAUERRTot_Tot_%s", (isPbPb?"PbPb":"PP"));
   string hOSNameBkg  = Form("dhCTAUERR_Bkg_%s", (isPbPb?"PbPb":"PP"));
   string hOSNameJpsi = Form("dhCTAUERR_Jpsi_%s", (isPbPb?"PbPb":"PP"));
   string hOSNamePsi2S = Form("dhCTAUERR_Psi2S_%s", (isPbPb?"PbPb":"PP"));
-  string dsSSName = Form("dSS_%s_%s%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
+  string dsSSName = Form("dSS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int)(jetR*10), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
 
   bool isWeighted = myws.data(dsOSName.c_str())->isWeighted();
   vector<double> range; range.push_back(cut.dMuon.ctau.Min); range.push_back(cut.dMuon.ctau.Max);
@@ -194,11 +198,11 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
   if (pasStyle) t->SetTextSize(0.044);
   if (pasStyle) t->SetTextFont(42);
   if (!pasStyle) {
-    t->DrawLatex(0.21, 0.86-dy, "2015 HI Soft Muon ID"); dy+=0.045;
+    t->DrawLatex(0.21, 0.86-dy, "2018 HI Soft Muon ID"); dy+=0.045;
     if (isPbPb) {
-      t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=0.045;
+      t->DrawLatex(0.21, 0.86-dy, "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1"); dy+=0.045;
     } else {
-      t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=0.045;
+      t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMuOpen_v1"); dy+=0.045;
     } 
     if (cut.dMuon.Zed.Max<100) {t->DrawLatex(0.21, 0.86-dy, Form("%.2f < z^{#mu#mu} #leq %.2f",cut.dMuon.Zed.Min,cut.dMuon.Zed.Max)); dy+=0.045;}
     t->DrawLatex(0.21, 0.86-dy, Form("%.1f #leq p_{T}^{#mu#mu} < %.1f GeV/c",cut.dMuon.Pt.Min,cut.dMuon.Pt.Max)); dy+=0.045;

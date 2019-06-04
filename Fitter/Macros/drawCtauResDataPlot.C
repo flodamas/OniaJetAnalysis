@@ -127,11 +127,11 @@ bool drawCtauResDataPlot(RooWorkspace& myws,   // Local workspace
   float dy = 0; 
   
   t->SetTextSize(0.03);
-  t->DrawLatex(0.21, 0.86-dy, "2015 HI Soft Muon ID"); dy+=0.045;
+  t->DrawLatex(0.21, 0.86-dy, "2018 HI Soft Muon ID"); dy+=0.045;
   if (isPbPb) {
-    t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=0.045;
+    t->DrawLatex(0.21, 0.86-dy, "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1"); dy+=0.045;
   } else {
-    t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMu0_v1"); dy+=0.045;
+    t->DrawLatex(0.21, 0.86-dy, "HLT_HIL1DoubleMuOpen_v1"); dy+=0.045;
   } 
   if (cut.dMuon.Zed.Max<100) {t->DrawLatex(0.21, 0.86-dy, Form("%.2f < z^{#mu#mu} #leq %.2f GeV/c",cut.dMuon.Zed.Min,cut.dMuon.Zed.Max)); dy+=0.045;}
   t->DrawLatex(0.21, 0.86-dy, Form("%.1f #leq p_{T}^{#mu#mu} < %.1f GeV/c",cut.dMuon.Pt.Min,cut.dMuon.Pt.Max)); dy+=0.045;

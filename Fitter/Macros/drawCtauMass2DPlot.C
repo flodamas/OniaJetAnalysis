@@ -20,6 +20,10 @@ void drawCtauMass2DPlot(RooWorkspace& myws,   // Local workspace
 
   if (DSTAG.find("_")!=std::string::npos) DSTAG.erase(DSTAG.find("_"));
 
+  double jetR = 0.4;
+  if (plotLabel.find("jetR3")!=std::string::npos) jetR = 0.3;
+  else if (plotLabel.find("jetR5")!=std::string::npos) jetR = 0.5;
+
   bool applyCorr = false;
   if ( (plotLabel.find("AccEff")!=std::string::npos) || (plotLabel.find("_lJpsiEff")!=std::string::npos) ) applyCorr = true;
   else applyCorr = false;
@@ -46,7 +50,7 @@ void drawCtauMass2DPlot(RooWorkspace& myws,   // Local workspace
   string pdfTotName  = Form("pdfCTAUMASS_Tot_%s", (isPbPb?"PbPb":"PP"));
   TH1* hPDF = ((RooAbsReal*)myws.pdf(pdfTotName.c_str()))->createHistogram("PDF 2D",*myws.var("ctau"), Extended(kTRUE), Binning(nBinsCtau, minRangeCtau, maxRangeCtau), YVar(*myws.var("invMass"), Binning(nBinsMass, minRangeMass, maxRangeMass)));
 
-  string dsOSName = Form("dOS_%s_%s%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
+  string dsOSName = Form("dOS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyCorr?Form("_%s", corrName.Data()):""), (applyJEC?"_JEC":""));
   TH1* hDATA = ((RooDataSet*)myws.data(dsOSName.c_str()))->createHistogram("DATA 2D",*myws.var("ctau"), Binning(nBinsCtau, minRangeCtau, maxRangeCtau), YVar(*myws.var("invMass"), Binning(nBinsMass, minRangeMass, maxRangeMass)));
   
   // Create the main canvas
