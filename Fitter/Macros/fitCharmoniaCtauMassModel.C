@@ -88,7 +88,7 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
   setCtauCutParameters(cut, incNonPrompt);
 
   // Import the local datasets
-  string label = ((DSTAG.find(COLL.c_str())!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s%s%s", DSTAG.c_str(), COLL.c_str(), (strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
+  string label = ((DSTAG.find(COLL.c_str())!=std::string::npos) ? DSTAG.c_str() : Form("%s_%s_jetR%d%s%s", DSTAG.c_str(), COLL.c_str(), (int)(jetR*10),(strcmp(applyCorr,"")?Form("_%s", applyCorr):""), (applyJEC?"_JEC":"")));
   string dsName = Form("dOS_%s", label.c_str());
   if ( !(myws.data(dsName.c_str())) ) {
     int importID = importDataset(myws, inputWorkspace, cut, label, fitSideBand);

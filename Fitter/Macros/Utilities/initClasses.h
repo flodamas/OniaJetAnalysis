@@ -524,18 +524,16 @@ bool loadPreviousFitResult(RooWorkspace& myws, string FileName, string DSTAG, bo
 bool loadCtauErrRange(string FileName, struct KinCuts& cut)
 {
   if (gSystem->AccessPathName(FileName.c_str())) {
-    cout << "[ERROR] File " << FileName << " was not found!" << endl;
     return false; // File was not found
   }
   TFile *file = new TFile(FileName.c_str());
   if (!file) return false;
-  RooWorkspace *ws = (RooWorkspace*) file->Get("workspace");
+  RooWorkspace *ws = (RooWorkspace*) file->Get("workspace;1");
   if (!ws) {
     cout << "[ERROR] Workspace was not found in: " << FileName << endl;
     file->Close(); delete file;
     return false;
   }
-
   if (ws->var("ctauErr")) {
     cut.dMuon.ctauErr.Min = ws->var("ctauErr")->getMin();
     cut.dMuon.ctauErr.Max = ws->var("ctauErr")->getMax();
@@ -545,7 +543,7 @@ bool loadCtauErrRange(string FileName, struct KinCuts& cut)
     file->Close(); delete file;
     return false;
   }
-
+  cout<<"end of loadCtauErr"<<endl;
   delete ws;
   file->Close(); delete file;
   return true;

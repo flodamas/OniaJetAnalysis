@@ -47,6 +47,7 @@ void results2tree(
                   const char* prependPath, //="",
                   const char* fitType, // "mass", "ctau"...
 		  bool wantPureSMC, // =false,
+		  double jetR,
 		  const char* applyCorr, // = "",
 		  bool applyJEC, // = false,
                   const char* thePoiNames //="N_Jpsi,b_Jpsi,f_Jpsi,m_Jpsi,sigma1_Jpsi,alpha_Jpsi,n_Jpsi,sigma2_Jpsi,rSigma21_Jpsi,
@@ -186,11 +187,11 @@ void results2tree(
       RooAbsPdf *model_bkg = pdfFromWS(ws, Form("_%s",collSystem), Form("pdf%s_Bkg",modelType.Data()));
       
       // get the dataset
-      const char* token = (strcmp(DSTag,"DATA") && wantPureSMC) ? Form("_%s_NoBkg%s",collSystem, (applyJEC?"_JEC":"")) : Form("_%s%s",collSystem,(applyJEC?"_JEC":""));
+      const char* token = (strcmp(DSTag,"DATA") && wantPureSMC) ? Form("_%s_NoBkg_jetR%d%s",collSystem, (int)(jetR*10), (applyJEC?"_JEC":"")) : Form("_%s_jetR%d%s",collSystem,(int)(jetR*10),(applyJEC?"_JEC":""));
       if (strcmp(applyCorr,""))
-	token = (strcmp(DSTag,"DATA") && wantPureSMC) ? Form("_%s_NoBkg_%s%s",collSystem, applyCorr, (applyJEC?"_JEC":"")) : Form("_%s_%s%s",collSystem,applyCorr, (applyJEC?"_JEC":""));
+	token = (strcmp(DSTag,"DATA") && wantPureSMC) ? Form("_%s_NoBkg_jetR%d_%s%s",collSystem, (int)(jetR*10), applyCorr, (applyJEC?"_JEC":"")) : Form("_%s_jetR%d_%s%s",collSystem,(int)(jetR*10),applyCorr, (applyJEC?"_JEC":""));
 
-      RooAbsData *dat = dataFromWS(ws, token, Form("dOS_%s", DSTag));
+      RooAbsData *dat = dataFromWS(ws, token, Form("dOS_%s_jetR%d", DSTag,(int)(jetR*10)));
       
       if (dat) {
         if (model) {

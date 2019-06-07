@@ -70,7 +70,7 @@ bool fitCharmoniaCtauErrModel( RooWorkspace& myws,             // Local Workspac
   if (incPsi2S) { plotLabel = plotLabel + "_Psi2S";  pdfNames.push_back(Form("%s_Psi2S_%s", pdfType.c_str(), COLL.c_str())); }
   if (!isMC)    { plotLabel = plotLabel + "_Bkg";    pdfNames.push_back(Form("%s_Bkg_%s", pdfType.c_str(), COLL.c_str()));   }
   if (wantPureSMC) { plotLabel = plotLabel + "_NoBkg"; }
-  plotLabel = Form("_jetR%d",(int)(jetR*10));
+  plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10));
   if (strcmp(applyCorr,"")) {plotLabel = plotLabel + "_" + string(applyCorr);}
   if (applyJEC) {plotLabel = plotLabel + "_JEC";}
 

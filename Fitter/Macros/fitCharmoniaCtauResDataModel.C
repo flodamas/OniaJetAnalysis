@@ -45,7 +45,6 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
 				   map<string, double> binWidth={} // User-defined Location of the fit results
 				   )  
 {
-
   bool usePerEventError = true;
 
   if (DSTAG.find("_")!=std::string::npos) DSTAG.erase(DSTAG.find("_"));
