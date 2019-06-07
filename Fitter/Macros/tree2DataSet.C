@@ -232,7 +232,7 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	  }
 	  
 	  theTree->GetEntry(jentry);
-	  normF += Gen_weight*getNColl(hiBin,!isPbPb);
+	  normF += getNColl(hiBin,!isPbPb);//normF += Gen_weight*getNColl(hiBin,!isPbPb);
 	}
 	normF = nentries/normF;
       }
@@ -430,10 +430,10 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	      corr_ptw = Gen_weight*getNColl(hiBin,!isPbPb)*normF;
 	    }
 	    else {
-	      if (pthat >= 15 && pthat < 25)  corr_ptw = 0.0247699;
-	      else if (pthat >= 25 && pthat < 35) corr_ptw = 0.00311931;
-	      else if (pthat >= 35 && pthat < 45) corr_ptw = 0.000693027;
-	      else if (pthat >= 45) corr_ptw = 0.000212618;
+	      if (pthat >= 15 && pthat < 25)  corr_ptw = 0.0145167;
+	      else if (pthat >= 25 && pthat < 35) corr_ptw = 0.00179365;
+	      else if (pthat >= 35 && pthat < 45) corr_ptw = 0.000393614;
+	      else if (pthat >= 45) corr_ptw = 0.000126545;
 	    }
 	  }
 	  corr_AccEff = wCorr;
@@ -866,11 +866,18 @@ double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP)
 	  std::cout << "[Error] pr or npr histogram not provided for correction of " << collName << " " << massName << ". Weight set to 1." << std::endl;
 	  return 1.;
 	}
+
       if (pt > 3 && pt < 50 && fabs(rapidity) < 2.4){
 	prEff = prcorrHisto->GetEfficiency(prcorrHisto->FindFixBin(rapidity, pt));
 	nprEff = nprcorrHisto->GetEfficiency(nprcorrHisto->FindFixBin(rapidity, pt));
 	bf = bfrac->Eval(pt);
 	corr = bf*nprEff + (1-bf)*prEff;
+      }
+      else if (pt > 3 && pt > 50 && fabs(rapidity) < 2.4) {
+	prEff = prcorrHisto->GetEfficiency(prcorrHisto->FindFixBin(rapidity, 49));
+	nprEff = nprcorrHisto->GetEfficiency(nprcorrHisto->FindFixBin(rapidity, 49));
+	bf = bfrac->Eval(49);
+	corr = bf*nprEff + (1-bf)*prEff;	
       }
     }
   if(corr<0.00001) corr=1.0;
