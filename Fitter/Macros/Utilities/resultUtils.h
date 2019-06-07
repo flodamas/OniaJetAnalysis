@@ -67,6 +67,7 @@ void results2tree(
       const char* prependPath="",
       const char* fitType = "",
       bool wantPureSMC = false,
+      double jetR =0.4,
       const char* applyCorr = "",
       bool applyJEC = false,
       const char* thePoiNames="N_Jpsi,b_Jpsi,f_Jpsi,m_Jpsi,sigma1_Jpsi,alpha_Jpsi,n_Jpsi,sigma2_Jpsi,rSigma21_Jpsi,"

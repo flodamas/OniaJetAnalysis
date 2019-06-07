@@ -191,7 +191,7 @@ void results2tree(
       if (strcmp(applyCorr,""))
 	token = (strcmp(DSTag,"DATA") && wantPureSMC) ? Form("_%s_NoBkg_jetR%d_%s%s",collSystem, (int)(jetR*10), applyCorr, (applyJEC?"_JEC":"")) : Form("_%s_jetR%d_%s%s",collSystem,(int)(jetR*10),applyCorr, (applyJEC?"_JEC":""));
 
-      RooAbsData *dat = dataFromWS(ws, token, Form("dOS_%s_jetR%d", DSTag,(int)(jetR*10)));
+      RooAbsData *dat = dataFromWS(ws, token, Form("dOS_%s", DSTag));
       
       if (dat) {
         if (model) {
