@@ -18,6 +18,7 @@
 #include "Utilities/initClasses.h"
 #include "TEfficiency.h"
 #include "TObjArray.h"
+#include "Utilities/JetCorrector.h"
 
 map<int, double>   fCentMap; // map for centrality-Ncoll mapping
 double             fCentBinning[200];
@@ -36,7 +37,7 @@ bool    checkDS(RooDataSet* DS, string DSName);
 double  deltaR(TLorentzVector* GenMuon, TLorentzVector* RecoMuon);
 bool    isMatchedDiMuon(int iRecoDiMuon, double maxDeltaR=0.03);
 double  getNColl(int centr, bool isPP);
-double  getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP);
+double  getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP, int cent);
 bool    readCorrection(const char* file);
 void    setCentralityMap(const char* file);
 float   jecCorr(double jtPt, double rawPt, double jpsiPt);
@@ -49,7 +50,11 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
   
   bool isPbPb = false;
   if (DSName.find("PbPb")!=std::string::npos) isPbPb =true;
-  int triggerIndex_PP   = PP::HLT_HIL1DoubleMuOpen_v1;
+  bool isPrompt = false;
+  if (DSName.find("JPSIPR")!=std::string::npos) isPrompt = true;
+  cout <<"[INFO] isPrompt = "<<isPrompt<<endl;
+
+  int triggerIndex_PP   = PP::HLT_HIL1DoubleMu0_v1;
   int triggerIndex_PbPb = HI::HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1;
   int CentFactor = 1;
   
@@ -61,9 +66,9 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
   }
   
   bool applyWeight = false;
-
-  if (isMC && isPbPb) applyWeight = true;
-  else if (isMC && !isPbPb && DSName.find("JPSIPR")!=std::string::npos) applyWeight = true;
+  if (isMC) applyWeight = true;
+  //if (isMC && isPbPb) applyWeight = true;
+  //else if (isMC && !isPbPb && DSName.find("JPSIPR")!=std::string::npos) applyWeight = true;
 
   bool isPureSDataset = false;
   if (OutputFileName.find("_PureS")!=std::string::npos) isPureSDataset = true;
@@ -75,7 +80,7 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
   TString corrFileName = "";
   if (OutputFileName.find("_AccEff")!=std::string::npos)
   {
-    corrFileName = "correction_AccEff.root";
+    corrFileName = "correction_AccEff_centMaps.root";
     corrName = "AccEff";
   }
   else if (OutputFileName.find("_lJpsiEff")!=std::string::npos)
@@ -216,7 +221,7 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
     //nentries = 2000000;
 
     float normF = 0.;
-    
+    /*
     if (isMC && isPbPb) 
       {
 	cout << "[INFO] Computing sum of weights for " << nentries << " nentries" << endl;
@@ -236,26 +241,27 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	}
 	normF = nentries/normF;
       }
-    
+    */
+    normF = 0.00276384;
+
+    cout <<"[INFO] normF = "<<normF<<endl;
     // creating the tree to use in the unfolding
-    string fl = InputFileNames[0];
-    if (fl.find("ext")!=std::string::npos && InputFileNames.size()>1) fl = "";
-    else if (fl.find("ext")!=std::string::npos && InputFileNames.size()==1) fl = "_ext";
-    else if (fl.find("pthat15")!=std::string::npos) fl = "_pthat15";
-    else if (fl.find("pthat25")!=std::string::npos) fl = "_pthat25";
-    else if (fl.find("pthat35")!=std::string::npos) fl = "_pthat35";
-    else if (fl.find("pthat45")!=std::string::npos) fl = "_pthat45";
-    else fl = "";
+    string fl = "";
+
+    string jecFileName = "/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V1_MC/Spring18_ppRef5TeV_V1_MC_L2Relative_AK3PF.txt";
+    if (isPbPb) jecFileName = "/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Autumn18_HI_V1_MC/Autumn18_HI_V1_MC_L2Relative_AK3PF.txt";
+    
+    cout <<"[INFO] reading JEC from file "<<jecFileName<<endl;
+    JetCorrector JEC(jecFileName.c_str());
 
     gSystem->mkdir("TreesForUnfolding");
     string trUnfFileName = Form("TreesForUnfolding/tree_%s%s_jetR%d%s%s%s.root", DSName.c_str(), (isPureSDataset?"_NoBkg":""), (int)(jetR*10), (applyWeight_Corr?Form("_%s",corrName.Data()):""), (applyJEC?"_JEC":""), (applyWeight? fl.c_str():""));
-
-    TFile * trUnfFile = new TFile (trUnfFileName.c_str(),"RECREATE");
+    TFile* trUnfFile = new TFile (trUnfFileName.c_str(),"RECREATE");
     //trUnfFile->cd();
     TTree* trUnf = new TTree ("treeForUnfolding","tree used for the unfolding");
     Int_t evtNb; Int_t centr; Float_t jp_pt; Float_t jp_rap; Float_t jp_eta; Float_t jp_mass; Float_t jp_phi; Float_t jp_l; 
     Float_t jp_gen_pt; Float_t jp_gen_rap; Float_t jp_gen_eta; Float_t jp_gen_phi; 
-    Float_t jt_pt; Float_t jt_rap; Float_t jt_eta; Float_t jt_phi; Float_t jt_CHF; Float_t jt_NHF; Float_t jt_CEF; Float_t jt_NEF; Float_t jt_MUF; Float_t jt_CHM; Float_t jt_NHM; Float_t jt_CEM; Float_t jt_NEM; Float_t jt_MUM; 
+    Float_t jt_pt; Float_t jt_pt_noZJEC; Float_t jt_rap; Float_t jt_eta; Float_t jt_phi; Float_t jt_CHF; Float_t jt_NHF; Float_t jt_CEF; Float_t jt_NEF; Float_t jt_MUF; Float_t jt_CHM; Float_t jt_NHM; Float_t jt_CEM; Float_t jt_NEM; Float_t jt_MUM; 
     Float_t jt_ref_pt; Float_t jt_ref_rap; Float_t jt_ref_eta; Float_t jt_ref_phi; Float_t jt_gen_chargedSum; Float_t jt_gen_hardSum; Float_t jt_signal_chargedSum; Float_t jt_signal_hardSum;
     Float_t z; Float_t gen_z; 
     Float_t corr_AccEff; Float_t pt_hat; Float_t corr_ptw;
@@ -270,19 +276,10 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
     trUnf->Branch("jp_mass", &jp_mass, "jp_mass/F");
     trUnf->Branch("jp_l", &jp_l, "jp_l/F");
     trUnf->Branch("jt_pt", &jt_pt, "jt_pt/F");
+    trUnf->Branch("jt_pt_noZJEC", &jt_pt_noZJEC,"jt_pt_noZJEC/F");
     trUnf->Branch("jt_rap", &jt_rap, "jt_rap/F");
     trUnf->Branch("jt_eta", &jt_eta, "jt_eta/F");
     trUnf->Branch("jt_phi", &jt_phi, "jt_phi/F");
-    trUnf->Branch("jt_CHF", &jt_CHF, "jt_CHF/F");
-    trUnf->Branch("jt_NHF", &jt_NHF, "jt_NHF/F");
-    trUnf->Branch("jt_CEF", &jt_CEF, "jt_CEF/F");
-    trUnf->Branch("jt_NEF", &jt_NEF, "jt_NEF/F");
-    trUnf->Branch("jt_MUF", &jt_MUF, "jt_MUF/F");
-    trUnf->Branch("jt_CHM", &jt_CHM, "jt_CHM/F");
-    trUnf->Branch("jt_NHM", &jt_NHM, "jt_NHM/F");
-    trUnf->Branch("jt_CEM", &jt_CEM, "jt_CEM/F");
-    trUnf->Branch("jt_NEM", &jt_NEM, "jt_NEM/F");
-    trUnf->Branch("jt_MUM", &jt_MUM, "jt_MUM/F");
     trUnf->Branch("z", &z, "z/F");
     trUnf->Branch("corr_AccEff", &corr_AccEff, "corr_AccEff/F");
     if (isMC) {
@@ -296,10 +293,6 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
       trUnf->Branch("jt_ref_rap", &jt_ref_rap, "jt_ref_rap/F");
       trUnf->Branch("jt_ref_eta", &jt_ref_eta, "jt_ref_eta/F");
       trUnf->Branch("jt_ref_phi", &jt_ref_phi, "jt_ref_phi/F");
-      trUnf->Branch("jt_gen_chargedSum", &jt_gen_chargedSum, "jt_gen_chargedSum/F");
-      trUnf->Branch("jt_gen_hardSum", &jt_gen_hardSum, "jt_gen_hardSum/F");
-      trUnf->Branch("jt_signal_chargedSum", &jt_signal_chargedSum, "jt_signal_chargedSum/F");
-      trUnf->Branch("jt_signal_hardSum", &jt_gen_hardSum, "jt_signal_hardSum/F");
       trUnf->Branch("gen_z", &gen_z, "gen_z/F");
     }
 
@@ -344,8 +337,14 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
         ctauN->setVal(ctau->getVal()/ctauErr->getVal());
         ptQQ->setVal(RecoQQ4mom->Pt());
         rapQQ->setVal(RecoQQ4mom->Rapidity());
-        cent->setVal(hiBin*CentFactor);
-	centr = hiBin;
+	if (isMC) {
+	  cent->setVal(HI::getMCHiBinFromhiHF(hiHF)*CentFactor);
+	  centr = HI::getMCHiBinFromhiHF(hiHF); //hiBin;
+	}
+	else {
+	  cent->setVal(HI::getHiBinFromhiHF(hiHF)*CentFactor);
+	  centr = HI::getHiBinFromhiHF(hiHF);//hiBin;
+	}
 	jp_pt = RecoQQ4mom->Pt();
 	jp_rap = RecoQQ4mom->Rapidity();
 	jp_eta = RecoQQ4mom->Eta();
@@ -359,23 +358,30 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	{
 	  if (jetsInHCALHole(jteta[ijet],jtphi[ijet])) continue;
 	    TLorentzVector v_jet;
-	    v_jet.SetPtEtaPhiM(jtpt[ijet], jteta[ijet], jtphi[ijet], jtm[ijet]);
+	    JEC.SetJetPT(jtpt[ijet]);
+	    JEC.SetJetEta(jteta[ijet]);
+	    JEC.SetJetPhi(jtphi[ijet]);
+	    JEC.SetRho(1);
+	    JEC.SetJetArea(jtarea[ijet]);
+	    jt_pt_noZJEC = JEC.GetCorrectedPT();
+
+	    v_jet.SetPtEtaPhiM(jt_pt_noZJEC, jteta[ijet], jtphi[ijet], jtm[ijet]);
 	    if (RecoQQ4mom->DeltaR (v_jet)<=drmin)
 	      {
 		drmin = RecoQQ4mom->DeltaR (v_jet);
 		if (applyJEC){
-		  zed->setVal(RecoQQ4mom->Pt()/jecCorr(jtpt[ijet], rawpt[ijet], RecoQQ4mom->Pt()));
+		  jt_pt = jecCorr(jt_pt_noZJEC, rawpt[ijet], RecoQQ4mom->Pt());
+		  zed->setVal(RecoQQ4mom->Pt()/jt_pt);
 		  if (zed->getVal() > 1 && zed->getVal() <= 1.000001) zed->setVal (0.9999999);
-		  ptJet->setVal(jecCorr(jtpt[ijet], rawpt[ijet], RecoQQ4mom->Pt()));
-		  jt_pt = jecCorr(jtpt[ijet], rawpt[ijet], RecoQQ4mom->Pt());
+		  ptJet->setVal(jt_pt);
 		  z = jp_pt/jt_pt;
 		  if (z > 1 && z <= 1.000001) z = 0.9999999;
 		}
 		else {
-		  zed->setVal(RecoQQ4mom->Pt()/jtpt[ijet]);
+		  zed->setVal(RecoQQ4mom->Pt()/jt_pt_noZJEC);
 		  if (zed->getVal() > 1 && zed->getVal() <= 1.000001) zed->setVal(0.9999999);
-		  ptJet->setVal(jtpt[ijet]);
-		  jt_pt = jtpt[ijet];
+		  jt_pt = jt_pt_noZJEC;
+		  ptJet->setVal(jt_pt);
 		  z = RecoQQ4mom->Pt()/jt_pt;
 		  if (z > 1 && z <= 1.000001) z = 0.9999999;
 		}
@@ -383,26 +389,12 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 		jt_rap = jty[ijet];
 		jt_eta = jteta[ijet];
 		jt_phi = jtphi[ijet];
-		jt_CHF = jtPfCHF[ijet];
-		jt_NHF = jtPfNHF[ijet];
-		jt_CEF = jtPfCEF[ijet];
-		jt_NEF = jtPfNEF[ijet];
-		jt_MUF = jtPfMUF[ijet];
-		jt_CHM = jtPfCHM[ijet];
-		jt_NHM = jtPfNHM[ijet];
-		jt_CEM = jtPfCEM[ijet];
-		jt_NEM = jtPfNEM[ijet];
-		jt_MUM = jtPfMUM[ijet];
 
 		if (isMC) {
 		  jt_ref_pt = refpt[ijet];
 		  jt_ref_rap = refy[ijet];
 		  jt_ref_eta = refeta[ijet];
 		  jt_ref_phi = refphi[ijet];
-		  jt_gen_chargedSum = genChargedSum[ijet];
-		  jt_gen_hardSum = genHardSum[ijet];
-		  jt_signal_chargedSum = signalChargedSum[ijet];
-		  jt_signal_hardSum = signalHardSum[ijet];
 		}
 	      }
 	  }
@@ -423,17 +415,19 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	  weight->setVal(w);
         }
         else if (applyWeight_Corr) {
-	  double wCorr = 1.0/getCorr(RecoQQ4mom->Rapidity(),RecoQQ4mom->Pt(),RecoQQ4mom->M(),!isPbPb);
+	  double wCorr = 1.0/getCorr(RecoQQ4mom->Rapidity(),RecoQQ4mom->Pt(),RecoQQ4mom->M(),!isPbPb, centr);
 	  //// add pt weights for prompt MC
 	  if (applyWeight) {
-	    if (isPbPb){
+	    if (!isMC) cout <<"[WARNING] this is data and you are applying MC weights"<<endl;
+	    if (isPbPb) {
 	      corr_ptw = Gen_weight*getNColl(hiBin,!isPbPb)*normF;
 	    }
+	    else if (!isPrompt) corr_ptw = Gen_weight; //cout<<"corr_ptw = "<<corr_ptw<<endl;
 	    else {
-	      if (pthat >= 15 && pthat < 25)  corr_ptw = 0.0145167;
-	      else if (pthat >= 25 && pthat < 35) corr_ptw = 0.00179365;
-	      else if (pthat >= 35 && pthat < 45) corr_ptw = 0.000393614;
-	      else if (pthat >= 45) corr_ptw = 0.000126545;
+	      if (pthat >= 15 && pthat < 25)  corr_ptw = 0.0247699;
+	      else if (pthat >= 25 && pthat < 35) corr_ptw =  0.00311931;
+	      else if (pthat >= 35 && pthat < 45) corr_ptw = 0.000693027;
+	      else if (pthat >= 45) corr_ptw = 0.000212618;
 	    }
 	  }
 	  corr_AccEff = wCorr;
@@ -447,6 +441,17 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
             )
 	  {
 	    if (Reco_QQ_sign[iQQ]==0) { // Opposite-Sign dimuons
+	      //cout <<"jentry = "<<jentry<<", iQQ = "<<iQQ<<", pt = "<<RecoQQ4mom->Pt()<<", Rap = "<<RecoQQ4mom->Rapidity()<<endl;
+	      /*
+	      int iMupl = Reco_QQ_mupl_idx[iQQ];
+	      int iMumi = Reco_QQ_mumi_idx[iQQ];
+	      cout <<"Reco_QQ_sign[iQQ] = "<<Reco_QQ_sign[iQQ]<<endl;
+	      cout <<"RecoQQ::areMuonsInAcceptance2019(iQQ) = "<<RecoQQ::areMuonsInAcceptance2019(iQQ)<<endl;
+	      cout <<"(Reco_mu_SelectionType[iMumi, iMupl]&((ULong64_t)pow(2, 1))) = "<<(Reco_mu_SelectionType[iMumi]&((ULong64_t)pow(2, 1)))<<","<<(Reco_mu_SelectionType[iMupl]&((ULong64_t)pow(2, 1)))<<endl;
+	      cout <<"Reco_mu_nTrkWMea[iMumi, iMupl] = "<<Reco_mu_nTrkWMea[iMumi]<<","<<Reco_mu_nTrkWMea[iMupl]<<endl;
+	      cout <<"fabs(Reco_mu_dz[iMumi, iMupl]) = "<<fabs(Reco_mu_dz[iMumi])<<","<<fabs(Reco_mu_dz[iMupl])<<endl;
+	      cout <<"RecoQQ::isTriggerMatch(iQQ,triggerIndex_PbPb) = "<<RecoQQ::isTriggerMatch(iQQ,triggerIndex_PbPb)<<endl;
+	      */
 	      if (isMC && isPureSDataset && isMatchedDiMuon(iQQ)) {
 		if (applyWeight_Corr)
 		  dataOSNoBkg->add(*cols, weightCorr->getVal()); //Signal-only dimuons
@@ -469,7 +474,7 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	      if (isMC && isPureSDataset && gen_z >= 0 && z < 100)
 		trUnf->Fill();
 	      
-	      else if (!isPureSDataset && z < 100)
+	      else if (!isPureSDataset)// && z < 100)
 		trUnf->Fill();
 	    }
 	    else { // Like-Sign dimuons
@@ -484,18 +489,19 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
     theTree->Reset(); delete theTree;
     // Save the tree for the unfolding
     cout<<"[INFO] Saving the tree for the unfolding" << endl;
+    //trUnf->Write("treeForUnfolding");
     trUnfFile->cd();
-    trUnf->Write("treeForUnfolding");
+    trUnf->Write();
     trUnfFile->Close(); delete trUnfFile;
     // Save all the datasets
     TFile *DBFile = TFile::Open(OutputFileName.c_str(),"RECREATE");
     DBFile->cd();
     if (isMC && isPureSDataset && applyWeight_Corr) {
-      cout<<"[INFO] saving name = "<<Form("dOS_%s_NoBkg_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(),(applyJEC?"_JEC":""))<<endl;
+      //cout<<"[INFO] saving name = "<<Form("dOS_%s_NoBkg_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(),(applyJEC?"_JEC":""))<<endl;
       dataOSNoBkg->Write(Form("dOS_%s_NoBkg_jetR%d_%s%s", DSName.c_str(), (int)(jetR*10), corrName.Data(),(applyJEC?"_JEC":"")));
     }
     else if (isMC && isPureSDataset && !applyWeight_Corr) {
-      cout<<"[INFO] saving name = "<<Form("dOS_%s_NoBkg_jetR%d%s", DSName.c_str(),(int)(jetR*10), (applyJEC?"_JEC":""))<<endl;
+      //cout<<"[INFO] saving name = "<<Form("dOS_%s_NoBkg_jetR%d%s", DSName.c_str(),(int)(jetR*10), (applyJEC?"_JEC":""))<<endl;
       dataOSNoBkg->Write(Form("dOS_%s_NoBkg_jetR%d%s", DSName.c_str(),(int)(jetR*10), (applyJEC?"_JEC":"")));
     }
     else if (!isPureSDataset && applyWeight_Corr) {
@@ -559,6 +565,7 @@ string  findJetTree(string FileName, double jetR)
   else if (jetR == 0.3){
     if(f->GetListOfKeys()->Contains("ak3PFJetAnalyzer")) name = "ak3PFJetAnalyzer/t";
     else if (f->GetListOfKeys()->Contains("akCs3PFJetAnalyzer")) name = "akCs3PFJetAnalyzer/t";
+    //else if (f->GetListOfKeys()->Contains("akFlowPuCs3PFJetAnalyzer")) name = "akFlowPuCs3PFJetAnalyzer/t";
     else if(f->GetListOfKeys()->Contains("t")) name = "t";
     else { cout << "[ERROR] t was not found in: " << FileName << endl; }
   }
@@ -619,13 +626,12 @@ bool getTChain(TChain *fChain, TChain *jChain, TChain *sChain, TChain *cChain, v
 void iniBranch(TChain* fChain, bool isMC)
 {
   cout << "[INFO] Initializing Branches of " << TreeName.c_str() << endl;
-  if (fChain->GetBranch("Reco_QQ_4mom"))      { fChain->GetBranch("Reco_QQ_4mom")->SetAutoDelete(false);      }
-  if (fChain->GetBranch("Reco_mu_4mom")) { fChain->GetBranch("Reco_mu_4mom")->SetAutoDelete(false); }
-  if (isMC) 
-    {
-      if (fChain->GetBranch("Gen_QQ_4mom"))      { fChain->GetBranch("Gen_QQ_4mom")->SetAutoDelete(false); }
-      if (fChain->GetBranch("Gen_mu_4mom")) { fChain->GetBranch("Gen_mu_4mom")->SetAutoDelete(false); }
-    }
+  if (fChain->GetBranch("Reco_QQ_4mom"))         { fChain->GetBranch("Reco_QQ_4mom")->SetAutoDelete(false);}
+  if (fChain->GetBranch("Reco_mu_4mom"))         { fChain->GetBranch("Reco_mu_4mom")->SetAutoDelete(false);}
+  if (isMC) {
+    if (fChain->GetBranch("Gen_QQ_4mom"))        { fChain->GetBranch("Gen_QQ_4mom")->SetAutoDelete(false);}
+    if (fChain->GetBranch("Gen_mu_4mom"))        { fChain->GetBranch("Gen_mu_4mom")->SetAutoDelete(false);}
+  }
   fChain->SetBranchStatus("*",0);
   RecoQQ::iniBranches(fChain);
   if (fChain->GetBranch("runNb"))                 { fChain->SetBranchStatus("runNb",1);                 }
@@ -647,21 +653,23 @@ void iniBranch(TChain* fChain, bool isMC)
   if (fChain->GetBranch("jty"))                   { fChain->SetBranchStatus("jty",1);                   }
   if (fChain->GetBranch("jtphi"))                 { fChain->SetBranchStatus("jtphi",1);                 }
   if (fChain->GetBranch("jtm"))                   { fChain->SetBranchStatus("jtm",1);                   }
-  if (fChain->GetBranch("jtPfCHF"))               { fChain->SetBranchStatus("jtPfCHF",1);               }
-  if (fChain->GetBranch("jtPfNHF"))               { fChain->SetBranchStatus("jtPfNHF",1);               }
-  if (fChain->GetBranch("jtPfCEF"))               { fChain->SetBranchStatus("jtPfCEF",1);               }
-  if (fChain->GetBranch("jtPfNEF"))               { fChain->SetBranchStatus("jtPfNEF",1);               }
-  if (fChain->GetBranch("jtPfMUF"))               { fChain->SetBranchStatus("jtPfMUF",1);               }
-  if (fChain->GetBranch("jtPfCHM"))               { fChain->SetBranchStatus("jtPfCHM",1);               }
-  if (fChain->GetBranch("jtPfNHM"))               { fChain->SetBranchStatus("jtPfNHM",1);               }
-  if (fChain->GetBranch("jtPfCEM"))               { fChain->SetBranchStatus("jtPfCEM",1);               }
-  if (fChain->GetBranch("jtPfNEM"))               { fChain->SetBranchStatus("jtPfNEM",1);               }
-  if (fChain->GetBranch("jtPfMUM"))               { fChain->SetBranchStatus("jtPfMUM",1);               }
+  if (fChain->GetBranch("jtarea"))                { fChain->SetBranchStatus("jtarea",1);                }
+  //if (fChain->GetBranch("jtPfCHF"))               { fChain->SetBranchStatus("jtPfCHF",1);               }
+  //if (fChain->GetBranch("jtPfNHF"))               { fChain->SetBranchStatus("jtPfNHF",1);               }
+  //if (fChain->GetBranch("jtPfCEF"))               { fChain->SetBranchStatus("jtPfCEF",1);               }
+  //if (fChain->GetBranch("jtPfNEF"))               { fChain->SetBranchStatus("jtPfNEF",1);               }
+  //if (fChain->GetBranch("jtPfMUF"))               { fChain->SetBranchStatus("jtPfMUF",1);               }
+  //if (fChain->GetBranch("jtPfCHM"))               { fChain->SetBranchStatus("jtPfCHM",1);               }
+  //if (fChain->GetBranch("jtPfNHM"))               { fChain->SetBranchStatus("jtPfNHM",1);               }
+  //if (fChain->GetBranch("jtPfCEM"))               { fChain->SetBranchStatus("jtPfCEM",1);               }
+  //if (fChain->GetBranch("jtPfNEM"))               { fChain->SetBranchStatus("jtPfNEM",1);               }
+  //if (fChain->GetBranch("jtPfMUM"))               { fChain->SetBranchStatus("jtPfMUM",1);               }
   if (fChain->GetBranch("pPAprimaryVertexFilter")){ fChain->SetBranchStatus("pPAprimaryVertexFilter",1);}
   if (fChain->GetBranch("pBeamScrapingFilter"))   { fChain->SetBranchStatus("pBeamScrapingFilter",1);   }
   if (fChain->GetBranch("pprimaryVertexFilter"))  { fChain->SetBranchStatus("pprimaryVertexFilter",1);  }
   if (fChain->GetBranch("phfCoincFilter2Th4"))    { fChain->SetBranchStatus("phfCoincFilter2Th4",1);    }
   if (fChain->GetBranch("hiBin"))                 { fChain->SetBranchStatus("hiBin",1);                 }
+  if (fChain->GetBranch("hiHF"))                  { fChain->SetBranchStatus("hiHF",1);                  }
 
   if (isMC)
   {
@@ -679,10 +687,10 @@ void iniBranch(TChain* fChain, bool isMC)
     if (fChain->GetBranch("refy"))                { fChain->SetBranchStatus("refy",1);                  }
     if (fChain->GetBranch("refphi"))              { fChain->SetBranchStatus("refphi",1);                }
     if (fChain->GetBranch("refm"))                { fChain->SetBranchStatus("refm",1);                  }
-    if (fChain->GetBranch("genChargedSum"))       { fChain->SetBranchStatus("genChargedSum",1);         }
-    if (fChain->GetBranch("genHardSum"))          { fChain->SetBranchStatus("genHardSum",1);            }
-    if (fChain->GetBranch("signalChargedSum"))    { fChain->SetBranchStatus("signalChargedSum",1);      }
-    if (fChain->GetBranch("signalHardSum"))       { fChain->SetBranchStatus("signalHardSum",1);         }
+    //if (fChain->GetBranch("genChargedSum"))       { fChain->SetBranchStatus("genChargedSum",1);         }
+    //if (fChain->GetBranch("genHardSum"))          { fChain->SetBranchStatus("genHardSum",1);            }
+    //if (fChain->GetBranch("signalChargedSum"))    { fChain->SetBranchStatus("signalChargedSum",1);      }
+    //if (fChain->GetBranch("signalHardSum"))       { fChain->SetBranchStatus("signalHardSum",1);         }
   }
 };
 
@@ -720,22 +728,6 @@ double deltaR(TLorentzVector* GenMuon, TLorentzVector* RecoMuon)
 
 bool isMatchedDiMuon(int iRecoDiMuon, double maxDeltaR)
 {
-  //TLorentzVector* RecoMuonpl = (TLorentzVector*) Reco_mu_4mom->At(Reco_QQ_mupl_idx[iRecoDiMuon]);
-  //TLorentzVector* RecoMuonmi = (TLorentzVector*) Reco_mu_4mom->At(Reco_QQ_mumi_idx[iRecoDiMuon]);
-  
-  //bool isMatched(false);
-  //int iGenMuon(0);
-  //while ( !isMatched && (iGenMuon < Gen_QQ_size) )
-  //{
-  //TLorentzVector *GenMuonpl = (TLorentzVector*)Gen_QQ_mu_4mom->At(Gen_QQ_mupl_idx[iGenMuon]);
-  //TLorentzVector *GenMuonmi = (TLorentzVector*)Gen_QQ_mu_4mom->At(Gen_QQ_mumi_idx[iGenMuon]);
-  //double dRpl = deltaR(GenMuonpl,RecoMuonpl);
-  //double dRmi = deltaR(GenMuonmi,RecoMuonmi);
-  //if ( (dRpl < maxDeltaR) && (dRmi < maxDeltaR)  ) isMatched = true;
-  //matchGR = iGenMuon;
-  //iGenMuon++;
-  //}
-
   if (Reco_QQ_whichGen[iRecoDiMuon] != -1) return true;
   return false;
 };
@@ -826,11 +818,11 @@ bool readCorrection(const char* file)
   return true;
 };
 
-double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP)
+double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP, int cent)
 {
   const char* collName = "PbPb";
   const char* massName = "Jpsi";
-  //if (isPP) 
+  if (isPP) 
     collName = "PP";
   
     if (!fcorrArray)
@@ -856,31 +848,50 @@ double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP)
   }
   else
     {
-      
-      TF1  *bfrac = new TF1("bfrac","exp(-2.74079+0.211476*pow(x,1)-0.007024*pow(x,2)+(7.90067e-05)*pow(x,3))", 3, 50);
-      TEfficiency* prcorrHisto = static_cast<TEfficiency*>(fcorrArray->FindObject(Form("hcorr_Jpsi_%s_pr",collName)));
-      TEfficiency* nprcorrHisto = static_cast<TEfficiency*>(fcorrArray->FindObject(Form("hcorr_Jpsi_%s_npr",collName)));
+      string centTag = "";
+      if (!isPP){
+	if (cent<=10) centTag="_cent010";
+	else if (cent<=20) centTag="_cent1020";
+	else if (cent<=30) centTag="_cent2030";
+	else if (cent<=40) centTag="_cent3040";
+	else if (cent<=60) centTag="_cent4060";
+	else if (cent<=80) centTag="_cent6080";
+	else if (cent<=100) centTag="_cent80100";
+	else if (cent<=140) centTag="_cent100140";
+	else if (cent<=200) centTag="_cent140200";
+      }
+      TString bfracFunc = "0.611808-0.718494*exp(-0.102699*x)";
+      if (isPP)
+	bfracFunc = "0.669157-0.784588*exp(-0.0731804*x)";
+      //TF1  *bfrac = new TF1("bfrac","exp(-2.74079+0.211476*pow(x,1)-0.007024*pow(x,2)+(7.90067e-05)*pow(x,3))", 3, 50);
+      TF1  *bfrac = new TF1("bfrac",bfracFunc, 3, 100);
+      TEfficiency* prcorrHisto = static_cast<TEfficiency*>(fcorrArray->FindObject(Form("hcorr_Jpsi_%s_pr%s",collName,centTag.c_str())));
+      //TEfficiency* nprcorrHisto = static_cast<TEfficiency*>(fcorrArray->FindObject(Form("hcorr_Jpsi_%s_npr",collName)));
       double prEff = 1.0; double nprEff = 1.0; double bf = 1.0;
-      if (!prcorrHisto || !nprcorrHisto)
+      if (!prcorrHisto )//|| !nprcorrHisto)
 	{
 	  std::cout << "[Error] pr or npr histogram not provided for correction of " << collName << " " << massName << ". Weight set to 1." << std::endl;
 	  return 1.;
 	}
 
-      if (pt > 3 && pt < 50 && fabs(rapidity) < 2.4){
+      if (pt > 3 && pt < 100 && fabs(rapidity) < 2.4){
 	prEff = prcorrHisto->GetEfficiency(prcorrHisto->FindFixBin(rapidity, pt));
-	nprEff = nprcorrHisto->GetEfficiency(nprcorrHisto->FindFixBin(rapidity, pt));
-	bf = bfrac->Eval(pt);
-	corr = bf*nprEff + (1-bf)*prEff;
-      }
-      else if (pt > 3 && pt > 50 && fabs(rapidity) < 2.4) {
-	prEff = prcorrHisto->GetEfficiency(prcorrHisto->FindFixBin(rapidity, 49));
-	nprEff = nprcorrHisto->GetEfficiency(nprcorrHisto->FindFixBin(rapidity, 49));
-	bf = bfrac->Eval(49);
-	corr = bf*nprEff + (1-bf)*prEff;	
+	//nprEff = nprcorrHisto->GetEfficiency(nprcorrHisto->FindFixBin(rapidity, pt)); 
+	//nprEff=1.;
+	//bf = bfrac->Eval(pt);
+	//corr = bf*nprEff + (1-bf)*prEff;
+	corr = prEff;
+	if (!(corr<1 && corr>0) && pt > 6.5) {
+	  cout<< "pt = "<<pt<<", rapidity = "<<rapidity<<endl;
+	  cout <<"prEff = "<<prEff<<endl;
+	  cout <<"nprEff = "<<nprEff<<endl;
+	  cout <<"bf = "<<bf<<endl;
+	  cout<<"corr = "<< corr <<", 1/corr = "<<1.0/corr<<endl;
+	}
       }
     }
-  if(corr<0.00001) corr=1.0;
+
+  if(!corr || corr<0.00001) corr=1.0;
   return corr;
 };
 

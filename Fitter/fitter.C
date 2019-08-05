@@ -198,8 +198,9 @@ void fitter(
       else {
         OutputFileName = dir + "DATASET_" + FILETAG + Form("_jetR%d",(int) (jetR*10)) + (applyJEC?"_JEC":"") + (isPbPb?(isPeriPD?"_PERI":"_CENT"):"") + ".root";
         if(gSystem->AccessPathName(OutputFileName.c_str())) { OutputFileName = DIR["dataset"][0] + "DATASET_" + FILETAG + Form("_jetR%d",(int) (jetR*10)) + (applyJEC?"_JEC":"") + (isPbPb?(isPeriPD?"_PERI":"_CENT"):"") + ".root"; }
-        string NAMETAG = DSTAG + FILETAG + Form("_jetR%d",(int) (jetR*10)) + (applyJEC?"_JEC":"");
+        string NAMETAG = DSTAG /*+ FILETAG +*/ + Form("_jetR%d",(int) (jetR*10)) + (applyJEC?"_JEC":"");
         if (checkData) { NAMETAG = string("MC")+(incJpsi?"JPSI":"PSI2S")+(incNonPrompt?"NOPR":"PR")+"_"+(fitPP?"PP":"PbPb"); }
+	cout <<"nameTag for workspace = "<<NAMETAG<<endl;
         if(!tree2DataSet(Workspace[NAMETAG], InputFileNames, FILETAG, OutputFileName)){ return; }
       }
       if (fitData && !aDSTAG->FindObject(DSTAG.c_str())) aDSTAG->Add(new TObjString(DSTAG.c_str()));
@@ -351,6 +352,7 @@ void fitter(
           else if (DSTAG.Contains("DATA") && strcmp(applyCorr,"")) wsName = Form("%s_jetR%d_%s%s",DSTAG.Data(),(int) (jetR*10),applyCorr,(applyJEC?"_JEC":""));
           else wsName = DSTAG + Form("_jetR%d",(int) (jetR*10)) +(applyJEC?"_JEC":"");
           if (Workspace.count(wsName.Data())>0) {
+	    cout <<"Workspace.count cond passed"<<endl;
             // DATA/MC datasets were loaded
             if (doSimulFit) {
               // If do simultaneous fits, then just fits once
