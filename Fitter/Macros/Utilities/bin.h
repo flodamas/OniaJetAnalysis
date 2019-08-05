@@ -42,6 +42,26 @@ class anabin : public tuple<binF,binF,binF,binI> {
       }
 };
 
+set<anabin> allbins19xxx() {
+  set<anabin> ans;
+  // JPsiJet analysis 
+  ans.insert(anabin(0.064,0.220,0,2.4,6.5,100,0,180));
+  ans.insert(anabin(0.220,0.376,0,2.4,6.5,100,0,180));
+  ans.insert(anabin(0.376,0.532,0,2.4,6.5,100,0,180));
+  ans.insert(anabin(0.532,0.688,0,2.4,6.5,100,0,180));
+  ans.insert(anabin(0.688,0.844,0,2.4,6.5,100,0,180));
+  ans.insert(anabin(0.844,1.000,0,2.4,6.5,100,0,180));
+  //for pp
+  ans.insert(anabin(0.064,0.220,0,2.4,6.5,100,0,200));
+  ans.insert(anabin(0.220,0.376,0,2.4,6.5,100,0,200));
+  ans.insert(anabin(0.376,0.532,0,2.4,6.5,100,0,200));
+  ans.insert(anabin(0.532,0.688,0,2.4,6.5,100,0,200));
+  ans.insert(anabin(0.688,0.844,0,2.4,6.5,100,0,200));
+  ans.insert(anabin(0.844,1.000,0,2.4,6.5,100,0,200));
+  
+  return ans;
+}
+
 
 set<anabin> allbins18012() {
   set<anabin> ans;

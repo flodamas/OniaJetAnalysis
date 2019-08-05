@@ -28,9 +28,9 @@
 
 // NB: luminosities in mub-1
 const double lumipp = 296.08e6;
-const double lumipbpb_ABCD = 1618.466;//351*1.049;
+const double lumipbpb_ABCD = 1512;//351*1.049;
 const double lumipbpb_peri = 464;
-const double NMB = 2.366003e9*1.049;
+const double NMB = (1.06391e+10)*(1./1.05);//2.366003e9*1.049;
 
 using namespace std;
 

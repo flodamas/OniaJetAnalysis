@@ -46,8 +46,8 @@ TString lumi_PbPb2015_alt  = "351 #mub^{-1}";
 TString lumi_pp2013  = "pp 5.4 pb^{-1}";
 TString lumi_pp2015  = "pp 27.39 pb^{-1}";
 TString lumi_pp2015_alt  = "28.0 pb^{-1}";
-TString lumi_pp2017  = "pp 296.08 pb^{-1}";
-TString lumi_PbPb2018  = "PbPb 1618.466 #mub^{-1}";
+TString lumi_pp2017  = "pp 293.61 pb^{-1}";
+TString lumi_PbPb2018  = "PbPb 1512.15 #mub^{-1}";
 bool drawLogo      = false;
 
 void CMS_lumi( TPad* pad, int iPeriod=3, int iPosX=10, TString label = lumi_PbPb2018 , bool writeExtraText = true);

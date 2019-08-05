@@ -323,7 +323,6 @@ bool saveWorkSpace(RooWorkspace& myws, string outputDir, string FileName)
 {
   // Save the workspace
   gSystem->mkdir(outputDir.c_str(), kTRUE);
-  cout << FileName << endl;
   TFile *file =  new TFile(FileName.c_str(), "RECREATE");
   if (!file) {
     file->Close(); delete file;
@@ -543,7 +542,6 @@ bool loadCtauErrRange(string FileName, struct KinCuts& cut)
     file->Close(); delete file;
     return false;
   }
-  cout<<"end of loadCtauErr"<<endl;
   delete ws;
   file->Close(); delete file;
   return true;
@@ -598,6 +596,7 @@ bool loadYields(RooWorkspace& myws, string FileName, string dsName, string pdfNa
 
 bool loadSPlotDS(RooWorkspace& myws, string FileName, string dsName)
 {
+  cout << "loading splot from file: "<<FileName<<endl;
   if (gSystem->AccessPathName(FileName.c_str())) {
     cout << "[ERROR] File " << FileName << " was not found!" << endl;
     return false; // File was not found
@@ -630,13 +629,14 @@ bool loadSPlotDS(RooWorkspace& myws, string FileName, string dsName)
 
 int importDataset(RooWorkspace& myws, const RooWorkspace& inputWS, struct KinCuts cut, string label, bool cutSideBand=false)
 {
+
   string indMuonMass    = Form("(%.6f < invMass && invMass < %.6f)",         cut.dMuon.M.Min,       cut.dMuon.M.Max);
   if (cutSideBand) {
     indMuonMass =  indMuonMass + "&&" + "((2.0 < invMass && invMass < 2.8) || (3.3 < invMass && invMass < 3.5) || (3.9 < invMass && invMass < 5.0))";
   }
   string indMuonRap     = Form("(%.6f <= abs(rap) && abs(rap) < %.6f)",      cut.dMuon.AbsRap.Min,   cut.dMuon.AbsRap.Max);
   string indMuonPt      = Form("(%.6f <= pt && pt < %.6f)",                  cut.dMuon.Pt.Min,       cut.dMuon.Pt.Max);
-  string indMuonZed     = Form("(%.2f < zed && zed <= %.2f)",                cut.dMuon.Zed.Min,      cut.dMuon.Zed.Max);
+  string indMuonZed     = Form("(%.6f < zed && zed <= %.6f)",                cut.dMuon.Zed.Min,      cut.dMuon.Zed.Max);
   string indMuonCtau    = Form("(%.6f < ctau && ctau <= %.6f)",              cut.dMuon.ctau.Min,     cut.dMuon.ctau.Max); 
   if(cut.dMuon.ctauCut!=""){ indMuonCtau = cut.dMuon.ctauCut; }
   string indMuonCtauErr = Form("(%.12f < ctauErr && ctauErr < %.12f)",       cut.dMuon.ctauErr.Min,  cut.dMuon.ctauErr.Max);
@@ -663,6 +663,7 @@ int importDataset(RooWorkspace& myws, const RooWorkspace& inputWS, struct KinCut
     cout << "[ERROR] No events from dataset " <<  Form("dOS_%s", label.c_str()) << " passed the kinematic cuts!" << endl;
     //return -1;
   }
+
   myws.import(*dataOS);
   delete dataOS;
   
@@ -791,6 +792,7 @@ int importDataset(RooWorkspace& myws, const RooWorkspace& inputWS, struct KinCut
     myws.var("ctauN")->setMin(cut.dMuon.ctauN.Min);      
     myws.var("ctauN")->setMax(cut.dMuon.ctauN.Max);
   }
+
   cout << "[INFO] Analyzing bin: " << Form(
                                            "%.3f < z <= %.3f,%.3f < pt(JPsi) < %.3f, %.3f < rap(JPsi) < %.3f, %.3f < pt(jet) < %.3f, %.3f < rap(jet) < %.3f, %d < cent < %d", 
 					   cut.dMuon.Zed.Min,
