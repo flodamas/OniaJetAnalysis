@@ -108,6 +108,7 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
   // Define pdf and plot names
   string plotLabel = "";
   plotLabel = plotLabel + Form("_CtauRes_%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str());
+  plotLabel = plotLabel + Form("_jetR%d",(int)(jetR*10)) + (strcmp(applyCorr,"")?Form("_%s", applyCorr):"")+ (applyJEC?"_JEC":"");
   string pdfName = Form("pdfCTAURES_Tot_%s", (isPbPb?"PbPb":"PP"));
 
   string FileName = "";
@@ -223,7 +224,9 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
     if(!drawCtauResDataPlot(myws, outputDir, opt, cut, parIni, plotLabel, DSTAG, dsName2Fit.c_str(), isPbPb, setLogScale, incSS, binWidth["CTAURES"])) { return false; }
     // Save the results
     string FileName = ""; setCtauResDataFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
+    cout <<"saving snapshot"<<endl;
     myws.saveSnapshot(Form("%s_parFit", pdfName.c_str()),*newpars,kTRUE);
+    cout <<"saving the workspace"<<endl;
     saveWorkSpace(myws, Form("%sctauRes/%s/result", outputDir.c_str(), DSTAG.c_str()), FileName);
   }
   
@@ -322,7 +325,6 @@ void setCtauResDataCutParameters(struct KinCuts& cut)
 
 bool createSignalCtauDSUsingSPLOT(RooWorkspace& ws, string dsName, map<string, string>  parIni, struct KinCuts cut, bool incJpsi, bool incPsi2S, bool incBkg, bool useSPlot)
 {
-  
   bool isPbPb = false;
   if (dsName.find("PbPb")!=std::string::npos) { isPbPb = true; }
   if (dsName.find("MC")!=std::string::npos)   { return false;  }  // Only accept data

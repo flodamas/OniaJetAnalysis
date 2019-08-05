@@ -28,7 +28,7 @@ void drawMassFrom2DPlot(RooWorkspace& myws,   // Local workspace
                   bool paperStyle=false // if true, print less info
                   ) 
 {
-  bool pasStyle = true;
+  bool pasStyle = false;
   RooMsgService::instance().getStream(0).removeTopic(Caching);  
   RooMsgService::instance().getStream(1).removeTopic(Caching);
   RooMsgService::instance().getStream(0).removeTopic(Plotting);
@@ -268,7 +268,7 @@ void drawMassFrom2DPlot(RooWorkspace& myws,   // Local workspace
   }
   
   // CMS_lumi(pad1, isPbPb ? 105 : 104, 33, label);
-  CMS_lumi(pad1, isPbPb ? 108 : 107, 33, "");
+  CMS_lumi(pad1, isPbPb ? 110 : 109, 33, "");
   if (!paperStyle) gStyle->SetTitleFontSize(0.05);
   
   pad1->Update();

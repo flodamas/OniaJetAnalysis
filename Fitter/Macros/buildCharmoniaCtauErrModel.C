@@ -26,7 +26,6 @@ bool buildCharmoniaCtauErrModel(RooWorkspace& ws, map<string, string>  parIni,
                                 )
 {
 
-
   bool isMC = false;
   if (dsName.find("MC")!=std::string::npos) { isMC = true; }
   bool isPbPb = false;
@@ -98,6 +97,7 @@ bool createCtauErrTemplateUsingSPLOT(RooWorkspace& ws, string dsName, string pdf
   if (incJpsi)  { yieldList.add( *ws.var(Form("N_Jpsi_%s", (isPbPb?"PbPb":"PP"))) );  }
   if (incPsi2S) { yieldList.add( *ws.var(Form("N_Psi2S_%s", (isPbPb?"PbPb":"PP"))) ); }
   yieldList.add( *ws.var(Form("N_Bkg_%s", (isPbPb?"PbPb":"PP"))) ); // Always add background
+
   RooDataSet* data = (RooDataSet*)ws.data(dsName.c_str())->Clone("TMP_DATA");
   RooAbsPdf* pdf = clone(*ws.pdf(pdfMassName.c_str()));
 

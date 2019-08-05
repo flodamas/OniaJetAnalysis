@@ -27,7 +27,7 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
                         ) 
 {
 
-  bool pasStyle = true;
+  bool pasStyle = false;
 
   RooMsgService::instance().getStream(0).removeTopic(Caching);  
   RooMsgService::instance().getStream(1).removeTopic(Caching);
@@ -225,11 +225,11 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
   }
   // Drawing the Legend
   double ymin = 0.7602;
-  if (pasStyle) ymin = 0.25;
+  if (pasStyle) ymin = 0.2;
   if (incPsi2S && incJpsi && incSS)  { ymin = 0.7202; } 
   if (incPsi2S && incJpsi && !incSS) { ymin = 0.7452; }
   TLegend* leg = new TLegend(0.5175, ymin, 0.7180, 0.8809); leg->SetTextSize(0.03);
-  if (pasStyle) {leg = new TLegend(0.2, ymin, 0.4, 0.5); leg->SetTextSize(0.044); leg->SetTextFont(42);}
+  if (pasStyle) {leg = new TLegend(0.2, ymin, 0.4, 0.4); leg->SetTextSize(0.044); leg->SetTextFont(42);}
   leg->AddEntry(frame->findObject("dOS"), (incSS?"Opposite Charge":"Data"),"pe");
   if (incSS) { leg->AddEntry(frame->findObject("dSS"),"Same Charge","pe"); }
   if(frame->findObject("PDF")) { leg->AddEntry(frame->findObject("PDF"),"Total fit","fl"); }
@@ -260,7 +260,7 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
   }
   
   //CMS_lumi(pad1, isPbPb ? 105 : 104, 33, label);
-  CMS_lumi(pad1, isPbPb ? 108 : 107, 33, "");
+  CMS_lumi(pad1, isPbPb ? 110 : 109, 33, "");
   gStyle->SetTitleFontSize(0.05);
   
   pad1->Update();

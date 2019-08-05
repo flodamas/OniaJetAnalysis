@@ -107,7 +107,7 @@ bool fitCharmoniaCtauErrModel( RooWorkspace& myws,             // Local Workspac
       if (importID<0) { return false; }
       else if (importID==0) { doCtauErrPdf = false; }
     }
-    numEntries = myws.data(dsName.c_str())->sumEntries(); if (numEntries<=0) { doCtauErrPdf = false; }
+    numEntries = myws.data(dsName.c_str())->sumEntries(); if (numEntries<=0) { doCtauErrPdf = false;}
   }
   else if (doCtauErrPdf && !(myws.data(dsName.c_str()))) { cout << "[ERROR] No local dataset was found to make the ctau Error Pdf!" << endl; return false; }
 
