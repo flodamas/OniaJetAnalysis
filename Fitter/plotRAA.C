@@ -125,7 +125,9 @@ void plotPt(string workDirName, string poiname, int iplot) {
   
   string xaxis = "pt";
   vector<anabin> theCats;
-  
+  theCats.push_back(anabin(0.0,101.0,0.0,2.4,6.5,50.0,0,180));
+
+  /*  
   // 4 rapidity intervals
   if (iplot==0) {
     theCats.push_back(anabin(0,0.6,6.5,50,0,200));
@@ -151,7 +153,7 @@ void plotPt(string workDirName, string poiname, int iplot) {
     theCats.push_back(anabin(0,1.6,6.5,30,0,200));
     theCats.push_back(anabin(1.6,2.4,3.0,30,0,200));
   }
-  
+  */
   
   nameTag = nameTag_base + Form("_%i",iplot);
   
@@ -170,7 +172,7 @@ void plotCent(string workDirName, string poiname, int iplot) {
   
   string xaxis = "cent";
   vector<anabin> theCats;
-  
+  /*
   // 4 rapidity intervals
   if (iplot==0) {
     theCats.push_back(anabin(0,0.6,6.5,50,0,200));
@@ -195,7 +197,8 @@ void plotCent(string workDirName, string poiname, int iplot) {
     theCats.push_back(anabin(0,1.6,6.5,30,0,200));
     theCats.push_back(anabin(1.6,2.4,3.0,30,0,200));
   }
-  
+  */
+
   nameTag = nameTag_base + Form("_%i",iplot);
   if (poiname.find("RAA")!=std::string::npos) plotRAA(theCats,xaxis,workDirName);
   else if (poiname.find("BF")!=std::string::npos && !plotPsi2S) plotBF(theCats,xaxis,workDirName);
@@ -212,7 +215,7 @@ void plotRap(string workDirName, string poiname) {
   string xaxis = "rap";
   vector<anabin> theCats;
   
-  theCats.push_back(anabin(0,2.4,6.5,50,0,200));
+  //theCats.push_back(anabin(0,2.4,6.5,50,0,200));
   
   nameTag = nameTag_base;
   if (poiname.find("RAA")!=std::string::npos) plotRAA(theCats,xaxis,workDirName);
@@ -228,7 +231,8 @@ void plotAll(string workDirName, string poiname) {
   // poiname is the observable to be plotted = "RAA", "BF" and "XS" (For RAA, b-fraction and cross-section)
 //  if (dononprompt) nameTag_base = "_nonprompt";
   if (!doprompt && !dononprompt) nameTag_base = "";
-  
+  plotPt(workDirName,poiname,0);//,DSTag,prependPath,fitType);
+  /*
   if (is16004)
   {
     plotPt(workDirName,poiname,3);
@@ -246,13 +250,21 @@ void plotAll(string workDirName, string poiname) {
     }
     plotRap(workDirName,poiname);
   }
+  */
 };
 
 void doAllplots(bool is16004=false) {
   //bool adoprompt, bool adononprompt, bool aplotFwdMid, bool ais16004, bool aplotPsi2S, bool aplot14005, bool aapplyEff, bool aapplyAcc, bool adoLogPt, bool aincludeEffSyst, bool  aexcludeNonFitSyst, string anameTag_base=""
-  
-  if (!is16004)
-  {
+  setOptions(true, false, false, false, false, false, false, false, false, false, true, "");
+  //setOptions(true, false, false, false, false, false, false, false, false, false, false, true,"");
+  printOptions();
+  plotAll("DataFits_Raa_finerBins","RAA");//, "DATA", "", "ctauMass");
+  plotAll("DataFits_Raa_finerBins","XS");//, "DATA", "", "ctauMass");
+
+  //if (!is16004)
+  //{
+
+    /*
     // pr J/psi
     // noCorr with fitSyst
     setOptions(true,false,false,false,false,false,false,false,false,true,false);
@@ -305,16 +317,16 @@ void doAllplots(bool is16004=false) {
     // accEffCorr with all syst
     setOptions(false,false,false,false,false,false,true,true,false,true,false,"");
     plotAll("DataFits_16025_2D_2CB_polBkg_nominal","BF");
-    
+    */
     // Tables of systematics
 //    map<anabin, syst> syst_PP = readSyst_all("PP","NJpsi_prompt","16025",true,true,"",true,"Systematics/systs_PP_prompt_all.tex");
 //    syst_PP = readSyst_all("PP","NJpsi_nonprompt","16025",true,true,"",true,"Systematics/systs_PP_nonprompt_all.tex");
 //    
 //    map<anabin, syst> syst_PbPb = readSyst_all("PbPb","NJpsi_prompt","16025",true,true,"",true,"Systematics/systs_PbPb_prompt_all.tex");
 //    syst_PbPb = readSyst_all("PbPb","NJpsi_nonprompt","16025",true,true,"",true,"Systematics/systs_PbPb_nonprompt_all.tex");
-  }
-  else
-  {
+  //}
+  //else
+  //{
 //    setOptions(true,false,true,false,false,false,false,false,false,true);
 //    printOptions();
 //    plotAll("DataFits_16004_2D_2CB_polBkg_nominal","RAA");
@@ -329,10 +341,12 @@ void doAllplots(bool is16004=false) {
 //    plotAll("DataFits_16004_2D_2CB_polBkg_nominal","RAA");
     
   //bool adoprompt, bool adononprompt, bool ais16004, bool aplotPsi2S, bool aplot14005, bool aapplyEff, bool aapplyAcc, bool adoLogPt, bool aincludeEffSyst, bool  aexcludeNonFitSyst, string anameTag_base=""
+    /*
     setOptions(true,false,false,true,true,false,true,true,false,true,false);
     printOptions();
     plotAll("DataFits_16004_2D_2CB_polBkg_nominal","RAA");
-  }
+    */
+  //}
 
 };
 
@@ -379,13 +393,15 @@ void plotRAA(vector<anabin> thecats, string xaxis, string outputDir) {
   map<anabin, syst> syst_glb_high; // for the boxes at 1
   
   vector<double> x, ex, y, ey;
-  float ptmin, ptmax, ymin, ymax, centmin, centmax;
+  float zmin, zmax, ptmin, ptmax, ymin, ymax, centmin, centmax;
   float eff, acc, lumi, taa, ncoll;
   float val, errL=0, errH=0;
   float bfrac, bfrac_errL,bfrac_errH;
   float correl=0;
   int ival=-999;
   char collSystem[5];
+  tr->SetBranchAddress("zmin",&zmin);
+  tr->SetBranchAddress("zmax",&zmax);
   tr->SetBranchAddress("ptmin",&ptmin);
   tr->SetBranchAddress("ptmax",&ptmax);
   tr->SetBranchAddress("ymin",&ymin);
@@ -422,7 +438,7 @@ void plotRAA(vector<anabin> thecats, string xaxis, string outputDir) {
     
     if (xaxis=="rap" && ((ymin==0 && ymax<=0.61 && ymax>=0.59 ) || (ymin>=0.59 && ymin<=0.61 && ymax>=1.19 && ymax <=1.21) || (ymin>=1.19 && ymin<=1.21 && ymax>=1.79 && ymax <=1.81) || (ymin>=1.79 && ymin<=1.81 && ymax>=2.39 && ymax <=2.41))) continue;
     
-    anabin thebin(ymin, ymax, ptmin, ptmax, centmin, centmax);
+    anabin thebin(zmin, zmax, ymin, ymax, ptmin, ptmax, centmin, centmax);
     
     bool ispp = (TString(collSystem)=="PP");
     
@@ -740,13 +756,15 @@ void plotXS(vector<anabin> thecats, string xaxis, string outputDir) {
   map<anabin, syst> syst_glb_pp; // for the boxes at 1
   
   vector<double> x, ex, y, ey;
-  float ptmin, ptmax, ymin, ymax, centmin, centmax;
+  float zmin, zmax, ptmin, ptmax, ymin, ymax, centmin, centmax;
   float eff, acc, lumi, taa, ncoll;
   float val, errL=0, errH=0;
   float bfrac, bfrac_errL,bfrac_errH;
   float correl=0;
   int ival=-999;
   char collSystem[5];
+  tr->SetBranchAddress("zmin",&zmin);
+  tr->SetBranchAddress("zmax",&zmax);
   tr->SetBranchAddress("ptmin",&ptmin);
   tr->SetBranchAddress("ptmax",&ptmax);
   tr->SetBranchAddress("ymin",&ymin);
@@ -784,7 +802,7 @@ void plotXS(vector<anabin> thecats, string xaxis, string outputDir) {
     
     if (xaxis=="rap" && ((ymin==0 && ymax<=0.61 && ymax>=0.59 ) || (ymin>=0.59 && ymin<=0.61 && ymax>=1.19 && ymax <=1.21) || (ymin>=1.19 && ymin<=1.21 && ymax>=1.79 && ymax <=1.81) || (ymin>=1.79 && ymin<=1.81 && ymax>=2.39 && ymax <=2.41))) continue;
     
-    anabin thebin(ymin, ymax, ptmin, ptmax, centmin, centmax);
+    anabin thebin(zmin, zmax, ymin, ymax, ptmin, ptmax, centmin, centmax);
     
     bool ispp = (TString(collSystem)=="PP");
     
@@ -1053,13 +1071,16 @@ void plotBF(vector<anabin> thecats, string xaxis, string outputDir) {
   map<anabin, syst> systEffNP_PbPb = readSyst_all("PbPb","NJpsi_nonprompt",sTag.Data(),true,true);
   
   vector<double> x, ex, y, ey;
-  float ptmin, ptmax, ymin, ymax, centmin, centmax;
+  float zmin, zmax, ptmin, ptmax, ymin, ymax, centmin, centmax;
   float effp, accp,effnp, accnp;
   float val, err=0;
   float bfrac, bfrac_err;
   float correl=0;
   int ival=-999;
   char collSystem[5];
+
+  tr->SetBranchAddress("zmin",&zmin);
+  tr->SetBranchAddress("zmax",&zmax);
   tr->SetBranchAddress("ptmin",&ptmin);
   tr->SetBranchAddress("ptmax",&ptmax);
   tr->SetBranchAddress("ymin",&ymin);
@@ -1086,7 +1107,7 @@ void plotBF(vector<anabin> thecats, string xaxis, string outputDir) {
     //fixing the error bin problems?
     //if (xaxis=="pt" && ((centmin == 0) && (centmax == 200) && ymin==0 && ymax>=2.39 && ymax <=2.41 && ((ptmin>=14.99 && ptmin<15.01 && ptmax <= 20.01 && ptmax > 19.99) || (ptmin>=19.99 && ptmin<20.01 && ptmax <= 30.01 && ptmax > 29.99) || (ptmin>=29.99 && ptmin<30.01 && ptmax <= 50.01 && ptmax > 49.99)))) continue;
     
-    anabin thebin(ymin, ymax, ptmin, ptmax, centmin, centmax);
+    anabin thebin(zmin, zmax, ymin, ymax, ptmin, ptmax, centmin, centmax);
 
     if (ispp) {
       theVars_inputs[thebin].bfracpp = bfrac;
@@ -1388,7 +1409,7 @@ void plotGraphRAA(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
       if (fraa && fraa_syst) {
         // the main graph
         name14005 = Form("g%sJpsi",dononprompt ? "NonPr" : "Pr");
-        if (thebin != anabin(0,2.4,6.5,50,0,200) && thebin != anabin(0,2.4,6.5,30,0,200)) {
+        if (thebin != anabin(0,101,0,2.4,6.5,50,0,200) && thebin != anabin(0,101,0,2.4,6.5,30,0,200)) {
           int ptlowi = thebin.ptbin().low()*10;
           if (ptlowi == ((int) thebin.ptbin().low())*10) ptlowi = thebin.ptbin().low();
           int pthighi = (thebin.ptbin().high()<30) ? thebin.ptbin().high() : 30;
@@ -1401,7 +1422,7 @@ void plotGraphRAA(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
         
         // the syst graph
         name14005 = Form("g%sJpsiSyst",dononprompt ? "NonPr" : "Pr");
-        if (thebin != anabin(0,2.4,6.5,50,0,200) && thebin != anabin(0,2.4,6.5,30,0,200)) {
+        if (thebin != anabin(0,101,0,2.4,6.5,50,0,200) && thebin != anabin(0,101,0,2.4,6.5,30,0,200)) {
           int ptlowi = thebin.ptbin().low()*10;
           if (ptlowi == ((int) thebin.ptbin().low())*10) ptlowi = thebin.ptbin().low();
           int pthighi = (thebin.ptbin().high()<30) ? thebin.ptbin().high() : 30;
@@ -1606,7 +1627,9 @@ void plotGraphRAA(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
       if (plotFwdMid && cnt>0) x = rightA - (2*dx + dx);
       y = 1;
       
-      anabin thebinglb(it->first.rapbin().low(),
+      anabin thebinglb(it->first.zbin().low(),
+                       it->first.zbin().high(),
+		       it->first.rapbin().low(),
                        it->first.rapbin().high(),
                        it->first.ptbin().low(),
                        it->first.ptbin().high(),
@@ -2051,7 +2074,9 @@ void plotGraphXS(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphAs
       centmaxGlob = it->first.centbin().high();
     }
     
-    anabin thebinglb(it->first.rapbin().low(),
+    anabin thebinglb(it->first.zbin().low(),
+                     it->first.zbin().high(),
+		     it->first.rapbin().low(),
                      it->first.rapbin().high(),
                      it->first.ptbin().low(),
                      it->first.ptbin().high(),
@@ -2256,7 +2281,9 @@ void plotCombGraphXS(map<anabin, TGraphAsymmErrors*> theGraphs_pp, map<anabin, T
     tleg->AddEntry(tg, "pp", "p");
     
     //  global systematics
-    anabin thebinglb(it->first.rapbin().low(),
+    anabin thebinglb(it->first.zbin().low(),
+                     it->first.zbin().high(),
+		     it->first.rapbin().low(),
                      it->first.rapbin().high(),
                      it->first.ptbin().low(),
                      it->first.ptbin().high(),
@@ -2303,7 +2330,9 @@ void plotCombGraphXS(map<anabin, TGraphAsymmErrors*> theGraphs_pp, map<anabin, T
     tleg->AddEntry(tg, "PbPb, Cent. 0-100%", "p");
     
     //  global systematics
-    anabin thebinglb(it->first.rapbin().low(),
+    anabin thebinglb(it->first.zbin().low(),
+                     it->first.zbin().high(),
+		     it->first.rapbin().low(),
                      it->first.rapbin().high(),
                      it->first.ptbin().low(),
                      it->first.ptbin().high(),
@@ -2919,7 +2948,7 @@ map<anabin, raa_input > readResults(const char* resultsFile)
   cout << "[INFO] Reading results : " << resultname.c_str() << endl;
   
   string line;
-  double rapmin=0, rapmax=0, ptmin=0, ptmax=0, centmin=0, centmax=0, value=0;
+  double zmin=0, zmax=0, rapmin=0, rapmax=0, ptmin=0, ptmax=0, centmin=0, centmax=0, value=0;
   
   while (file.good()) {
     getline(file,line);
@@ -2933,18 +2962,20 @@ map<anabin, raa_input > readResults(const char* resultsFile)
       else if (cnt==1) rapmax = value;
       else if (cnt==2) ptmin = value;
       else if (cnt==3) ptmax = value;
-      else if (cnt==4) centmin = value;
-      else if (cnt==5) centmax = value;
-      else if (cnt==6) theresult.naa = value;
-      else if (cnt==7) theresult.dnaa_stat = value;
-      else if (cnt==8) theresult.systaa = value;
-      else if (cnt>8) {
+      else if (cnt==4) zmin = value;
+      else if (cnt==5) zmax = value;
+      else if (cnt==6) centmin = value;
+      else if (cnt==7) centmax = value;
+      else if (cnt==8) theresult.naa = value;
+      else if (cnt==9) theresult.dnaa_stat = value;
+      else if (cnt==10) theresult.systaa = value;
+      else if (cnt>10) {
         cout << "Warning, too many fields, I'll take the last one." << endl;
         continue;
       }
       cnt++;
     }
-    anabin thebin(rapmin, rapmax, ptmin, ptmax, centmin, centmax);
+    anabin thebin(zmin, zmax, rapmin, rapmax, ptmin, ptmax, centmin, centmax);
     ans[thebin] = theresult;
   }
   

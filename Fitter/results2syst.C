@@ -41,7 +41,7 @@ void printTex(map<anabin, vector<double> > mapvals,
 // MAIN FUNCTION //
 ///////////////////
 
-void results2syst(const char* workDirNames, const char* systFileName, const char* systHeader, int method, const char* collTag="", bool relativeSyst=true, const char* poiname = "N_Jpsi", bool testChi2 = true, bool isMid = true, bool isXS=false) {
+void results2syst(const char* workDirNames, const char* systFileName, const char* systHeader, int method, const char* collTag="", bool relativeSyst=true, const char* poiname = "N_Jpsi", bool testChi2 = true, bool isXS=false) {
   // workDirNames: of the form "dir1,dir2,dir3,..."
   // systFileName: "syst_blabla.csv" (do NOT specify the full path, it will be assigned automatically to Systematics/csv/)
   // systHeader:   this will be the header of the systematics file. A few words describing what this systematic is.
@@ -62,9 +62,7 @@ void results2syst(const char* workDirNames, const char* systFileName, const char
   if (is16004) thebins = allbins16004();
   else thebins = allbins();
 
-  thebins = allbins18012();
-  if (isMid) thebins = midbins18012();
-  else thebins = forbins18012();
+  thebins = allbins19xxx();
 
   if (isXS) thebins = totbins18012();
   

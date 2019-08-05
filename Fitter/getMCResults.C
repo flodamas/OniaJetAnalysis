@@ -45,30 +45,31 @@ using namespace std;
 Double_t ptbins2D []= {3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5, 4.75, 5.0, 5.25, 5.5, 5.75, 6.0, 6.25, 6.5, 6.75, 7.0, 7.25, 7.5, 7.75, 8.0, 8.5, 9.0, 9.5, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 20.0, 25.0, 30.0, 40.0, 50};
 Double_t ybins2D []= {-2.4, -2.0, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4};
 
-void GetMCResults (bool isPr=true, bool underflowOff=true, bool plotBpt=false, bool plotxi=false);
-Bool_t isGlobalMuonInAccept2015 (TLorentzVector* Muon);
+void GetMCResults (bool isPbPb=false,bool isPr=true, bool underflowOff=true, bool plotBpt=false, bool plotxi=false);
+Bool_t isGlobalMuonInAccept2019 (TLorentzVector* Muon);
 
 void GetMCResults_all ()
 {
   //GetMCResults(true, true, false);
   //GetMCResults(true, false, false);
-
-  GetMCResults(false,  true, false);
+  GetMCResults(false, true,  true, false);
+  //GetMCResults(false, false,  true, false);
   //GetMCResults(false,  false, false);
 
   //GetMCResults(false, true, true);
   //GetMCResults(false, false, true);
 }
 
-void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
+void GetMCResults (bool isPbPb, bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
 {
   int ny2D = sizeof(ybins2D)/sizeof(double)-1;
   int npt2D = sizeof(ptbins2D)/sizeof(double)-1;
 
   double sefer=0;
 
-  TFile *treeFile = TFile::Open(Form("/data_CMS/cms/mnguyen/jPsiJet/mc/%s/merged_HiForestAOD.root", isPr?"prompt/v9_ext":"nonprompt/v9_ext_bHadronGen"));
-  cout << Form("[INFO] Reading tree from file /data_CMS/cms/mnguyen/jPsiJet/mc/%s/merged_HiForestAOD.root", isPr?"prompt/v9_ext":"nonprompt/v9_ext_bHadronGen")<<endl;
+  //TFile *treeFile = TFile::Open(Form("/data_CMS/cms/mnguyen/jPsiJet/mc/%s/merged_HiForestAOD.root", isPr?"prompt/v9_ext":"nonprompt/v9_ext_bHadronGen"));
+  //cout << Form("[INFO] Reading tree from file /data_CMS/cms/mnguyen/jPsiJet/mc/%s/merged_HiForestAOD.root", isPr?"prompt/v9_ext":"nonprompt/v9_ext_bHadronGen")<<endl;
+  TFile *treeFile = TFile::Open(Form("/data_CMS/cms/diab/JpsiJet/MC/pp/%s/HiForestAOD%s_merged.root", isPr?"prompt/v3":"nonprompt/v4",isPr?"_ext":""));
 
   TTree* oniaTree = (TTree*) treeFile->Get("hionia/myTree");
   TTree* jetTree = (TTree*) treeFile->Get("ak4PFJetAnalyzer/t");
@@ -84,7 +85,7 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   TH1F* nFwdHist = new TH1F ("nFwdHist","", 10, 0, 1); nFwdHist->Sumw2();
 
   cout <<"[INFO] Importing AccFiles to correct"<<endl;
-  TFile *corrFile = TFile::Open(Form("../MyEfficiency/FilesAccxEff/Acc/%sAccHists.root",isPr?"pr":"npr"));
+  TFile *corrFile = TFile::Open(Form("../Efficiency/FilesAccxEff/Acc/%sAccHists_%s.root",isPr?"pr":"npr",isPbPb?"PbPb":"PP"));
   TH2F* corrNum = (TH2F*) corrFile->Get("hnum_2d_nominal");
   TH2F* corrDeno =(TH2F*) corrFile->Get("hdeno_2d");
 
@@ -103,6 +104,11 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   TClonesArray    *Gen_QQ_4mom;
   TClonesArray    *Gen_QQ_mupl_4mom;
   TClonesArray    *Gen_QQ_mumi_4mom;
+  TClonesArray    *Gen_mu_4mom;
+  Int_t           Gen_QQ_mupl_idx[99];
+  Int_t           Gen_QQ_mumi_idx[99];
+  Float_t         Gen_weight;
+
   Int_t           ngen;
   Float_t         genpt[99];   //[ngen]
   Float_t         geneta[99];   //[ngen]
@@ -120,6 +126,10 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   TBranch        *b_Gen_QQ_4mom;   //!
   TBranch        *b_Gen_QQ_mupl_4mom;   //!
   TBranch        *b_Gen_QQ_mumi_4mom;   //!
+  TBranch        *b_Gen_mu_4mom;
+  TBranch        *b_Gen_QQ_mupl_idx;
+  TBranch        *b_Gen_QQ_mumi_idx;
+  TBranch        *b_Gen_weight;
   TBranch        *b_ngen;   //!
   TBranch        *b_genpt;   //!
   TBranch        *b_geneta;   //!
@@ -135,6 +145,7 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   Gen_QQ_4mom = 0;
   Gen_QQ_mupl_4mom = 0;
   Gen_QQ_mumi_4mom = 0;
+  Gen_mu_4mom = 0;
   //jtbHadronPt = 0;
 
   if (!oniaTree) { cout<<"[ERROR] no tree found"<<endl; return;}
@@ -142,8 +153,13 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   fChain = oniaTree;
   if (fChain->GetBranch("Gen_QQ_size")) fChain->SetBranchAddress("Gen_QQ_size", &Gen_QQ_size, &b_Gen_QQ_size);
   if (fChain->GetBranch("Gen_QQ_4mom")) fChain->SetBranchAddress("Gen_QQ_4mom", &Gen_QQ_4mom, &b_Gen_QQ_4mom);
-  if (fChain->GetBranch("Gen_QQ_mupl_4mom")) fChain->SetBranchAddress("Gen_QQ_mupl_4mom", &Gen_QQ_mupl_4mom, &b_Gen_QQ_mupl_4mom);
-  if (fChain->GetBranch("Gen_QQ_mumi_4mom")) fChain->SetBranchAddress("Gen_QQ_mumi_4mom", &Gen_QQ_mumi_4mom, &b_Gen_QQ_mumi_4mom);
+  //if (fChain->GetBranch("Gen_QQ_mupl_4mom")) fChain->SetBranchAddress("Gen_QQ_mupl_4mom", &Gen_QQ_mupl_4mom, &b_Gen_QQ_mupl_4mom);
+  //if (fChain->GetBranch("Gen_QQ_mumi_4mom")) fChain->SetBranchAddress("Gen_QQ_mumi_4mom", &Gen_QQ_mumi_4mom, &b_Gen_QQ_mumi_4mom);
+  if (fChain->GetBranch("Gen_mu_4mom")) fChain->SetBranchAddress("Gen_mu_4mom", &Gen_mu_4mom, &b_Gen_mu_4mom);
+  if (fChain->GetBranch("Gen_QQ_mupl_idx")) fChain->SetBranchAddress("Gen_QQ_mupl_idx", Gen_QQ_mupl_idx, &b_Gen_QQ_mupl_idx);
+  if (fChain->GetBranch("Gen_QQ_mumi_idx")) fChain->SetBranchAddress("Gen_QQ_mumi_idx", Gen_QQ_mumi_idx, &b_Gen_QQ_mumi_idx);
+  if (fChain->GetBranch("Gen_weight")) fChain->SetBranchAddress("Gen_weight", &Gen_weight, &b_Gen_weight);
+  
   if (fChain->GetBranch("ngen")) fChain->SetBranchAddress("ngen", &ngen, &b_ngen);
   if (fChain->GetBranch("genpt")) fChain->SetBranchAddress("genpt", genpt, &b_genpt);
   if (fChain->GetBranch("geneta")) fChain->SetBranchAddress("geneta", geneta, &b_geneta);
@@ -151,16 +167,21 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   if (fChain->GetBranch("genphi")) fChain->SetBranchAddress("genphi", genphi, &b_genphi);
   if (fChain->GetBranch("genm")) fChain->SetBranchAddress("genm", genm, &b_genm);
   if (fChain->GetBranch("mult")) fChain->SetBranchAddress("mult", &mult, &b_mult);
-  if (fChain->GetBranch("pt")) fChain->SetBranchAddress("pt", &pt, &b_pt);
-  if (fChain->GetBranch("eta")) fChain->SetBranchAddress("eta", &eta, &b_eta);
-  if (fChain->GetBranch("phi")) fChain->SetBranchAddress("phi", &phi, &b_phi);
-
+  //if (fChain->GetBranch("pt")) fChain->SetBranchAddress("pt", &pt, &b_pt);
+  //if (fChain->GetBranch("eta")) fChain->SetBranchAddress("eta", &eta, &b_eta);
+  //if (fChain->GetBranch("phi")) fChain->SetBranchAddress("phi", &phi, &b_phi);
+  cout<<"[INFO] all branch addresses set"<<endl;
+  /*
   fChain->SetBranchStatus("*",0);
 
   if (fChain->GetBranch("Gen_QQ_size")) fChain->SetBranchStatus("Gen_QQ_size",1);
   if (fChain->GetBranch("Gen_QQ_4mom")) fChain->SetBranchStatus("Gen_QQ_4mom",1);
   if (fChain->GetBranch("Gen_QQ_mupl_4mom")) fChain->SetBranchStatus("Gen_QQ_mupl_4mom",1);
   if (fChain->GetBranch("Gen_QQ_mumi_4mom")) fChain->SetBranchStatus("Gen_QQ_mumi_4mom",1);
+  if (fChain->GetBranch("Gen_mu_4mom")) fChain->SetBranchStatus("Gen_mu_4mom",1); 
+  if (fChain->GetBranch("Gen_QQ_mupl_idx")) fChain->SetBranchStatus("Gen_QQ_mupl_idx",1);
+  if (fChain->GetBranch("Gen_QQ_mumi_idx")) fChain->SetBranchStatus("Gen_QQ_mumi_idx",1);
+  if (fChain->GetBranch("Gen_weight")) fChain->SetBranchStatus("Gen_weight",1);
   if (fChain->GetBranch("ngen")) fChain->SetBranchStatus("ngen",1);
   if (fChain->GetBranch("genpt")) fChain->SetBranchStatus("genpt",1);
   if (fChain->GetBranch("geneta")) fChain->SetBranchStatus("geneta",1);
@@ -171,7 +192,7 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   if (fChain->GetBranch("pt")) fChain->SetBranchStatus("pt",1);
   if (fChain->GetBranch("eta")) fChain->SetBranchStatus("eta",1);
   if (fChain->GetBranch("phi")) fChain->SetBranchStatus("phi",1);
-  
+  */
 
   //get the histograms for the Fonll weights
 
@@ -199,15 +220,17 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
 	  zed = -1;
 	  drmin = 0.5;
 	  TLorentzVector *GenQQ4mom = (TLorentzVector*) Gen_QQ_4mom->At(iQQ);
-	  TLorentzVector *GenQQmupl = (TLorentzVector*) Gen_QQ_mupl_4mom->At(iQQ);
-	  TLorentzVector *GenQQmumi = (TLorentzVector*) Gen_QQ_mumi_4mom->At(iQQ);
+	  TLorentzVector *GenQQmupl = (TLorentzVector*) Gen_mu_4mom->At(Gen_QQ_mupl_idx[iQQ]);
+	  TLorentzVector *GenQQmumi = (TLorentzVector*) Gen_mu_4mom->At(Gen_QQ_mumi_idx[iQQ]);
 
 	  if (GenQQ4mom->M()<2.6 || GenQQ4mom->M()>3.5) continue;
 	  if (GenQQ4mom->Pt() < 3 || GenQQ4mom->Pt() > 35) continue;
 	  if (abs(GenQQ4mom->Rapidity())>2.4) continue;
-	  if (!isGlobalMuonInAccept2015(GenQQmupl) || !isGlobalMuonInAccept2015(GenQQmumi)) continue;
+	  if (!isGlobalMuonInAccept2019(GenQQmupl) || !isGlobalMuonInAccept2019(GenQQmumi)) continue;
 
 	  accWeight = 1.0/(accCorr->GetEfficiency(accCorr->FindFixBin(GenQQ4mom->Rapidity(), GenQQ4mom->Pt())));
+	  if (isPr) Gen_weight=1;
+	  accWeight = accWeight * Gen_weight;
 
 	  float jPsiPt = GenQQ4mom->Pt();
 	  float fonllXs = gFonllMid->Eval(jPsiPt);
@@ -253,8 +276,8 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
 
 	  //if (pythiaXs==0)
 	  //cout<<"[INFO] pythiaXS =0"<<endl;
-	  if (!isPr && pythiaXs>0)
-	    accWeight = accWeight*fonllXs/pythiaXs;
+	  //if (!isPr && pythiaXs>0)
+	  //accWeight = accWeight*fonllXs/pythiaXs;
 
 	  if (abs(GenQQ4mom->Rapidity())>1.6)
 	    nFwdHist->Fill(sefer, accWeight);
@@ -311,8 +334,10 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   //zFwdHist->Scale(1.0/zFwdHist->Integral("width"));
   //}
   //zHist->Scale(1.0/0.2);
-  gSystem->mkdir("Output/MCResults/fonllCorr");
-  TFile *fsave = new TFile(Form("Output/MCResults/fonllCorr/mcResult_%s_%s%s%s.root",isPr?"prompt":"nonprompt", underflowOff?"underflowOff":"all", plotBpt?"_bHadronPt":"", plotXi?"_xi":""),"RECREATE");
+  gSystem->mkdir("Output/MCResults");
+  //gSystem->mkdir("Output/MCResults/fonllCorr");
+  //TFile *fsave = new TFile(Form("Output/MCResults/fonllCorr/mcResult_%s_%s%s%s.root",isPr?"prompt":"nonprompt", underflowOff?"underflowOff":"all", plotBpt?"_bHadronPt":"", plotXi?"_xi":""),"RECREATE");
+  TFile *fsave = new TFile(Form("Output/MCResults/mcResult_%s_%s_%s%s%s.root",isPbPb?"PbPb":"PP",isPr?"prompt":"nonprompt", underflowOff?"underflowOff":"all", plotBpt?"_bHadronPt":"", plotXi?"_xi":""),"RECREATE");
   zMidHist->Write("zDist_mid");
   nMidHist->Write("Ntot_mid");
   zFwdHist->Write("zDist_fwd");
@@ -320,12 +345,12 @@ void GetMCResults (bool isPr, bool underflowOff, bool plotBpt, bool plotXi)
   fsave->Close();
 }
 
-Bool_t isGlobalMuonInAccept2015 (TLorentzVector* Muon)
+Bool_t isGlobalMuonInAccept2019 (TLorentzVector* Muon)
 {
   return (fabs(Muon->Eta()) < 2.4 &&
 	  ((fabs(Muon->Eta()) < 1.2 && Muon->Pt() >= 3.5) ||
-	   (1.2 <= fabs(Muon->Eta()) && fabs(Muon->Eta()) < 2.1 && Muon->Pt() >= 5.77-1.89*fabs(Muon->Eta())) ||
-	   (2.1 <= fabs(Muon->Eta()) && Muon->Pt() >= 1.8)));
+	   (1.2 <= fabs(Muon->Eta()) && fabs(Muon->Eta()) < 2.1 && Muon->Pt() >= 5.47-1.89*fabs(Muon->Eta())) ||
+	   (2.1 <= fabs(Muon->Eta()) && Muon->Pt() >= 1.5)));
 }
 
 

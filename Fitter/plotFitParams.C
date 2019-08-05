@@ -31,13 +31,14 @@
 
 using namespace std;
 void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, const char* applyCorr, bool applyJEC);
-void getUnfoldingInput(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, const char* applyCorr, bool applyJEC, bool statErr);
+void getUnfoldingInput(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, double jetR, const char* applyCorr, bool applyJEC, bool statErr);
 double readSyst(const char* systfile, double zedmin, double zedmax, double rapmin, double rapmax);
 void plotMCMassPars(const char* workDirName,
 		    const char* rapRegion,
 		    const char* DSTag, //="DATA", // Data Set tag can be: "DATA","MCPSI2SP", "MCJPSIP" ...
 		    const char* fitType, // "mass", "ctau"...
 		    bool wantPureSMC, // =false,
+		    double jetR,
 		    const char* applyCorr, // = "",
 		    bool applyJEC // =false
 		    )
@@ -82,7 +83,7 @@ void plotMCMassPars(const char* workDirName,
   TFile *f = new TFile(treeFileName);
   if (!f || !f->IsOpen()) {
     cout << "[INFO] tree file not found! creating the result trees."<<endl;
-    results2tree(Form("%s/DataFits_%s", workDirName, rapRegion), DSTag,"", fitType, wantPureSMC, applyCorr, applyJEC);
+    results2tree(Form("%s/DataFits_%s", workDirName, rapRegion), DSTag,"", fitType, wantPureSMC, jetR, applyCorr, applyJEC);
     f = new TFile(treeFileName);
     if (!f) return;
   }
@@ -241,7 +242,7 @@ void plotMCMassPars(const char* workDirName,
 }
 
 
-void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, const char* applyCorr, bool applyJEC) {
+void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, double jetR, const char* applyCorr, bool applyJEC) {
   gStyle->SetOptStat(0);
 
   double zbins016 [] = {0.3, 0.44, 0.58, 0.72, 0.86, 1.0};
@@ -275,7 +276,7 @@ void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DS
   TFile *f = new TFile(treeFileName);
   if (!f || !f->IsOpen()) {
     cout << "[INFO] tree file not found! creating the result trees."<<endl;
-    results2tree(Form("%s/DataFits_%s", workDirName, rapRegion), DSTag,"", fitType, wantPureSMC, applyCorr, applyJEC);
+    results2tree(Form("%s/DataFits_%s", workDirName, rapRegion), DSTag,"", fitType, wantPureSMC, jetR, applyCorr, applyJEC);
     f = new TFile(treeFileName);
     if (!f) return;
   }
@@ -389,20 +390,19 @@ void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DS
 }
 
 
-void getUnfoldingInput(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, const char* applyCorr, bool applyJEC, bool statErr) {
+void getUnfoldingInput(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, double jetR, const char* applyCorr, bool applyJEC, bool statErr) {
   gStyle->SetOptStat(0);
 
   double zbins016 [] = {0.3, 0.44, 0.58, 0.72, 0.86, 1.0};
-  //double zbins1624 [] = {0.16, 0.3, 0.44, 0.58, 0.72, 0.86, 1.0};
-
-  //double zbins016 [] = {0.2, 0.4, 0.6, 0.8, 1.0};
   double zbins1624 [] = {0.2, 0.4, 0.6, 0.8, 1.0};
-
+  double zbins024 [] = {0.064, 0.220, 0.376, 0.532, 0.688, 0.844, 1.000};
 
   string binTag = workDirName;
   if (binTag.find("midJtPt")!=std::string::npos) binTag = "midJtPt";
   else if (binTag.find("lowJtPt")!=std::string::npos) binTag = "lowJtPt";
+  else if (binTag.find("lowerJtPt")!=std::string::npos) binTag = "lowerJtPt";
   else if (binTag.find("highJtPt")!=std::string::npos) binTag = "highJtPt";
+  else if (binTag.find("higherJtPt")!=std::string::npos) binTag = "higherJtPt";
 
   double prSyst;
   double nprSyst;
@@ -412,35 +412,36 @@ void getUnfoldingInput(const char* workDirName, const char* rapRegion, const cha
 
   int nzbins = 0;
   double zedmin, zedmax;
-  if (strcmp(rapRegion,"1624")) {
+  if (!strcmp(rapRegion,"016")) {
     nzbins = sizeof(zbins016)/sizeof(double)-1;
     zedmin = zbins016[0];
     zedmax = zbins016[nzbins];
   }
-  else {
+  else if (!strcmp(rapRegion,"1624")){
     nzbins = sizeof(zbins1624)/sizeof(double)-1;
     zedmin = zbins1624[0];
     zedmax = zbins1624[nzbins];
   }
-
-  TH1F* prNhist = NULL;//new TH1F ("prNhist",";z(J/#psi);N(J/#psi)", 5, 0, 1);
-  TH1F* nprNhist = NULL;//new TH1F ("nprNhist",";z(J/#psi);N(J/#psi)", 5, 0, 1);
-
-  if (!strcmp(rapRegion,"016")){
-    prNhist = new TH1F ("prNhist",";z(J/#psi);N(J/#psi)", 7, 0.02, 1);
-    nprNhist = new TH1F ("nprNhist",";z(J/#psi);N(J/#psi)", 7, 0.02, 1);
-  }
   else {
-    prNhist = new TH1F ("prNhist",";z(J/#psi);N(J/#psi)", 5, 0, 1);
-    nprNhist = new TH1F ("nprNhist",";z(J/#psi);N(J/#psi)", 5, 0, 1);
+    nzbins = sizeof(zbins024)/sizeof(double)-1;
+    zedmin = zbins024[0];
+    zedmax = zbins024[nzbins];
   }
-  gSystem->mkdir(Form("Output/%s/DataFits_%s/%s/%s/fitsPars",workDirName, rapRegion, fitType, DSTag));
-  TString treeFileName = Form ("Output/%s/DataFits_%s/%s/%s/result/tree_allvars.root",workDirName, rapRegion, fitType, DSTag);
+
+  TH1F* prNhist_pp = new TH1F ("prNhist_pp",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
+  TH1F* nprNhist_pp = new TH1F ("nprNhist_pp",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
+
+  TH1F* prNhist_PbPb = new TH1F ("prNhist_PbPb",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
+  TH1F* nprNhist_PbPb = new TH1F ("nprNhist_PbPb",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
+  
+
+  gSystem->mkdir(Form("Output/%s/%s/%s/fitsPars",workDirName, fitType, DSTag));
+  TString treeFileName = Form ("Output/%s/%s/%s/result/tree_allvars.root",workDirName, fitType, DSTag);
   cout << "[INFO] extracting MC parameters from "<<treeFileName<<endl;
   TFile *f = new TFile(treeFileName);
   if (!f || !f->IsOpen()) {
     cout << "[INFO] tree file not found! creating the result trees."<<endl;
-    results2tree(Form("%s/DataFits_%s", workDirName, rapRegion), DSTag,"", fitType, wantPureSMC, applyCorr, applyJEC);
+    results2tree(Form("%s", workDirName), DSTag,"", fitType, wantPureSMC, jetR, applyCorr, applyJEC);
     f = new TFile(treeFileName);
     if (!f) return;
   }
@@ -470,8 +471,8 @@ void getUnfoldingInput(const char* workDirName, const char* rapRegion, const cha
   //tr->SetBranchAddress("N_Jpsi_val",&val);
   //tr->SetBranchAddress("N_Jpsi_errL",&errL);
   //tr->SetBranchAddress("N_Jpsi_errH",&errH);
-  tr->SetBranchAddress("N_Jpsi_parLoad_mass",&val);                                                                                                                                                 
-  tr->SetBranchAddress("N_Jpsi_parLoad_mass_err",&errL);                                                                                                                                             
+  tr->SetBranchAddress("N_Jpsi_parLoad_mass",&val);
+  tr->SetBranchAddress("N_Jpsi_parLoad_mass_err",&errL);
   tr->SetBranchAddress("collSystem",collSystem);
   tr->SetBranchAddress("lumi_val",&lumi);
   tr->SetBranchAddress("taa_val",&taa);
@@ -486,34 +487,52 @@ void getUnfoldingInput(const char* workDirName, const char* rapRegion, const cha
   int ntr = tr->GetEntries();
   for (int i=0; i<ntr; i++) {
     tr->GetEntry(i);
-    //if (zmax < zmin+0.22){
     prSyst = 0;
     nprSyst = 0;
+
     for (int j=0; j<nSyst ; j++) {
       double v1 = readSyst(Form("../Fitter/Systematics/csv/syst_%s_%s_NJpsi_prompt_PP_%s.csv", binTag.c_str(), rapRegion, systName[i].c_str()), zmin, zmax, ymin, ymax);
       double v2 = readSyst(Form("../Fitter/Systematics/csv/syst_%s_%s_NJpsi_nonprompt_PP_%s.csv", binTag.c_str(), rapRegion, systName[i].c_str()), zmin, zmax, ymin, ymax);
       prSyst=sqrt(pow(prSyst,2)+pow(v1,2));
       nprSyst=sqrt(pow(nprSyst,2)+pow(v2,2));
     }
-      prNhist->SetBinContent(prNhist->FindBin(zmin+0.001),val*(1-bfrac));
+    if (TString(collSystem)=="PP") {
+      prNhist_pp->SetBinContent(prNhist_pp->FindBin(zmin+0.001),val*(1-bfrac));
       if (statErr)
-	prNhist->SetBinError(prNhist->FindBin(zmin+0.001), val*(1-bfrac)*sqrt(pow(errL/val,2)-2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
+	prNhist_pp->SetBinError(prNhist_pp->FindBin(zmin+0.001), val*(1-bfrac)*sqrt(pow(errL/val,2)-2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
       else
-	prNhist->SetBinError(prNhist->FindBin(zmin+0.001), val*(1-bfrac)*prSyst);
+	prNhist_pp->SetBinError(prNhist_pp->FindBin(zmin+0.001), val*(1-bfrac)*prSyst);
 
-      nprNhist->SetBinContent(nprNhist->FindBin(zmin+0.001),val*bfrac);
+      nprNhist_pp->SetBinContent(nprNhist_pp->FindBin(zmin+0.001),val*bfrac);
       if (statErr)
-	nprNhist->SetBinError(nprNhist->FindBin(zmin+0.001), val*bfrac*sqrt(pow(errL/val,2)+2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
+	nprNhist_pp->SetBinError(nprNhist_pp->FindBin(zmin+0.001), val*bfrac*sqrt(pow(errL/val,2)+2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
       else 
-	nprNhist->SetBinError(nprNhist->FindBin(zmin+0.001),val*bfrac*nprSyst);
-      //}
+	nprNhist_pp->SetBinError(nprNhist_pp->FindBin(zmin+0.001),val*bfrac*nprSyst);
+      }
+    else {
+      prNhist_PbPb->SetBinContent(prNhist_PbPb->FindBin(zmin+0.001),val*(1-bfrac));
+      if (statErr)
+	prNhist_PbPb->SetBinError(prNhist_PbPb->FindBin(zmin+0.001), val*(1-bfrac)*sqrt(pow(errL/val,2)-2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
+      else
+	prNhist_PbPb->SetBinError(prNhist_PbPb->FindBin(zmin+0.001), val*(1-bfrac)*prSyst);
+
+      nprNhist_PbPb->SetBinContent(nprNhist_PbPb->FindBin(zmin+0.001),val*bfrac);
+      if (statErr)
+	nprNhist_PbPb->SetBinError(nprNhist_PbPb->FindBin(zmin+0.001), val*bfrac*sqrt(pow(errL/val,2)+2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
+      else 
+	nprNhist_PbPb->SetBinError(nprNhist_PbPb->FindBin(zmin+0.001),val*bfrac*nprSyst);
+      }
+
   }
-  TFile* fsave = new TFile (Form("Output/%s/DataFits_%s/%s/%s/fitsPars/unfoldingInput_%s_rap%s_%s.root", workDirName, rapRegion, fitType, DSTag, binTag.c_str(), rapRegion, statErr?"statErr":"systErr"),"RECREATE");
+  TFile* fsave = new TFile (Form("Output/%s/%s/%s/fitsPars/unfoldingInput_%s_rap%s_jetR%d_%s.root", workDirName, fitType, DSTag, binTag.c_str(), rapRegion, (int)(jetR*10), statErr?"statErr":"systErr"),"RECREATE");
   fsave->ls();
-  prNhist->Write(Form("prHist_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
-  nprNhist->Write(Form("nprHist_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+  prNhist_pp->Write(Form("prHist_PP_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+  nprNhist_pp->Write(Form("nprHist_PP_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+  prNhist_PbPb->Write(Form("prHist_PbPb_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+  nprNhist_PbPb->Write(Form("nprHist_PbPb_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+
   fsave->Close();
-  delete prNhist; delete nprNhist; delete fsave; delete f;
+  delete prNhist_pp; delete nprNhist_pp; delete prNhist_PbPb; delete nprNhist_PbPb; delete fsave; delete f;
 }
 
 double readSyst(const char* systfile, double zedmin, double zedmax, double rapmin, double rapmax) {
