@@ -36,25 +36,25 @@ Int_t iterDef = iterMax - 2;
   string outputName = "";
 
   if(doPrompt && doMid){
-    testInputName = Form("mcUnfNewMidBins/unfInput/step%i/response_4D_prompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    trainInputName = Form("mcUnfNewMidBins/unfInput/step%i/response_4D_prompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
-    outputName = Form("mcUnfNewMidBins/unfOutput/step%i/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber);
+    testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_prompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
+    trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_prompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
+    outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber);
   }
   if(doPrompt && !doMid){
-    testInputName = Form("mcUnfNewMidBins/unfInput/step%i/response_4D_prompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
-    trainInputName = Form("mcUnfNewMidBins/unfInput/step%i/response_4D_prompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
-    outputName = Form("mcUnfNewMidBins/unfOutput/step%i/UnfoldedDistributions_Prompt_Fwd_8iter_50z15ptBins.root",stepNumber);
+    testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_prompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
+    trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_prompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
+    outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_Prompt_Fwd_8iter_50z15ptBins.root",stepNumber);
   }
     
   if(!doPrompt && doMid){
-    testInputName = Form("mcUnfNewMidBins/unfInput/step%i/response_4D_nonprompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    trainInputName = Form("mcUnfNewMidBins/unfInput/step%i/response_4D_nonprompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
-    outputName = Form("mcUnfNewMidBins/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber);
+    testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_nonprompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
+    trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_nonprompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
+    outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber);
   }
   if(!doPrompt && !doMid){
-    testInputName = Form("mcUnfNewMidBins/unfInput/step%i/response_4D_nonprompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
-    trainInputName = Form("mcUnfNewMidBins/unfInput/step%i/response_4D_nonprompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
-    outputName = Form("mcUnfNewMidBins/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Fwd_8iter_50z15ptBins.root",stepNumber);
+    testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_nonprompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
+    trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_nonprompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
+    outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Fwd_8iter_50z15ptBins.root",stepNumber);
   }
   
   

@@ -30,27 +30,28 @@
 #include <string>
 #include <algorithm>
 
+#include "../../colors.h"
 using namespace std;
 
 void plot(bool doPrompt = false, bool doMid = true){
-
+  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/plots/");
   string filename1 = "";
   string filename2 = "";
   string filename3 = "";
   string filename4 = "";
 
   if(doPrompt && doMid){
-    filename1 = "../unfOutput/step1/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root";
-    filename2 = "../unfOutput/step2/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root";
-    filename3 = "../unfOutput/step3/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root";
-    filename4 = "../unfOutput/step4/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root";
+    filename1 = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step1/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root";
+    filename2 = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step2/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root";
+    filename3 = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step3/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root";
+    filename4 = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step4/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root";
   }
   
   if(!doPrompt && doMid){
-    filename1 = "../unfOutput/step1/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root";
-    filename2 = "../unfOutput/step2/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root";
-    filename3 = "../unfOutput/step3/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root";
-    filename4 = "../unfOutput/step4/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root";
+    filename1 = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step1/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root";
+    filename2 = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step2/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root";
+    filename3 = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step3/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root";
+    filename4 = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step4/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root";
   }
     
   TFile *file1 = new TFile(filename1.c_str());
@@ -379,11 +380,11 @@ void plot(bool doPrompt = false, bool doMid = true){
   mycan1->Update();
   
   if(doPrompt && doMid){
-    mycan1->SaveAs("../plots/unf_mc_prompt_mid_newBins_corrAccEff.pdf");
+    mycan1->SaveAs("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/plots/unf_mc_prompt_mid_newBins_corrAccEff.pdf");
   }
 
   if(!doPrompt && doMid){
-    mycan1->SaveAs("../plots/unf_mc_nonprompt_mid_newBins_corrAccEff.pdf");
+    mycan1->SaveAs("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/plots/unf_mc_nonprompt_mid_newBins_corrAccEff.pdf");
   }
   
   

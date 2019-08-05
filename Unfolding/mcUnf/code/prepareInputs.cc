@@ -38,43 +38,47 @@ void prepare(bool doPrompt = false, bool doTrain=true, bool doMid = true, Int_t 
   string filename = "";
   string outputfile = "";
   string filenamePrevStep = "";
-  
+
+  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput");
+  gSystem->mkdir(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i",stepNumber));
+  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput");
+  gSystem->mkdir(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i",stepNumber));
   if(doPrompt && doTrain){
-    filename = "../../TreesForUnfolding_corrAccEff/tree_MCJPSIPR_PP_NoBkg_AccEff_JEC.root";
+    filename = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_MCJPSIPR_PP_NoBkg_jetR4_AccEff_JEC.root";
     
-    if(doMid) outputfile = Form("../unfInput/step%i/unfolding_4D_prompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
-    if(!doMid) outputfile = Form("../unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
+    if(doMid) outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
+    if(!doMid) outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
     
-    if(stepNumber > 1 && doMid) filenamePrevStep = Form("../unfOutput/step%i/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber-1);
-    if(stepNumber > 1 && !doMid) filenamePrevStep = Form("../unfOutput/step%i/UnfoldedDistributions_Prompt_Fwd_8iter_50z15ptBins.root",stepNumber-1);
+    if(stepNumber > 1 && doMid) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber-1);
+    if(stepNumber > 1 && !doMid) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_Prompt_Fwd_8iter_50z15ptBins.root",stepNumber-1);
   }
   if(doPrompt && !doTrain){
-    filename = "../../TreesForUnfolding_corrAccEff/tree_MCJPSIPR_PP_NoBkg_AccEff_JEC.root";
+    filename = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_MCJPSIPR_PP_NoBkg_jetR4_AccEff_JEC.root";
     
-    if(doMid) outputfile = Form("../unfInput/step%i/unfolding_4D_prompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    if(!doMid) outputfile = Form("../unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
+    if(doMid) outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
+    if(!doMid) outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
     
-    if(stepNumber > 1 && doMid) filenamePrevStep = Form("../unfOutput/step%i/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber-1);
-    if(stepNumber > 1 && !doMid) filenamePrevStep = Form("../unfOutput/step%i/UnfoldedDistributions_Prompt_Fwd_8iter_50z15ptBins.root",stepNumber-1);
+    if(stepNumber > 1 && doMid) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber-1);
+    if(stepNumber > 1 && !doMid) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_Prompt_Fwd_8iter_50z15ptBins.root",stepNumber-1);
   }
   
   if(!doPrompt && doTrain){
-    filename = "../../TreesForUnfolding_corrAccEff/tree_MCJPSINOPR_PP_NoBkg_AccEff_JEC.root";
+    filename = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_MCJPSINOPR_PP_NoBkg_jetR4_AccEff_JEC.root";
     
-    if(doMid) outputfile = Form("../unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
-    if(!doMid) outputfile = Form("../unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
+    if(doMid) outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
+    if(!doMid) outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
     
-    if(stepNumber > 1 && doMid) filenamePrevStep = Form("../unfOutput/step%i/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber-1);
-    if(stepNumber > 1 && !doMid) filenamePrevStep = Form("../unfOutput/step%i/UnfoldedDistributions_NonPrompt_Fwd_8iter_50z15ptBins.root",stepNumber-1);
+    if(stepNumber > 1 && doMid) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber-1);
+    if(stepNumber > 1 && !doMid) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Fwd_8iter_50z15ptBins.root",stepNumber-1);
   }
   if(!doPrompt && !doTrain){
-    filename = "../../TreesForUnfolding_corrAccEff/tree_MCJPSINOPR_PP_NoBkg_AccEff_JEC.root";
+    filename = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_MCJPSINOPR_PP_NoBkg_jetR4_AccEff_JEC.root";
     
-    if(doMid) outputfile = Form("../unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    if(!doMid) outputfile = Form("../unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
+    if(doMid) outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
+    if(!doMid) outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
     
-    if(stepNumber > 1 && doMid) filenamePrevStep = Form("../unfOutput/step%i/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber-1);
-    if(stepNumber > 1 && !doMid) filenamePrevStep = Form("../unfOutput/step%i/UnfoldedDistributions_NonPrompt_Fwd_8iter_50z15ptBins.root",stepNumber-1);
+    if(stepNumber > 1 && doMid) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber-1);
+    if(stepNumber > 1 && !doMid) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Fwd_8iter_50z15ptBins.root",stepNumber-1);
   }
 
   TFile *file = new TFile(filename.c_str());
@@ -431,7 +435,7 @@ void prepare(bool doPrompt = false, bool doTrain=true, bool doMid = true, Int_t 
 
 
   
-  /*
+  
   TH1D *gTruth1DX = dynamic_cast<TH1D*>(fSparse_newZNorm->Projection(0,"E"));
   TH1D *gTruth1DY = dynamic_cast<TH1D*>(fSparse_newZNorm->Projection(1,"E"));
   
@@ -442,7 +446,7 @@ void prepare(bool doPrompt = false, bool doTrain=true, bool doMid = true, Int_t 
   can1->cd(2);
   gTruth1DY->Draw("EP");
   can1->SaveAs("matrixTest.png");
-  */
+  
   
 
   /// jet pt normalization -> put it to match jet pt truth
@@ -524,7 +528,7 @@ void prepare(bool doPrompt = false, bool doTrain=true, bool doMid = true, Int_t 
   }
 
 
-  /*
+  
   TH2D *gTruth2D = dynamic_cast<TH2D*>(fSparse_newJetPtNorm->Projection(0,1));
   gTruth2D->Draw("colz");
 
@@ -539,7 +543,7 @@ void prepare(bool doPrompt = false, bool doTrain=true, bool doMid = true, Int_t 
   can3->cd(2);
   gTruth1DY_jtPt->Draw("EP");
   can3->SaveAs("matrixTest_jtPt.png");
-  */
+  
   
   ///
     
@@ -564,7 +568,7 @@ void prepare(bool doPrompt = false, bool doTrain=true, bool doMid = true, Int_t 
 }
 
 void prepareInputs(Int_t step = 1){
-
+  //prepare(bool doPrompt = false, bool doTrain=true, bool doMid = true, Int_t stepNumber = 1)
   prepare(true,true,true,step);
   prepare(true,false,true,step);
 
@@ -578,7 +582,5 @@ void prepareInputs(Int_t step = 1){
 
   prepare(false,true,false,step);
   prepare(false,false,false,step);
-
-
 }
 

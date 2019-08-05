@@ -24,7 +24,7 @@ using namespace std;
 void create(bool doPrompt = true, bool doMid = true, bool doTrain = false, Int_t stepNumber = 1){
   
   //#ifdef __CINT__
-  //gSystem->Load("/home/ikucher/newRooUnfoldVersion/RooUnfold/libRooUnfold");
+  gSystem->Load("~/rootBuild/RooUnfold/libRooUnfold");
   //#endif
   
   string inputName = "";
@@ -32,25 +32,25 @@ void create(bool doPrompt = true, bool doMid = true, bool doTrain = false, Int_t
   string partOfOutput = "response";
   
   if(doPrompt && doMid) {
-    if(!doTrain) inputName = Form("mcUnfNewMidBins/unfInput/step%i/unfolding_4D_prompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    else inputName = Form("mcUnfNewMidBins/unfInput/step%i/unfolding_4D_prompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
+    if(!doTrain) inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
+    else inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
   }
   if(doPrompt && !doMid) {
-    if(!doTrain) inputName = Form("mcUnfNewMidBins/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
-    else inputName = Form("mcUnfNewMidBins/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
+    if(!doTrain) inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
+    else inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
   }
 
   if(!doPrompt && doMid) {
-    if(!doTrain) inputName = Form("mcUnfNewMidBins/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    else inputName = Form("mcUnfNewMidBins/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
+    if(!doTrain) inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
+    else inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
   }
   if(!doPrompt && !doMid) {
-    if(!doTrain) inputName = Form("mcUnfNewMidBins/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
-    else inputName = Form("mcUnfNewMidBins/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
+    if(!doTrain) inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
+    else inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
   }
 
   outputName = inputName;
-  outputName.replace(31,9,partOfOutput);
+  outputName.replace(90,9,partOfOutput);
     
   TFile *f = new TFile(inputName.c_str());
   f->ls();
