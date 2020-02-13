@@ -1,17 +1,19 @@
-echo "Step 1 : "
-sh unfStep1.sh
-echo "Done!"
+#!/bin/sh
 
-echo "Step 2 : "
-sh unfStep2.sh
-echo "Done!"
+cd /Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/code
+root -l -q -b create2DMeas_data_statErrs.cc+\(1,1\)
+root -l -q -b create2DMeas_data_statErrs.cc+\(1,0\)
 
-echo "Step 3 : "
-sh unfStep3.sh
+cd /Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/shellScripts
+for i in {1..99}
+do
+    echo "Step $i : "
+    sh unfStepi.sh $i
+    echo "Done!"
+done
 
-echo "Step 4 : "
-sh unfStep4.sh
-
-echo "Done!"
-
+cd /Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/code
+root -l -q -b PlotRatios_DataUnfolded_afterDiag.cc+
+root -l -q -b finalResults_statErrs.cc+
+#root -l -q -b plotFinalResults.cc+
 echo "Finished!"

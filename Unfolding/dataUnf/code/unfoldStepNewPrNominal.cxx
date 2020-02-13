@@ -1,67 +1,23 @@
-#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
-#include <iostream>
-using std::cout;
-using std::endl;
+#include "inputParams.h"
 
-#include "THnSparse.h"
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TStyle.h"
-#include "TSystem.h"
-
-#include "TRandom.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TLegend.h"
-
-#include "RooUnfoldResponse.h"
-#include "RooUnfoldBayes.h"
-#endif
-
-using namespace std;
-
-void unfold(bool doPrompt = true, bool doMid = true, Int_t iterMax = 8, Int_t stepNumber = 1, double SF = 1.1) {
-
-  //gSystem->Load("libRooUnfold");
+void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t stepNumber = 1) {
+  if (!setSystTag()) return;
   
-Int_t iterMin =1;
-Int_t iterDef = iterMax - 2;
+  Int_t iterMin =1;
+  Int_t iterDef = iterMax - 2;
   
-//#ifdef __CINT__
-//  gSystem->Load("libRooUnfold");
-//#endif
-
   string testInputName = "";
   string trainInputName = "";
   string outputName = "";
 
-  string SF_name = "";
-  if(SF == 1.1) SF_name = "_nominal";
-  if(SF == 1.2) SF_name = "_up";
-  if(SF == 1.0) SF_name= "_down";
+  //string SF_name = "";
+  //if(SF == 1.1) SF_name = "_nominal";
+  //if(SF == 1.2) SF_name = "_up";
+  //if(SF == 1.0) SF_name = "_down";
 
-  if(doPrompt && doMid){
-    testInputName = "dataUnfNewMidBins/data_results/meas_data_prompt_mid_statErrs.root";
-    trainInputName = Form("dataUnfNewMidBins/unfInput/step%i/response_4D_prompt_midRapidity_49z15ptBins7zMeasBins_newNominal%s.root",stepNumber,SF_name.c_str());
-    outputName = Form("dataUnfNewMidBins/unfOutput/step%i/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins_newNominal%s.root",stepNumber,SF_name.c_str());
-  }
-  if(doPrompt && !doMid){
-    testInputName = "dataUnfNewMidBins/data_results/meas_data_prompt_fwd_statErrs.root";
-    trainInputName = Form("dataUnfNewMidBins/unfInput/step%i/response_4D_prompt_fwdRapidity_50z15ptBins_newNominal%s.root",stepNumber,SF_name.c_str());
-    outputName = Form("dataUnfNewMidBins/unfOutput/step%i/UnfoldedDistributions_Prompt_Fwd_8iter_50z15ptBins_newNominal%s.root",stepNumber,SF_name.c_str());
-  }
-
-  if(!doPrompt && doMid){
-    testInputName = "dataUnfNewMidBins/data_results/meas_data_nonprompt_mid_statErrs.root";
-    trainInputName = Form("dataUnfNewMidBins/unfInput/step%i/response_4D_nonprompt_midRapidity_49z15ptBins7zMeasBins%s.root",stepNumber,SF_name.c_str());
-    outputName = Form("dataUnfNewMidBins/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins%s.root",stepNumber,SF_name.c_str());
-  }
-  if(!doPrompt && !doMid){
-    testInputName = "dataUnfNewMidBins/data_results/meas_data_nonprompt_fwd_statErrs.root";
-    trainInputName = Form("dataUnfNewMidBins/unfInput/step%i/response_4D_nonprompt_fwdRapidity_50z15ptBins%s.root",stepNumber,SF_name.c_str());
-    outputName = Form("dataUnfNewMidBins/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Fwd_8iter_50z15ptBins%s.root",stepNumber,SF_name.c_str());
-  }
-  
+  testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/data_results/meas_%s_data_%s_statErrs.root",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt");
+  trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfInput/step%i/response_4D_%s_%s_%dz%dptBins%dz%dptMeasBins%s.root", stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   
   TFile *f_measured = new TFile(testInputName.c_str());
   f_measured->ls();
@@ -159,8 +115,8 @@ Int_t iterDef = iterMax - 2;
   hPriorFolded->SetName("hPriorFolded");
   
   
-  Int_t min_PriorFolded = hPriorFolded->GetYaxis()->FindBin(25.0+0.00001);
-  Int_t max_PriorFolded = hPriorFolded->GetYaxis()->FindBin(35.0-0.00001);
+  Int_t min_PriorFolded = hPriorFolded->GetYaxis()->FindBin(midLowerPt+0.00001);
+  Int_t max_PriorFolded = hPriorFolded->GetYaxis()->FindBin(midUpperPt-0.00001);
   TH1D *hPriorFolded_x = dynamic_cast<TH1D*>(hPriorFolded->ProjectionX("hPriorFolded_x",min_PriorFolded,max_PriorFolded));
    
   
@@ -179,8 +135,8 @@ Int_t iterDef = iterMax - 2;
   hSP[0] = dynamic_cast<TH1D*>(hMeasured->ProjectionX("hSP_x"));
   hSP[1] = dynamic_cast<TH1D*>(hMeasured->ProjectionY("hSP_y"));
 
-  Int_t min_Measured = hMeasured->GetYaxis()->FindBin(25.0+0.00001);
-  Int_t max_Measured = hMeasured->GetYaxis()->FindBin(35.0-0.00001);
+  Int_t min_Measured = hMeasured->GetYaxis()->FindBin(midLowerPt+0.00001);
+  Int_t max_Measured = hMeasured->GetYaxis()->FindBin(midUpperPt-0.00001);
   TH1D *hMeasured_x = dynamic_cast<TH1D*>(hMeasured->ProjectionX("hMeasured_x",min_Measured,max_Measured));
     
   // 1d projections of true z and jet pt (mc  sample)
@@ -213,17 +169,21 @@ Int_t iterDef = iterMax - 2;
   Double_t ptmax[nPtBins] = {25.,35.,45.};
   */
   
-  const Int_t nPtBins = 15;
-  Double_t ptmin[nPtBins] = {15.,17.,19.,21.,23.,25.,27.,29.,31.,33.,35.,37.,39.,41.,43.};
-  Double_t ptmax[nPtBins] = {17.,19.,21.,23.,25.,27.,29.,31.,33.,35.,37.,39.,41.,43.,45.};
-    
-  TH1D *hMUnf[nPtBins][nIter];
-  TH1D *hMFol[nPtBins][nIter];
-  TH1D *hMTru[nPtBins];
-  TH1D *hMSme[nPtBins];
-  TH1D *hMPri[nPtBins];
+  Double_t *ptmin = new Double_t[nBinJet_gen];
+  Double_t *ptmax = new Double_t[nBinJet_gen];
 
-  for(Int_t i = 0; i<nPtBins; i++) {
+  for (int i=0;i<nBinJet_gen;i++) {
+    ptmin[i] = min_jetpt+i*jetPt_gen_binWidth;
+    ptmax[i] = min_jetpt+(i+1)*jetPt_gen_binWidth;
+  }
+    
+  TH1D *hMUnf[nBinJet_gen][nIter];
+  TH1D *hMFol[nBinJet_gen][nIter];
+  TH1D *hMTru[nBinJet_gen];
+  TH1D *hMSme[nBinJet_gen];
+  TH1D *hMPri[nBinJet_gen];
+
+  for(Int_t i = 0; i<nBinJet_gen; i++) {
     Int_t min = hTrue->GetYaxis()->FindBin(ptmin[i]+0.00001);
     Int_t max = hTrue->GetYaxis()->FindBin(ptmax[i]-0.00001);
     hMTru[i] = dynamic_cast<TH1D*>(hTrue->ProjectionX(Form("hMTru_%d",i),min,max));
@@ -265,7 +225,7 @@ Int_t iterDef = iterMax - 2;
   }
 
 
-  for(Int_t i = 0; i<nPtBins; i++) {
+  for(Int_t i = 0; i<nBinJet_gen; i++) {
     //hMPri[i]->Write();
     hMSme[i]->Write();
     hMTru[i]->Write();
@@ -274,16 +234,13 @@ Int_t iterDef = iterMax - 2;
       if(hMFol[i][iter-iterMin]) hMFol[i][iter-iterMin]->Write();
     }
   }
-
   
   fout->Write();
   fout->Close();
 }
 
-void unfoldStepNewPrNominal(Int_t step = 1, double SF = 1.1){
-
-  //prompt
-  unfold(true,true,3,step,SF);
-  unfold(true,false,3,step,SF);
-  
+void unfoldStepNewPrNominal(Int_t step = 1) { //, double SF = 1.1){
+  unfold(true,true,nIter,step);
+  if (step<=nSIter_pp && centShift==0)
+    unfold(true,false,nIter,step);
 }
