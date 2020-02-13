@@ -1,62 +1,19 @@
-#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
-#include <iostream>
-using std::cout;
-using std::endl;
-
-#include "THnSparse.h"
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TStyle.h"
-#include "TSystem.h"
-
-#include "TRandom.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TLegend.h"
-
-#include "RooUnfoldResponse.h"
-#include "RooUnfoldBayes.h"
-#endif
-
-using namespace std;
-
-void unfold(bool doPrompt = true, bool doMid = true, Int_t iterMax = 8, Int_t stepNumber = 1) {
-
-  //gSystem->Load("libRooUnfold");
-  
-Int_t iterMin =1;
-Int_t iterDef = iterMax - 2;
-  
-//#ifdef __CINT__
-//  gSystem->Load("libRooUnfold");
+//#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#include "inputParams.h"
 //#endif
 
+void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t stepNumber = 1) {
+
+  Int_t iterMin =1;
+  Int_t iterDef = iterMax - 2;
+  
   string testInputName = "";
   string trainInputName = "";
   string outputName = "";
 
-  if(doPrompt && doMid){
-    testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_prompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_prompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
-    outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_Prompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber);
-  }
-  if(doPrompt && !doMid){
-    testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_prompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
-    trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_prompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
-    outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_Prompt_Fwd_8iter_50z15ptBins.root",stepNumber);
-  }
-    
-  if(!doPrompt && doMid){
-    testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_nonprompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_nonprompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
-    outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Mid_8iter_49z15ptBins7zMeasBins.root",stepNumber);
-  }
-  if(!doPrompt && !doMid){
-    testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_nonprompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
-    trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_nonprompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
-    outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_NonPrompt_Fwd_8iter_50z15ptBins.root",stepNumber);
-  }
-  
+  testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_%s_%s_Test_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
+  trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_%s_%s_Train_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
+  outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
   
   TFile *f_measured = new TFile(testInputName.c_str());
   f_measured->ls();
@@ -91,7 +48,6 @@ Int_t iterDef = iterMax - 2;
     unfold[iter-iterMin] = RooUnfoldBayes(resp, hMeasured, iter);
 
     // unfold using response matrix
-    
     hReco[iter-iterMin] = (TH2D*)unfold[iter-iterMin].Hreco(errorTreatment);
     hReco[iter-iterMin]->SetName(Form("hReco_Iter%d",iter));
     unfold[iter-iterMin].Print();
@@ -99,7 +55,6 @@ Int_t iterDef = iterMax - 2;
     unfold[iter-iterMin].PrintTable(cout,hTrueInd,RooUnfold::kCovariance);
     
     // fold using just unfolded result
-    
     hFolded[iter-iterMin] = (TH2D*)resp->ApplyToTruth(hReco[iter-iterMin]);
     //hFolded[iter-iterMin]->Sumw2();
     hFolded[iter-iterMin]->SetName(Form("hFolded_Iter%d",iter));
@@ -143,8 +98,8 @@ Int_t iterDef = iterMax - 2;
   hPriorFolded->SetName("hPriorFolded");
   
   
-  Int_t min_PriorFolded = hPriorFolded->GetYaxis()->FindBin(25.0+0.00001);
-  Int_t max_PriorFolded = hPriorFolded->GetYaxis()->FindBin(35.0-0.00001);
+  Int_t min_PriorFolded = hPriorFolded->GetYaxis()->FindBin(midLowerPt+0.00001);
+  Int_t max_PriorFolded = hPriorFolded->GetYaxis()->FindBin(midUpperPt-0.00001);
   TH1D *hPriorFolded_x = dynamic_cast<TH1D*>(hPriorFolded->ProjectionX("hPriorFolded_x",min_PriorFolded,max_PriorFolded));
    
   
@@ -163,8 +118,8 @@ Int_t iterDef = iterMax - 2;
   hSP[0] = dynamic_cast<TH1D*>(hMeasured->ProjectionX("hSP_x"));
   hSP[1] = dynamic_cast<TH1D*>(hMeasured->ProjectionY("hSP_y"));
 
-  Int_t min_Measured = hMeasured->GetYaxis()->FindBin(25.0+0.00001);
-  Int_t max_Measured = hMeasured->GetYaxis()->FindBin(35.0-0.00001);
+  Int_t min_Measured = hMeasured->GetYaxis()->FindBin(midLowerPt+0.00001);
+  Int_t max_Measured = hMeasured->GetYaxis()->FindBin(midUpperPt-0.00001);
   TH1D *hMeasured_x = dynamic_cast<TH1D*>(hMeasured->ProjectionX("hMeasured_x",min_Measured,max_Measured));
     
   // 1d projections of true z and jet pt (test sampel)
@@ -189,23 +144,24 @@ Int_t iterDef = iterMax - 2;
   hJetPtMeas = (TH1D*)hSP[1]->Clone();
   hJetPtMeas->SetName("hJetPtMeas");
 
-  /*
-  const Int_t nPtBins = 3;  
-  Double_t ptmin[nPtBins] = {15.,25.,35.};
-  Double_t ptmax[nPtBins] = {25.,35.,45.};
-  */
-  
-  const Int_t nPtBins = 15;
-  Double_t ptmin[nPtBins] = {15.,17.,19.,21.,23.,25.,27.,29.,31.,33.,35.,37.,39.,41.,43.};
-  Double_t ptmax[nPtBins] = {17.,19.,21.,23.,25.,27.,29.,31.,33.,35.,37.,39.,41.,43.,45.};
-    
-  TH1D *hMUnf[nPtBins][nIter];
-  TH1D *hMFol[nPtBins][nIter];
-  TH1D *hMTru[nPtBins];
-  TH1D *hMSme[nPtBins];
-  TH1D *hMPri[nPtBins];
+  Double_t *ptmin = new Double_t[nBinJet_gen];
+  Double_t *ptmax = new Double_t[nBinJet_gen];
 
-  for(Int_t i = 0; i<nPtBins; i++) {
+  for (int i=0;i<nBinJet_gen;i++) {
+      ptmin[i] = min_jetpt+i*jetPt_gen_binWidth;
+      ptmax[i] = min_jetpt+(i+1)*jetPt_gen_binWidth;
+    }
+
+  //Double_t ptmin[nBinJet_gen] = {20.,22.,24.,26.,28.,30.,32.,34.,36.,38.,40.,42.,44.,46.,48.};
+  //Double_t ptmax[nBinJet_gen] = {22.,24.,26.,28.,30.,32.,34.,36.,38.,40.,42.,44.,46.,48.,50.};
+
+  TH1D *hMUnf[nBinJet_gen][nIter];
+  TH1D *hMFol[nBinJet_gen][nIter];
+  TH1D *hMTru[nBinJet_gen];
+  TH1D *hMSme[nBinJet_gen];
+  TH1D *hMPri[nBinJet_gen];
+
+  for(Int_t i = 0; i<nBinJet_gen; i++) {
     Int_t min = hTrueInd->GetYaxis()->FindBin(ptmin[i]+0.00001);
     Int_t max = hTrueInd->GetYaxis()->FindBin(ptmax[i]-0.00001);
     hMTru[i] = dynamic_cast<TH1D*>(hTrueInd->ProjectionX(Form("hMTru_%d",i),min,max));
@@ -245,7 +201,7 @@ Int_t iterDef = iterMax - 2;
   }
 
 
-  for(Int_t i = 0; i<nPtBins; i++) {
+  for(Int_t i = 0; i<nBinJet_gen; i++) {
     //hMPri[i]->Write();
     hMSme[i]->Write();
     hMTru[i]->Write();
@@ -261,15 +217,8 @@ Int_t iterDef = iterMax - 2;
 }
 
 void unfoldStep(Int_t step = 1){
-
   //prompt
-  unfold(true,true,3,step);
-  unfold(true,false,3,step);
-
-  //nonprompt
-  
-  unfold(false,true,3,step);
-  unfold(false,false,3,step);
-  
-  
+  unfold(true,true,nIter,step);
+  if (step<=nSIter_pp && centShift == 0)
+    unfold(true,false,nIter,step);
 }

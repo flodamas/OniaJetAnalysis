@@ -1,17 +1,13 @@
-echo "Step 1 : "
-sh unfStep1.sh
-echo "Done!"
+#!/bin/sh
 
-echo "Step 2 : "
-sh unfStep2.sh
-echo "Done!"
+for i in {1..99}
+do
+    echo "Step $i : "
+    sh unfStepi.sh $i
+    echo "Done!"
+done
 
-echo "Step 3 : "
-sh unfStep3.sh
-
-echo "Step 4 : "
-sh unfStep4.sh
-
-echo "Done!"
+cd /Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/code
+root -l -q -b PlotRatios_MCUnfoldedTruth.cc+
 
 echo "Finished!"

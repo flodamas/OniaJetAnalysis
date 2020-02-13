@@ -1,58 +1,27 @@
-#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
-#include <iostream>
-using std::cout;
-using std::endl;
+//#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#include "inputParams.h"
+//#endif
 
-#include "THnSparse.h"
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TStyle.h"
-#include "TSystem.h"
-
-#include "TRandom.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TLegend.h"
-
-#include "RooUnfoldResponse.h"
-#include "RooUnfoldBayes.h"
-
-#endif
-
-using namespace std;
-
-void create(bool doPrompt = true, bool doMid = true, Int_t stepNumber = 1, double SF = 1.1){
-  
-  //#ifdef __CINT__
-  //gSystem->Load("/home/ikucher/newRooUnfoldVersion/RooUnfold/libRooUnfold");
-  //#endif
+void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
+  if (!setSystTag()) return;
   
   string inputName = "";
   string outputName = "";
   string partOfOutput = "response";
 
-  string SF_name = "";
-  if(SF == 1.1) SF_name = "_nominal";
-  if(SF == 1.2) SF_name = "_up";
-  if(SF == 1.0) SF_name= "_down";
+  //string SF_name = "";
+  //if(SF == 1.1) SF_name = "_nominal";
+  //if(SF == 1.2) SF_name = "_up";
+  //if(SF == 1.0) SF_name= "_down";
 
   cout << "step # =" << stepNumber << endl;
     
-  if(doPrompt && doMid) {
-    inputName = Form("dataUnfNewMidBins/unfInput/step%i/unfolding_4D_prompt_midRapidity_49z15ptBins7zMeasBins_newNominal%s.root",stepNumber,SF_name.c_str());
-  }
-  if(doPrompt && !doMid) {
-    inputName = Form("dataUnfNewMidBins/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_50z15ptBins_newNominal%s.root",stepNumber,SF_name.c_str());
-  }
-  if(!doPrompt && doMid) {
-    inputName = Form("dataUnfNewMidBins/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_49z15ptBins7zMeasBins%s.root",stepNumber,SF_name.c_str());
-  }
-  if(!doPrompt && !doMid) {
-    inputName = Form("dataUnfNewMidBins/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_50z15ptBins%s.root",stepNumber,SF_name.c_str());
-  }
+  inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%dz%dptBins%dz%dptMeasBins%s.root", stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
 
   outputName = inputName;
-  outputName.replace(33,9,partOfOutput);
+  if (stepNumber > 9) outputName.replace(93,9,partOfOutput);
+  else if (stepNumber > 99) outputName.replace(94,9,partOfOutput);
+  else outputName.replace(92,9,partOfOutput);
 
   cout << "outputName = " << outputName << endl;
   
@@ -84,37 +53,21 @@ void create(bool doPrompt = true, bool doMid = true, Int_t stepNumber = 1, doubl
   Int_t nDim = hn->GetNdimensions();
   cout <<"nDim = " << nDim << endl;
   
-  Int_t iPtTrue   = 0;
-  Int_t iZTrue  = 1;
-  Int_t iPtDet  = 2;
+  Int_t iPtTrue = 0;
+  Int_t iZTrue = 1;
+  Int_t iPtDet = 2;
   Int_t iZDet = 3;
 
-  TH2D *fh2Smear = dynamic_cast<TH2D*>(hn->Projection(2,3,"E"));
-  TH2D *fh2Prior = dynamic_cast<TH2D*>(hn->Projection(0,1,"E"));
+  TH2D *fh2Smear = dynamic_cast<TH2D*>(hn->Projection(iPtDet,iZDet,"E"));
+  TH2D *fh2Prior = dynamic_cast<TH2D*>(hn->Projection(iPtTrue,iZTrue,"E"));
 
-  Int_t nBinPt[2] = {3,15};
-  Double_t ptmin[2] = {15.0,15.0};
-  Double_t ptmax[2] = {45.0,45.0};
+  Int_t nBinPt[2] = {nBinJet_reco,nBinJet_gen};
+  Double_t ptmin[2] = {min_jetpt,min_jetpt};
+  Double_t ptmax[2] = {max_jetpt,max_jetpt};
 
-  /*
-  Int_t nBinZ[2] = {5,50};
-  Double_t mmin[2] = {0.,0.};
-  Double_t mmax[2] = {1.0,1.0};
-  */
-
-  int n_zBins = 5;
-  if(doMid) n_zBins = 7;
-
-  double z_min = 0.;
-  if(doMid) z_min = 0.02;
-  double z_max = 1.0;
-
-  int n_zGenBins = 50;
-  if(doMid) n_zGenBins = 49;
-
-  Int_t nBinZ[2] = {n_zBins,n_zGenBins};
-  Double_t mmin[2] = {z_min,z_min};
-  Double_t mmax[2] = {z_max,z_max};
+  Int_t nBinZ[2] = {nBinZ_reco,nBinZ_gen};
+  Double_t mmin[2] = {min_z,min_z};
+  Double_t mmax[2] = {max_z,max_z};
     
   //dimensions of measured axis
   TH2D *fh2RespDimM = new TH2D("fh2RespDimM","fh2RespDimM",nBinZ[0],mmin[0],mmax[0],nBinPt[0],ptmin[0],ptmax[0]);
@@ -173,54 +126,15 @@ void create(bool doPrompt = true, bool doMid = true, Int_t stepNumber = 1, doubl
   fResponse->Setup(fh2RespDimM,fh2RespDimT);
 
   //Fill RooUnfoldResponse object
-  
   Int_t* coord = new Int_t[nDim];
-  //  Int_t nbin = fhnSparseReduced->GetNbins();
   Int_t nbin = hn->GetNbins();
   
-  //  cout << "nbin = " << nbin << endl;
-
-  /*
-  cout << " fhnSparseReduced->GetAxis(0)->GetXmin() = " << fhnSparseReduced->GetAxis(0)->GetXmin() << endl;
-  cout << " fhnSparseReduced->GetAxis(1)->GetXmin() = "<< fhnSparseReduced->GetAxis(1)->GetXmin() << endl;
-  cout << " fhnSparseReduced->GetAxis(2)->GetXmin() = "<< fhnSparseReduced->GetAxis(2)->GetXmin() << endl;
-  cout << " fhnSparseReduced->GetAxis(3)->GetXmin() = "<< fhnSparseReduced->GetAxis(3)->GetXmin() << endl;
-
-  cout << " fhnSparseReduced->GetAxis(0)->GetXmax() = "<< fhnSparseReduced->GetAxis(0)->GetXmax() << endl;
-  cout << " fhnSparseReduced->GetAxis(1)->GetXmax() = "<< fhnSparseReduced->GetAxis(1)->GetXmax() << endl;
-  cout << " fhnSparseReduced->GetAxis(2)->GetXmax() = "<< fhnSparseReduced->GetAxis(2)->GetXmax() << endl;
-  cout << " fhnSparseReduced->GetAxis(3)->GetXmax() = "<< fhnSparseReduced->GetAxis(3)->GetXmax() << endl;
-  */
-  
-  for(Int_t bin=0; bin<nbin; bin++) {
-
-    //cout << "bin = " << bin << endl;
-
-    /*
-    Double_t w = fhnSparseReduced->GetBinContent(bin,coord);
-    Double_t pttrue = fhnSparseReduced->GetAxis(0)->GetBinCenter(coord[0]);
-    Double_t ztrue = fhnSparseReduced->GetAxis(1)->GetBinCenter(coord[1]);
-    Double_t ptdet = fhnSparseReduced->GetAxis(2)->GetBinCenter(coord[2]);
-    Double_t zdet = fhnSparseReduced->GetAxis(3)->GetBinCenter(coord[3]);
-    */
-    
+  for(Int_t bin=0; bin<nbin; bin++) {    
     Double_t w = hn->GetBinContent(bin,coord);
     Double_t pttrue = hn->GetAxis(0)->GetBinCenter(coord[0]);
     Double_t ztrue = hn->GetAxis(1)->GetBinCenter(coord[1]);
     Double_t ptdet = hn->GetAxis(2)->GetBinCenter(coord[2]);
-    Double_t zdet = hn->GetAxis(3)->GetBinCenter(coord[3]);
-    
-    
-    /*
-    cout << "all : " << endl;
-    
-    cout << "pttrue = " << pttrue << endl;
-    cout << "ztrue = " << ztrue << endl;
-    cout << "ptdet = " << ptdet << endl;
-    cout << "zdet = "<< zdet<< endl;
-    cout << "w = " <<w << endl;
-    */
-    
+    Double_t zdet = hn->GetAxis(3)->GetBinCenter(coord[3]);    
     if(zdet>=mmin[0] && zdet<=mmax[0]
        && ztrue>=mmin[1] && ztrue<=mmax[1]
        && ptdet>=ptmin[0] && ptdet<=ptmax[0]
@@ -228,34 +142,13 @@ void create(bool doPrompt = true, bool doMid = true, Int_t stepNumber = 1, doubl
        ){
          fResponse->Fill(zdet,ptdet,ztrue,pttrue,w);
     } 
-    else {
-
-      /*
-      cout << "failed conditions : " << endl;
-      
-      cout << "bin = " << bin << endl;
-      
-      cout << "coord[0] = " << coord[0] << endl;
-      cout << "coord[1] = " << coord[1] << endl;
-      cout << "coord[2] = " << coord[2] << endl;
-      cout << "coord[3] = " << coord[3] << endl;
-      
-      cout << "pttrue = " << pttrue << endl;
-      cout << "ztrue = " << ztrue << endl;
-      cout << "ptdet = " << ptdet << endl;
-      cout << "zdet = " << zdet << endl;
-      cout << "w = " << w << endl;
-
-      cout << "******************" << endl;
-      */
-      
+    else {      
       fResponse->Miss(ztrue,pttrue,w);
       fh2Miss->Fill(ztrue,pttrue,w);
     }
   }
 
   delete [] coord;
-
   //Write response + 2D histos to file
   TFile *fout = new TFile(outputName.c_str(),"RECREATE");
   hn->Write("fhn");
@@ -276,11 +169,10 @@ void create(bool doPrompt = true, bool doMid = true, Int_t stepNumber = 1, doubl
   fout->Close();
 }
 
-void createRooUnfoldResponseNewPrNominal(Int_t step = 1, double SF = 1.1){
-
-  create(true,true,step,SF);
-  create(true,false,step,SF);
-  
+void createRooUnfoldResponseNewPrNominal(Int_t step = 1) { //, double SF = 1.1){
+  create(true,true,step);
+  if (step<=nSIter_pp && centShift==0)
+    create(true,false,step);
 }
 
   

@@ -1,51 +1,32 @@
+#include "inputParams.h"
+
 void makeRebinMatrix(){
 
   // find the transfer matrix to take a measurement of 50 bins in z and 15 bins in pT to one with 5 bins in z and 3 bins in pT.  
 
-  // number of fine and coarse bins
-  int nfpt = 15;
-  int ncpt = 3;
-  int nfz = 50;
-  int ncz = 5;
-
-  // bin width in coarse bins
-  double wcpt = 10.;
-  double wcz = 0.2;
-
-  // bin width in narrow bins
-  double wfpt = wcpt*ncpt/nfpt;
-  double wfz = wcz*ncz/nfz;
-  
-
-  // overall bin boundaries
-  double lopt = 15.;
-  double loz = 0.;
-  double hipt = lopt + wcpt*ncpt;
-  double hiz = loz + wcz*ncz;
-
-  TH2D *h2dpt = new TH2D("h2dpt","h2dpt",nfpt,lopt,hipt,ncpt,lopt,hipt);
-  TH2D *h2dz = new TH2D("h2dz","h2dz",nfz,loz,hiz,ncz,loz,hiz);
+  TH2D *h2dpt = new TH2D("h2dpt","h2dpt",nBinJet_gen,min_jetpt,max_jetpt,nBinJet_reco,min_jetpt,max_jetpt);
+  TH2D *h2dz = new TH2D("h2dz","h2dz",nBinZ_gen,min_z,max_z,nBinZ_reco,min_z,max_z);
 
   int fDim = 4.;  
   Int_t* bins_sparce = new Int_t[fDim];
   Double_t *xmin_sparce = new Double_t[fDim];
   Double_t *xmax_sparce = new Double_t[fDim];
 
-  bins_sparce[0] = 15;
-  xmin_sparce[0] = 15.0;
-  xmax_sparce[0] = 45.0;
+  bins_sparce[0] = nBinJet_gen;
+  xmin_sparce[0] = min_jetpt;
+  xmax_sparce[0] = max_jetpt;
 
-  bins_sparce[1] = 50;
-  xmin_sparce[1] = 0.;
-  xmax_sparce[1] = 1.0;
+  bins_sparce[1] = nBinZ_gen;
+  xmin_sparce[1] = min_z;
+  xmax_sparce[1] = max_z;
 
-  bins_sparce[2] = 3;
-  xmin_sparce[2] = 15.0;
-  xmax_sparce[2] = 45.0;
+  bins_sparce[2] = nBinJet_reco;
+  xmin_sparce[2] = min_jetpt;
+  xmax_sparce[2] = max_jetpt;
 
-  bins_sparce[3] = 5;
-  xmin_sparce[3] = 0.;
-  xmax_sparce[3] = 1.0;
+  bins_sparce[3] = nBinZ_reco;
+  xmin_sparce[3] = min_z;
+  xmax_sparce[3] = max_z;
 
   //initial not normalized 4D
   THnSparseF * fSparse = new THnSparseF("hs", "hs", fDim, bins_sparce, xmin_sparce, xmax_sparce);
@@ -56,37 +37,37 @@ void makeRebinMatrix(){
   Double_t *xmin_sparce2 = new Double_t[fDim];
   Double_t *xmax_sparce2 = new Double_t[fDim];
 
-  bins_sparce2[2] = 15;
-  xmin_sparce2[2] = 15.0;
-  xmax_sparce2[2] = 45.0;
+  bins_sparce2[2] = nBinJet_gen;
+  xmin_sparce2[2] = min_jetpt;
+  xmax_sparce2[2] = max_jetpt;
 
-  bins_sparce2[3] = 50;
-  xmin_sparce2[3] = 0.;
-  xmax_sparce2[3] = 1.0;
+  bins_sparce2[3] = nBinZ_gen;
+  xmin_sparce2[3] = min_z;
+  xmax_sparce2[3] = max_z;
 
-  bins_sparce2[0] = 3;
-  xmin_sparce2[0] = 15.0;
-  xmax_sparce2[0] = 45.0;
+  bins_sparce2[0] = nBinJet_reco;
+  xmin_sparce2[0] = min_jetpt;
+  xmax_sparce2[0] = max_jetpt;
 
-  bins_sparce2[1] = 5;
-  xmin_sparce2[1] = 0.;
-  xmax_sparce2[1] = 1.0;
+  bins_sparce2[1] = nBinZ_reco;
+  xmin_sparce2[1] = min_z;
+  xmax_sparce2[1] = max_z;
   
   THnSparseF * fSparseInv = new THnSparseF("hsInv", "hsInv", fDim, bins_sparce2, xmin_sparce2, xmax_sparce2);
   fSparseInv->Sumw2();
   fSparseInv->CalculateErrors();
   
 
-  for(int ipt = 0; ipt < ncpt; ipt++){    
-    for(int iz = 0; iz < ncz; iz++){
+  for(int ipt = 0; ipt < nBinJet_reco; ipt++){    
+    for(int iz = 0; iz < nBinZ_reco; iz++){
 
-      float izMid = iz*wcz+wcz/2;
-      float ijetMid = 15.+ipt*wcpt+wcpt/2;
+      float izMid = min_z+iz*z_reco_binWidth+z_reco_binWidth/2;
+      float ijetMid = min_jetpt+ipt*jetPt_reco_binWidth+jetPt_reco_binWidth/2;
 
-      int jzlo = iz*nfz/ncz;
-      int jzhi = (iz+1)*nfz/ncz;
-      int jptlo = ipt*nfpt/ncpt;
-      int jpthi = (ipt+1)*nfpt/ncpt;
+      int jzlo = iz*nBinZ_gen/nBinZ_reco;
+      int jzhi = (iz+1)*nBinZ_gen/nBinZ_reco;
+      int jptlo = ipt*nBinJet_gen/nBinJet_reco;
+      int jpthi = (ipt+1)*nBinJet_gen/nBinJet_reco;
      
       for(int jpt = jptlo; jpt < jpthi; jpt++){	
 	for(int jz = jzlo; jz < jzhi; jz++){
@@ -94,8 +75,8 @@ void makeRebinMatrix(){
 	  h2dpt->SetBinContent(jpt+1,ipt+1,1.);
 	  h2dz->SetBinContent(jz+1,iz+1,1.);
 
-	  float jzMid = jz*wfz+wfz/2;
-	  float jjetMid = 15.+jpt*wfpt+wfpt/2;
+	  float jzMid = min_z+jz*z_gen_binWidth+z_gen_binWidth/2;
+	  float jjetMid = min_jetpt+jpt*jetPt_gen_binWidth+jetPt_gen_binWidth/2;
 	  	  
 	  const double x[4] = {jjetMid,jzMid,ijetMid,izMid};
 	  int bin = fSparse->GetBin(x);
@@ -123,10 +104,8 @@ void makeRebinMatrix(){
   TCanvas *c2_4Dpr=new TCanvas("c2_4Dpr","c2_4Dpr",600,600);
   fSparseInv->Projection(1,3)->Draw("zcol");
 
-  
-  
+
   TFile *fout = new TFile("diag4DMatrixInv.root","RECREATE");
   fSparse->Write("diag4DMatrix");  
   fSparseInv->Write("diag4DMatrixInv");
-  
 }

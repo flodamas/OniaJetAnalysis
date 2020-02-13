@@ -1,57 +1,19 @@
-#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
-#include <iostream>
-using std::cout;
-using std::endl;
+//#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#include "inputParams.h"
+//#endif
 
-#include "THnSparse.h"
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TStyle.h"
-#include "TSystem.h"
-
-#include "TRandom.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TLegend.h"
-
-#include "RooUnfoldResponse.h"
-#include "RooUnfoldBayes.h"
-
-#endif
-
-using namespace std;
-
-void create(bool doPrompt = true, bool doMid = true, bool doTrain = false, Int_t stepNumber = 1){
-  
-  //#ifdef __CINT__
-  gSystem->Load("~/rootBuild/RooUnfold/libRooUnfold");
-  //#endif
-  
+void create(bool doPrompt = true, bool doPbPb = true, bool doTrain = false, Int_t stepNumber = 1){  
   string inputName = "";
   string outputName = "";
   string partOfOutput = "response";
+
+  inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_%s_%s_%s_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root", stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", doTrain?"Train":"Test", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
   
-  if(doPrompt && doMid) {
-    if(!doTrain) inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    else inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
-  }
-  if(doPrompt && !doMid) {
-    if(!doTrain) inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
-    else inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_prompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
-  }
-
-  if(!doPrompt && doMid) {
-    if(!doTrain) inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Test_49z15ptBins7zMeasBins.root",stepNumber);
-    else inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_midRapidity_Train_49z15ptBins7zMeasBins.root",stepNumber);
-  }
-  if(!doPrompt && !doMid) {
-    if(!doTrain) inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Test_50z15ptBins.root",stepNumber);
-    else inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_nonprompt_fwdRapidity_Train_50z15ptBins.root",stepNumber);
-  }
-
   outputName = inputName;
-  outputName.replace(90,9,partOfOutput);
-    
+  if (stepNumber > 9) outputName.replace(91,9,partOfOutput);
+  else if (stepNumber > 99) outputName.replace(92,9,partOfOutput);
+  else outputName.replace(90,9,partOfOutput);
+
   TFile *f = new TFile(inputName.c_str());
   f->ls();
 
@@ -59,7 +21,8 @@ void create(bool doPrompt = true, bool doMid = true, bool doTrain = false, Int_t
 
   string thnSparseName = "";
   //take normalized tr matrix 
-  if(doTrain) thnSparseName = "hs_newJetPtNorm;1";
+  if(doTrain && flatPrior) thnSparseName = "hs_newJetPtNorm;1";
+  else if(doTrain && !flatPrior) thnSparseName = "hs;1";
   //take not normalized matrix, since we need real measured 2D distribution from it
   else thnSparseName = "hs;1";
   
@@ -79,38 +42,28 @@ void create(bool doPrompt = true, bool doMid = true, bool doTrain = false, Int_t
   Int_t nDim = hn->GetNdimensions();
   cout <<"nDim = " << nDim << endl;
   
-  Int_t iPtTrue   = 0;
-  Int_t iZTrue  = 1;
-  Int_t iPtDet  = 2;
+  Int_t iPtTrue = 0;
+  Int_t iZTrue = 1;
+  Int_t iPtDet = 2;
   Int_t iZDet = 3;
 
-  TH2D *fh2Smear = dynamic_cast<TH2D*>(hn->Projection(2,3,"E"));
-  TH2D *fh2Prior = dynamic_cast<TH2D*>(hn->Projection(0,1,"E"));
+  TH2D *fh2Smear = dynamic_cast<TH2D*>(hn->Projection(iPtDet,iZDet,"E"));
+  TH2D *fh2Prior = dynamic_cast<TH2D*>(hn->Projection(iPtTrue,iZTrue,"E"));
 
-  Int_t nBinPt[2] = {3,15};
-  Double_t ptmin[2] = {15.0,15.0};
-  Double_t ptmax[2] = {45.0,45.0};
-
-  int n_zBins = 5;
-  if(doMid) n_zBins = 7;
-
-  double z_min = 0.;
-  if(doMid) z_min = 0.02;
-  double z_max = 1.0;
-
-  int n_zGenBins = 50;
-  if(doMid) n_zGenBins = 49;
-    
-  Int_t nBinZ[2] = {n_zBins,n_zGenBins};
-  Double_t mmin[2] = {z_min,z_min};
-  Double_t mmax[2] = {z_max,z_max};
+  Int_t nBinPt[2] = {nBinJet_reco,nBinJet_gen};
+  Double_t ptmin[2] = {min_jetpt,min_jetpt};
+  Double_t ptmax[2] = {max_jetpt,max_jetpt};
+   
+  Int_t nBinZ[2] = {nBinZ_reco,nBinZ_gen};
+  Double_t mmin[2] = {min_z,min_z};
+  Double_t mmax[2] = {max_z,max_z};
   
   //dimensions of measured axis
   TH2D *fh2RespDimM = new TH2D("fh2RespDimM","fh2RespDimM",nBinZ[0],mmin[0],mmax[0],nBinPt[0],ptmin[0],ptmax[0]);
   //dimensions of true axis
   TH2D *fh2RespDimT = new TH2D("fh2RespDimT","fh2RespDimT",nBinZ[1],mmin[1],mmax[1],nBinPt[1],ptmin[1],ptmax[1]);  
   //feed-out of response
-  TH2D *fh2Miss     = new TH2D("fh2Miss","fh2Miss",nBinZ[1],mmin[1],mmax[1],nBinPt[1],ptmin[1],ptmax[1]);
+  TH2D *fh2Miss = new TH2D("fh2Miss","fh2Miss",nBinZ[1],mmin[1],mmax[1],nBinPt[1],ptmin[1],ptmax[1]);
   cout << "fh2Smear->GetEntries() " << fh2Smear->GetEntries() << endl;
 
   //fill detector-level distribution
@@ -164,51 +117,14 @@ void create(bool doPrompt = true, bool doMid = true, bool doTrain = false, Int_t
   //Fill RooUnfoldResponse object
   
   Int_t* coord = new Int_t[nDim];
-  //  Int_t nbin = fhnSparseReduced->GetNbins();
   Int_t nbin = hn->GetNbins();
   
-  //  cout << "nbin = " << nbin << endl;
-
-  /*
-  cout << " fhnSparseReduced->GetAxis(0)->GetXmin() = " << fhnSparseReduced->GetAxis(0)->GetXmin() << endl;
-  cout << " fhnSparseReduced->GetAxis(1)->GetXmin() = "<< fhnSparseReduced->GetAxis(1)->GetXmin() << endl;
-  cout << " fhnSparseReduced->GetAxis(2)->GetXmin() = "<< fhnSparseReduced->GetAxis(2)->GetXmin() << endl;
-  cout << " fhnSparseReduced->GetAxis(3)->GetXmin() = "<< fhnSparseReduced->GetAxis(3)->GetXmin() << endl;
-
-  cout << " fhnSparseReduced->GetAxis(0)->GetXmax() = "<< fhnSparseReduced->GetAxis(0)->GetXmax() << endl;
-  cout << " fhnSparseReduced->GetAxis(1)->GetXmax() = "<< fhnSparseReduced->GetAxis(1)->GetXmax() << endl;
-  cout << " fhnSparseReduced->GetAxis(2)->GetXmax() = "<< fhnSparseReduced->GetAxis(2)->GetXmax() << endl;
-  cout << " fhnSparseReduced->GetAxis(3)->GetXmax() = "<< fhnSparseReduced->GetAxis(3)->GetXmax() << endl;
-  */
-  
-  for(Int_t bin=0; bin<nbin; bin++) {
-
-    //cout << "bin = " << bin << endl;
-
-    /*
-    Double_t w = fhnSparseReduced->GetBinContent(bin,coord);
-    Double_t pttrue = fhnSparseReduced->GetAxis(0)->GetBinCenter(coord[0]);
-    Double_t ztrue = fhnSparseReduced->GetAxis(1)->GetBinCenter(coord[1]);
-    Double_t ptdet = fhnSparseReduced->GetAxis(2)->GetBinCenter(coord[2]);
-    Double_t zdet = fhnSparseReduced->GetAxis(3)->GetBinCenter(coord[3]);
-    */
-    
+  for(Int_t bin=0; bin<nbin; bin++) {    
     Double_t w = hn->GetBinContent(bin,coord);
     Double_t pttrue = hn->GetAxis(0)->GetBinCenter(coord[0]);
     Double_t ztrue = hn->GetAxis(1)->GetBinCenter(coord[1]);
     Double_t ptdet = hn->GetAxis(2)->GetBinCenter(coord[2]);
     Double_t zdet = hn->GetAxis(3)->GetBinCenter(coord[3]);
-    
-    
-    /*
-    cout << "all : " << endl;
-    
-    cout << "pttrue = " << pttrue << endl;
-    cout << "ztrue = " << ztrue << endl;
-    cout << "ptdet = " << ptdet << endl;
-    cout << "zdet = "<< zdet<< endl;
-    cout << "w = " <<w << endl;
-    */
     
     if(zdet>=mmin[0] && zdet<=mmax[0]
        && ztrue>=mmin[1] && ztrue<=mmax[1]
@@ -217,27 +133,7 @@ void create(bool doPrompt = true, bool doMid = true, bool doTrain = false, Int_t
        ){
          fResponse->Fill(zdet,ptdet,ztrue,pttrue,w);
     } 
-    else {
-
-      /*
-      cout << "failed conditions : " << endl;
-      
-      cout << "bin = " << bin << endl;
-      
-      cout << "coord[0] = " << coord[0] << endl;
-      cout << "coord[1] = " << coord[1] << endl;
-      cout << "coord[2] = " << coord[2] << endl;
-      cout << "coord[3] = " << coord[3] << endl;
-      
-      cout << "pttrue = " << pttrue << endl;
-      cout << "ztrue = " << ztrue << endl;
-      cout << "ptdet = " << ptdet << endl;
-      cout << "zdet = " << zdet << endl;
-      cout << "w = " << w << endl;
-
-      cout << "******************" << endl;
-      */
-      
+    else {      
       fResponse->Miss(ztrue,pttrue,w);
       fh2Miss->Fill(ztrue,pttrue,w);
     }
@@ -265,30 +161,13 @@ void create(bool doPrompt = true, bool doMid = true, bool doTrain = false, Int_t
 }
 
 void createRooUnfoldResponse(Int_t step = 1){
-
-  //prompt mid
-  
+  //prompt PbPb
   create(true,true,true,step);
   create(true,true,false,step);
-  
-  //prompt fwd
-  
-  create(true,false,true,step);
-  create(true,false,false,step);
+  //prompt pp
+  if (step<=nSIter_pp && centShift ==0){
+    create(true,false,true,step);
+    create(true,false,false,step);
+  }
 
-  //nonprompt mid
-  
-  create(false,true,true,step);
-  create(false,true,false,step);
-
-  //nonprompt fwd
-  
-  create(false,false,true,step);
-  create(false,false,false,step);
-  
-  
-  
-  
 }
-
-  
