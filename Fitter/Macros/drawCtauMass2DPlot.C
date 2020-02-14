@@ -15,7 +15,7 @@ void drawCtauMass2DPlot(RooWorkspace& myws,   // Local workspace
                         map<string, double> binWidth={} // User-defined Location of the fit results
                         ) 
 {
-  cout << "start of the drawing function" << endl;
+  //cout << "start of the drawing function" << endl;
   gStyle->SetOptStat(0);
 
   if (DSTAG.find("_")!=std::string::npos) DSTAG.erase(DSTAG.find("_"));

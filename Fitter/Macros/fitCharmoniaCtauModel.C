@@ -51,7 +51,7 @@ bool fitCharmoniaCtauModel( RooWorkspace& myws,             // Local Workspace
                             )  
 {
   bool usePerEventError = true;
-  cout << "start the fitCharmoniaCtauModel"<<endl;
+  //cout << "start the fitCharmoniaCtauModel"<<endl;
   if (DSTAG.find("_")!=std::string::npos) DSTAG.erase(DSTAG.find("_"));
 
   // Check if input dataset is MC
@@ -259,14 +259,14 @@ bool fitCharmoniaCtauModel( RooWorkspace& myws,             // Local Workspace
       if (strcmp(applyCorr, "")) {plotLabel = plotLabel + "_" + applyCorr;}
       if (applyJEC) {plotLabel = plotLabel + "_JEC";}
       bool found = false;
-      cout <<"here"<<endl;
+      //cout <<"here"<<endl;
       if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAURES"]!="") {
         plotLabel = string(Form("_CtauRes_%s_NoBkg_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""),(applyJEC?"_JEC":"")));
         setCtauResFileName(FileName, (inputFitDir["CTAURES"]=="" ? outputDir : inputFitDir["CTAURES"]), DSTAG, plotLabel, cut, isPbPb);
       } else if (inputFitDir["CTAURES"]!="") { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAURES"]!="") {
         plotLabel = Form("_CtauRes_%s_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""),(applyJEC?"_JEC":""));
-	cout<<"looking for file with label "<<plotLabel<<endl;
+	//cout<<"looking for file with label "<<plotLabel<<endl;
         setCtauResFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
       } else if (inputFitDir["CTAURES"]!="") { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str())) {
@@ -314,7 +314,7 @@ bool fitCharmoniaCtauModel( RooWorkspace& myws,             // Local Workspace
       return true;
     }
   }
-  cout << "[INFO] actually starting the fit" << endl;
+  //cout << "[INFO] actually starting the fit" << endl;
   // Fit the Datasets
   if (skipFit==false) {
     if (!usectauBkgTemplate)

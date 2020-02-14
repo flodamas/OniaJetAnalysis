@@ -53,7 +53,7 @@ bool fitCharmonia( const RooWorkspace&  inputWorkspace,  // Workspace with all t
                    bool getMeanPT    = false       // Compute the mean PT (NEED TO FIX)
 		   )  
 {
-  cout <<"[INFO] start of fitCharmonia.C"<<endl;
+  //cout <<"[INFO] start of fitCharmonia.C"<<endl;
   RooMsgService::instance().getStream(0).removeTopic(Caching);  
   RooMsgService::instance().getStream(1).removeTopic(Caching);
   RooMsgService::instance().getStream(0).removeTopic(Plotting);

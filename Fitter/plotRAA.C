@@ -258,8 +258,8 @@ void doAllplots(bool is16004=false) {
   setOptions(true, false, false, false, false, false, false, false, false, false, true, "");
   //setOptions(true, false, false, false, false, false, false, false, false, false, false, true,"");
   printOptions();
-  plotAll("DataFits_Raa_finerBins","RAA");//, "DATA", "", "ctauMass");
-  plotAll("DataFits_Raa_finerBins","XS");//, "DATA", "", "ctauMass");
+  plotAll("DataFits_Raa_PDFix","RAA");//, "DATA", "", "ctauMass");
+  plotAll("DataFits_Raa_PDFix","XS");//, "DATA", "", "ctauMass");
 
   //if (!is16004)
   //{
@@ -522,12 +522,12 @@ void plotRAA(vector<anabin> thecats, string xaxis, string outputDir) {
       normfactoraa = 1./s.lumiaa;
       normfactoraa *= 1./(208.*208.*(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)));
     } else {
-      double myNmb = NMB * s.lumiaa / lumipbpb_ABCD;
+      double myNmb = NMB;//* s.lumiaa / lumipbpb_ABCD;
       normfactoraa = 1./(myNmb*s.taa*1e-3); // the 1e-3 factor is because taa is in mb-1 while lumis are in mub-1
 //      thebinOrig.print();
 //      cout << "Taa = " << s.taa << endl;
     }
-    normfactoraa *= 200./(it->first.centbin().high()-it->first.centbin().low());
+    normfactoraa *= /*200.*/180./(it->first.centbin().high()-it->first.centbin().low());
     
     if (applyEff && applyAcc)
     {
@@ -888,11 +888,11 @@ void plotXS(vector<anabin> thecats, string xaxis, string outputDir) {
       normfactoraa = 1./(s.lumiaa*deltaPt*deltaRap*1e-3);
       normfactoraa *= 1./(208.*208.*(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)));
     } else {
-      double myNmb = NMB * s.lumiaa / lumipbpb_ABCD;
+      double myNmb = NMB ;// s.lumiaa / lumipbpb_ABCD;
       normfactoraa *= 1./(myNmb*s.taa*1e-3); // the 1e-3 factor is because taa is in mb-1 while lumis are in mub-1
     }
     
-    normfactoraa *= 200./(it->first.centbin().high()-it->first.centbin().low());
+    normfactoraa *= /*200.*/180./(it->first.centbin().high()-it->first.centbin().low());
     
     if (applyEff && applyAcc)
     {
@@ -941,7 +941,7 @@ void plotXS(vector<anabin> thecats, string xaxis, string outputDir) {
     double syst_xsec_aa = xsec_aa*sqrt(pow(s.systaa,2));
     double syst_xsec_pp = xsec_pp*sqrt(pow(spp.systpp,2));
     
-//    cout << "PbPb: " << xsec_aa << " pp : " << xsec_pp << endl;
+    cout << "PbPb: " << xsec_aa <<" \pm "<<delta_xsec_aa<< " pp : " << xsec_pp <<" \pm "<<delta_xsec_pp<< endl;
     
     theVarsBinned_aa[thebin].push_back(xsec_aa);
     theVarsBinned_pp[thebin].push_back(xsec_pp);

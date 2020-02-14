@@ -1,11 +1,5 @@
 #include "makeAccEff.h" 
 //macro to get all AccEff Syst
-
-//Double_t ptbins []= {3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 20.0, 25.0, 30.0, 100.0};
-Double_t ptbins []= {3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 6.0, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 7.0, 7.1, 7.2, 7.3, 7.4, 7.5, 7.5, 7.7, 7.8, 7.9, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.0, 9.25, 9.5, 9.75, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 19., 20.0, 25.0, 30.0, 50, 100.0};
-Double_t ybins []= {-2.4, -2.0, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4};
-
-
 float min_z = 0.064;
 float max_z = 1.0;
 
@@ -16,13 +10,92 @@ int nBinZ = 6;
 
 float z_reco_binWidth = (max_z-min_z)*1.0/nBinZ;
 
+Double_t ptbins_01btw6590 [] = {3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 6.6, 6.7, 6.8, 6.9, 7.0, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.0, 9.25, 9.5, 9.75, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 19., 20.0, 25.0, 30.0, 50, 100.0};
+Double_t ptbins_02btw6590 [] = {3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 6.6, 6.8, 7.0, 7.2, 7.4, 7.6, 7.8, 8.0, 8.2, 8.4, 8.6, 8.8, 9.0, 9.5, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 20.0, 25.0, 30.0, 50, 100.0};
+Double_t ptbins_025btw6580 []= {3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.25, 6.5, 6.75, 7.0, 7.25, 7.5, 7.75, 8.0, 8.5, 9.0, 9.5, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 20.0, 25.0, 30.0, 40.0, 50.0, 100.0};
+Double_t ptbins_005t75_01t90_25t100_100t200 [] = {3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 6.55, 6.6, 6.65, 6.7, 6.75, 6.8, 6.85, 6.9, 6.95, 7.0, 7.05, 7.1, 7.15, 7.2, 7.25, 7.3, 7.35, 7.4, 7.45, 7.5, 7.6, 7.7, 7.8, 7.9, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.0, 9.25, 9.5, 9.75, 10.0, 10, 11, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 25.0, 30.0, 50, 100.0};
+
+Double_t ybins_24EvenBins []= {-2.4, -2.2, -2.0, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4};
+Double_t ybins_absEta_12EvenBins []= {0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4};
+
+Double_t ybins_1bin1010_15Bins []= {-2.4, -2.2, -2.0, -1.8, -1.6, -1.4, -1.2, -1.0, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4};
+Double_t ybins_absEta_1bin010_8Bins []= {0, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4};
+
+Double_t ybins_48EvenBins []= {-2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4};
+
+int centbins_10t40_20t100 [] = {0, 10, 20, 30, 40, 60, 80, 100, 140, 200};
+int centbins_5t20_10t40_20t100 [] = {0, 5, 10, 15, 20, 30, 40, 60, 80, 100, 200}; 
+
+void oniaTree::setBins(string caseTag) {
+  ////////for pt
+  if (caseTag.find("pt_FinerThenCoarser")!=std::string::npos) {
+    nptbins = sizeof(ptbins_005t75_01t90_25t100_100t200)/sizeof(double);
+    for (int i=0; i<nptbins; i++)
+      ptbins[i] = ptbins_005t75_01t90_25t100_100t200[i];
+  }
+  else if (caseTag.find("pt_SizeDoubled")!=std::string::npos){
+    nptbins = sizeof(ptbins_02btw6590)/sizeof(double);
+    for (int i=0; i<nptbins; i++)
+      ptbins[i] = ptbins_02btw6590[i];
+  }
+  else {
+    nptbins = sizeof(ptbins_01btw6590)/sizeof(double);
+    for (int i=0; i<nptbins; i++)
+      ptbins[i] = ptbins_01btw6590[i];
+  }
+
+  nptbins = nptbins-1;
+  /////for rapidity
+  if (caseTag.find("absEta_12EvenBins")!=std::string::npos){
+    nybins = sizeof(ybins_absEta_12EvenBins)/sizeof(double);
+    for (int i=0; i<nybins; i++)
+      ybins[i] = ybins_absEta_12EvenBins[i];
+  }
+  else if (caseTag.find("absEta_1bin010_8Bins")!=std::string::npos) {
+    nybins = sizeof(ybins_absEta_1bin010_8Bins)/sizeof(double);
+    for (int i=0; i<nybins; i++)
+      ybins[i] = ybins_absEta_1bin010_8Bins[i];
+  }
+  else if (caseTag.find("rap_1bin1010_15Bins")!=std::string::npos) {
+    nybins = sizeof(ybins_1bin1010_15Bins)/sizeof(double);
+    for (int i=0; i<nybins; i++)
+      ybins[i] = ybins_1bin1010_15Bins[i];
+  } 
+  else if (caseTag.find("rap_48EvenBins")!=std::string::npos) {
+    //cout <<"using rap_48EvenBins"<<endl;
+    nybins = sizeof(ybins_48EvenBins)/sizeof(double);
+    for (int i=0; i<nybins; i++)
+      ybins[i] = ybins_48EvenBins[i];
+  }
+  else {
+    nybins = sizeof(ybins_24EvenBins)/sizeof(double);
+    for (int i=0; i<nybins; i++)
+      ybins[i] = ybins_24EvenBins[i];
+  }
+
+  nybins = nybins-1;
+  /////for centrality
+  if (caseTag.find("cent_5t20")!=std::string::npos){
+    ncentbins = sizeof(centbins_5t20_10t40_20t100)/sizeof(int);
+    for (int i=0; i<ncentbins; i++)
+      centbins[i] = centbins_5t20_10t40_20t100[i];
+  }
+  else {
+    ncentbins = sizeof(centbins_10t40_20t100)/sizeof(int);
+    for (int i=0; i<ncentbins; i++)
+      centbins[i] = centbins_10t40_20t100[i];
+  }
+  ncentbins = ncentbins-1;
+    cout <<"ncentbins = "<<ncentbins<<endl;
+}
+
 void oniaTree::AccEffMisMod(string caseLabel) {
 } // end of the function
 
 
 void oniaTree::AccEffStatToy(int nToys) {
   // Randomise TEfficiency 100 times. Output will be a TObjArray with 100 TH2
-  TFile* effFile = TFile::Open("../Fitter/Input/correction_AccEff.root","READ"); 
+  TFile* effFile = TFile::Open("../Fitter/Input/correction_AccEff_centMaps.root","READ"); 
   TEfficiency *eff = (TEfficiency*) effFile->Get(Form("hcorr_Jpsi_%s_%s",isPbPb?"PbPb":"PP",isPr?"pr":"npr"));
   
   TObjArray *arrEffs = new TObjArray(); // Array to store efficiencies
@@ -32,23 +105,30 @@ void oniaTree::AccEffStatToy(int nToys) {
 
   for (int i=0 ; i < nToys ; i++)
     {
-      if (i%10==0) cout <<"[INFO] toy "<<i<<"/"<<nToys<<endl;
+      //if (i%10==0) 
+      cout <<"[INFO] toy "<<i<<"/"<<nToys<<endl;
       TH2* histoTot = (TH2*) eff->GetTotalHistogram()->Clone(Form("hTotToy_%d",i)); // Get corresponding histo and number of bins
       histoTot->Sumw2();
       TH2* histoPass = (TH2*) histoTot->Clone(Form("hPassToy_%d",i)); // Get corresponding histo and number of bins
       histoPass->Sumw2();
       int nBinsX = histoTot->GetNbinsX();
       int nBinsY = histoTot->GetNbinsY();
-  
+      //cout <<"nBinsX = "<<nBinsX<<", nBinsY = "<<nBinsY<<endl;
+
       for (int j = 1 ; j <= nBinsX ; j++)
 	{
+	  //cout <<"start bin "<<j<<endl;
 	  for (int k = 1 ; k <= nBinsY ; k++)
 	    {
 	      int bin = histoTot->GetBin(j,k);      
 	      double effVal = eff->GetEfficiency(bin);
-	      int ntot = histoTot->GetBinContent(bin);
-	      int newPass = rnd->Binomial(ntot,effVal);
+	      double ntot = histoTot->GetBinContent(bin);
+	      //double nPass = histoPass->GetBinContent(bin);
+	      double newPass = rnd->Binomial(ntot,effVal);
+	      //double x = histoTot->GetXaxis()->GetBinCenter(j);
+	      //double y = histoTot->GetYaxis()->GetBinCenter(k);
 	      histoPass->SetBinContent(histoPass->GetBin(j,k),newPass);
+	      //cout << "rap = "<<x<<", pt = "<<y<<" nTot = "<<ntot<<" nPass = "<<nPass<<" new Pass = "<<newPass<<" nominal eff = "<<effVal<<", new eff = "<<newPass*1.0/ntot<<endl;
 	    }
 	}
       TEfficiency* newHeff = (TEfficiency*) eff->Clone(Form("effToy_%d",i)); // Histo to store new 2D eff
@@ -59,6 +139,195 @@ void oniaTree::AccEffStatToy(int nToys) {
   effFile->Close();
   gSystem->mkdir("FilesAccxEff/toyMC");
   TFile* fsave = new TFile(Form("FilesAccxEff/toyMC/%sAccEff%dToys_%s.root",isPr?"pr":"npr", nToys,isPbPb?"PbPb":"PP"),"RECREATE");
+  arrEffs->Write("accEffArray", TObject::kSingleKey);
+  fsave->Close();
+}
+
+void oniaTree::AccEffStatToy_Acc(int nToys, string caseTag) {
+  // Randomise TEfficiency 100 times. Output will be a TObjArray with 100 TH2
+  setBins(caseTag);
+  TFile* effFile = TFile::Open(Form("../Fitter/Input/correction_AccEff_centMaps%s.root",caseTag.c_str())); 
+  TEfficiency *eff = (TEfficiency*) effFile->Get(Form("hcorr_Jpsi_%s_%s_Acc",isPbPb?"PbPb":"PP",isPr?"pr":"npr"));
+  
+  TObjArray *arrEffs = new TObjArray(); // Array to store efficiencies
+  arrEffs->SetOwner(true);
+
+  TRandom* rnd = new TRandom3(); // For randomisation
+
+  for (int i=0 ; i < nToys ; i++)
+    {
+      //if (i%10==0) 
+      cout <<"[INFO] toy "<<i<<"/"<<nToys<<endl;
+      TH2* histoTot = (TH2*) eff->GetTotalHistogram()->Clone(Form("hTotToy_%d",i)); // Get corresponding histo and number of bins
+      histoTot->Sumw2();
+      TH2* histoPass = (TH2*) histoTot->Clone(Form("hPassToy_%d",i)); // Get corresponding histo and number of bins
+      histoPass->Sumw2();
+      int nBinsX = histoTot->GetNbinsX();
+      int nBinsY = histoTot->GetNbinsY();
+      //cout <<"nBinsX = "<<nBinsX<<", nBinsY = "<<nBinsY<<endl;
+
+      for (int j = 1 ; j <= nBinsX ; j++)
+	{
+	  //cout <<"start bin "<<j<<endl;
+	  for (int k = 1 ; k <= nBinsY ; k++)
+	    {
+	      int bin = histoTot->GetBin(j,k);      
+	      double effVal = eff->GetEfficiency(bin);
+	      double ntot = histoTot->GetBinContent(bin);
+	      //double nPass = histoPass->GetBinContent(bin);
+	      double newPass = rnd->Binomial(ntot,effVal);
+	      //double x = histoTot->GetXaxis()->GetBinCenter(j);
+	      //double y = histoTot->GetYaxis()->GetBinCenter(k);
+	      histoPass->SetBinContent(histoPass->GetBin(j,k),newPass);
+	      //cout << "rap = "<<x<<", pt = "<<y<<" nTot = "<<ntot<<" nPass = "<<nPass<<" new Pass = "<<newPass<<" nominal eff = "<<effVal<<", new eff = "<<newPass*1.0/ntot<<endl;
+	    }
+	}
+      TEfficiency* newHeff = (TEfficiency*) eff->Clone(Form("effToy_%d",i)); // Histo to store new 2D eff
+      newHeff->SetPassedHistogram(*histoPass, "f");
+      newHeff->SetTotalHistogram(*histoTot, "f");
+      arrEffs->Add(newHeff);
+    }
+  effFile->Close();
+  gSystem->mkdir(Form("FilesAccxEff%s/toyMC",caseTag.c_str()));
+  TFile* fsave = new TFile(Form("FilesAccxEff%s/toyMC/%sAcc%dToys_%s.root",caseTag.c_str(),isPr?"pr":"npr", nToys,isPbPb?"PbPb":"PP"),"RECREATE");
+  arrEffs->Write("accEffArray", TObject::kSingleKey);
+  fsave->Close();
+}
+
+void oniaTree::AccEffStatToy_Eff(int nToys,string caseTag) {
+  // Randomise TEfficiency 100 times. Output will be a TObjArray with 100 TH2
+  TFile* effFile = TFile::Open(Form("../Fitter/Input/correction_AccEff_centMaps%s.root",caseTag.c_str())); 
+  TEfficiency *eff = (TEfficiency*) effFile->Get(Form("hcorr_Jpsi_%s_%s_Eff",isPbPb?"PbPb":"PP",isPr?"pr":"npr"));
+  
+  TObjArray *arrEffs = new TObjArray(); // Array to store efficiencies
+  arrEffs->SetOwner(true);
+
+  TRandom* rnd = new TRandom3(); // For randomisation
+
+  for (int i=0 ; i < nToys ; i++)
+    {
+      //if (i%10==0) 
+      cout <<"[INFO] toy "<<i<<"/"<<nToys<<endl;
+      TH2* histoTot = (TH2*) eff->GetTotalHistogram()->Clone(Form("hTotToy_%d",i)); // Get corresponding histo and number of bins
+      histoTot->Sumw2();
+      TH2* histoPass = (TH2*) histoTot->Clone(Form("hPassToy_%d",i)); // Get corresponding histo and number of bins
+      histoPass->Sumw2();
+      int nBinsX = histoTot->GetNbinsX();
+      int nBinsY = histoTot->GetNbinsY();
+      //cout <<"nBinsX = "<<nBinsX<<", nBinsY = "<<nBinsY<<endl;
+      
+      for (int j = 1 ; j <= nBinsX ; j++)
+	{
+	  //cout <<"start bin "<<j<<endl;
+	  for (int k = 1 ; k <= nBinsY ; k++)
+	    {
+	      int bin = histoTot->GetBin(j,k);      
+	      double effVal = eff->GetEfficiency(bin);
+	      double ntot = histoTot->GetBinContent(bin);
+	      //double nPass = histoPass->GetBinContent(bin);
+	      double newPass = rnd->Binomial(ntot,effVal);
+	      //double x = histoTot->GetXaxis()->GetBinCenter(j);
+	      //double y = histoTot->GetYaxis()->GetBinCenter(k);
+	      histoPass->SetBinContent(histoPass->GetBin(j,k),newPass);
+	      //cout << "rap = "<<x<<", pt = "<<y<<" nTot = "<<ntot<<" nPass = "<<nPass<<" new Pass = "<<newPass<<" nominal eff = "<<effVal<<", new eff = "<<newPass*1.0/ntot<<endl;
+	    }
+	}
+      TEfficiency* newHeff = (TEfficiency*) eff->Clone(Form("effToy_%d",i)); // Histo to store new 2D eff
+      newHeff->SetPassedHistogram(*histoPass, "f");
+      newHeff->SetTotalHistogram(*histoTot, "f");
+      arrEffs->Add(newHeff);
+    }
+
+  gSystem->mkdir(Form("FilesAccxEff%s/toyMC",caseTag.c_str()));
+  TFile* fsave = new TFile(Form("FilesAccxEff%s/toyMC/%sEff%dToys_%s.root",caseTag.c_str(),isPr?"pr":"npr", nToys,isPbPb?"PbPb":"PP"),"RECREATE");
+  eff->Write("nominal");
+  arrEffs->Write("accEffArray", TObject::kSingleKey);
+  
+  
+  if (caseTag.find("centBins")!=std::string::npos) {
+    setBins(caseTag);
+    TObjArray *arrEffsCent = new TObjArray();
+    arrEffsCent->SetOwner(true);
+    
+    for (int iCent = 0; iCent<ncentbins; iCent++) {
+      cout <<"[INFO] centrality[i] = "<<iCent<<" = cent_"<<centbins[iCent]<<centbins[iCent+1]<<endl;
+      TEfficiency* effTemp = (TEfficiency*) effFile->Get(Form("hcorr_Jpsi_%s_%s_Eff_cent%d%d",isPbPb?"PbPb":"PP",isPr?"pr":"npr",centbins[iCent],centbins[iCent+1]));
+      cout <<"Reading from efficiency "<<effTemp->GetName()<<endl;
+      TH2* histoTot = (TH2*) effTemp->GetTotalHistogram()->Clone(Form("hTotToy_cent%d%d",centbins[iCent],centbins[iCent+1])); // Get corresponding histo and number of bins
+      for (int i=0 ; i < nToys ; i++)
+	{
+	  cout <<"[INFO] toy "<<i<<"/"<<nToys<<endl;
+	  histoTot->Sumw2();
+	  TH2* histoPass = (TH2*) histoTot->Clone(Form("hPassToy_cent%d%d_%d",centbins[iCent],centbins[iCent+1],i)); // Get corresponding histo and number of bins
+	  histoPass->Sumw2();
+	  int nBinsX = histoTot->GetNbinsX();
+	  int nBinsY = histoTot->GetNbinsY();
+	  for (int j = 1 ; j <= nBinsX ; j++)
+	    {
+	      for (int k = 1 ; k <= nBinsY ; k++)
+		{
+		  int bin = histoTot->GetBin(j,k);      
+		  double effVal = effTemp->GetEfficiency(bin);
+		  double ntot = histoTot->GetBinContent(bin);
+		  double newPass = rnd->Binomial(ntot,effVal);
+		  histoPass->SetBinContent(histoPass->GetBin(j,k),newPass);
+		  //cout <<"bin = ["<<j<<","<<k<<"]"<<", effVal = "<<effVal<<", ntot = "<<ntot<<", oldEff = "<<effVal<<", newEff = "<<newPass/ntot<<endl;
+		}
+	    }
+	  TEfficiency* newHeff = (TEfficiency*) effTemp->Clone(Form("effToy_cent%d%d_%d",centbins[iCent],centbins[iCent+1],i)); // Histo to store new 2D eff
+	  newHeff->SetPassedHistogram(*histoPass, "f");
+	  newHeff->SetTotalHistogram(*histoTot, "f");
+	  arrEffsCent->Add(newHeff);
+	}
+      effTemp->Write(Form("nominal_cent%d%d",centbins[iCent],centbins[iCent+1]));
+    }
+      arrEffsCent->Write(Form("accEffArray_centAll"), TObject::kSingleKey);
+  }
+  
+  //effFile->Close();
+  fsave->Close();
+}
+
+void oniaTree::AccEffStatToy_1D(int nToys, string caseTag) {
+  // Randomise TEfficiency 100 times. Output will be a TObjArray with 100 TH2
+  TFile* effFile = TFile::Open(Form("../Fitter/Input/correction_AccEff_centMaps%s.root",caseTag.c_str()),"READ"); 
+  TEfficiency *eff = (TEfficiency*) effFile->Get(Form("hcorr_Jpsi_%s_%s_1D",isPbPb?"PbPb":"PP",isPr?"pr":"npr"));
+  
+  TObjArray *arrEffs = new TObjArray(); // Array to store efficiencies
+  arrEffs->SetOwner(true);
+
+  TRandom* rnd = new TRandom3(); // For randomisation
+
+  for (int i=0 ; i < nToys ; i++)
+    {
+      //if (i%10==0) 
+      cout <<"[INFO] toy "<<i<<"/"<<nToys<<endl;
+      TH1* histoTot = (TH1*) eff->GetTotalHistogram()->Clone(Form("hTotToy_%d",i)); // Get corresponding histo and number of bins
+      histoTot->Sumw2();
+      TH1* histoPass = (TH1*) histoTot->Clone(Form("hPassToy_%d",i)); // Get corresponding histo and number of bins
+      histoPass->Sumw2();
+      int nBinsX = histoTot->GetNbinsX();
+      //int nBinsY = histoTot->GetNbinsY();
+      //cout <<"nBinsX = "<<nBinsX<<", nBinsY = "<<nBinsY<<endl;
+      histoTot->Scale(1./1000);
+      histoPass->Scale(1./1000);
+
+      for (int j = 1 ; j <= nBinsX ; j++)
+	{
+	  int bin = histoTot->GetBin(j);      
+	  double effVal = eff->GetEfficiency(bin);
+	  double ntot = histoTot->GetBinContent(bin);
+	  double newPass = rnd->Binomial(ntot,effVal);
+	  histoPass->SetBinContent(histoPass->GetBin(j),newPass);
+	}
+      TEfficiency* newHeff = (TEfficiency*) eff->Clone(Form("effToy_%d",i)); // Histo to store new 2D eff
+      newHeff->SetPassedHistogram(*histoPass, "f");
+      newHeff->SetTotalHistogram(*histoTot, "f");
+      arrEffs->Add(newHeff);
+    }
+  effFile->Close();
+  gSystem->mkdir(Form("FilesAccxEff%s/toyMC",caseTag.c_str()));
+  TFile* fsave = new TFile(Form("FilesAccxEff%s/toyMC/%sAccEff%dToys_%s_1D.root",caseTag.c_str(),isPr?"pr":"npr", nToys,isPbPb?"PbPb":"PP"),"RECREATE");
   arrEffs->Write("accEffArray", TObject::kSingleKey);
   fsave->Close();
 }
@@ -97,7 +366,7 @@ void oniaTree::AccEffStat(string caseLabel) {
 
   TH1F* histVar = NULL;
 
-  TFile* nomFile = TFile::Open("../Fitter/Input/correction_AccEff.root","READ");
+  TFile* nomFile = TFile::Open("../Fitter/Input/correction_AccEff_centMaps.root","READ");
   TEfficiency* prnomEff = (TEfficiency*) nomFile->Get(Form("hcorr_Jpsi_%s_pr",isPbPb?"PbPb":"PP"));
 
   double bf = 1.0;
@@ -134,7 +403,7 @@ void oniaTree::AccEffStat(string caseLabel) {
       }// end of the tree entries
       hisArr->Add(histVar);
     } // end of the variations
-  TFile* fsave = new TFile(Form("FilesAccEff/zHistsWith100AccEffToys_%s_%s.root",isPbPb?"PbPb":"PP",isPr?"prompt":"nonprompt"),"RECREATE");
+  TFile* fsave = new TFile(Form("FilesAccxEff/zHistsWith100AccEffToys_%s_%s.root",isPbPb?"PbPb":"PP",isPr?"prompt":"nonprompt"),"RECREATE");
   hisArr->Write();
   fsave->Close();
 
@@ -171,8 +440,9 @@ void oniaTree::AccEffStat(string caseLabel) {
 
 void oniaTree::TnpSyst(string caseLabel) {
 
-  int npt2D = sizeof(ptbins)/sizeof(double)-1;
-  int ny2D = sizeof(ybins)/sizeof(double)-1;
+  setBins("");
+
+
 
   int jtPtmin=10;
   int jtPtmax=60;
@@ -298,7 +568,7 @@ void oniaTree::TnpSyst(string caseLabel) {
     prEffNum->Multiply(prAccNum);
 
     cout<<"syst i = "<<i<<endl;
-    prcorrTemp = new TEfficiency(Form("prCorr_%s", corrName[i].c_str()), "AccxEff(y,pt); y; pt; eff", ny2D, ybins, npt2D, ptbins);
+    prcorrTemp = new TEfficiency(Form("prCorr_%s", corrName[i].c_str()), "AccxEff(y,pt); y; pt; eff", nybins, ybins, nptbins, ptbins);
     prcorrTemp->SetStatisticOption(TEfficiency::kBBayesian);
     prcorrTemp->SetPassedHistogram(*prEffNum,"f");
     prcorrTemp->SetTotalHistogram(*prEffDen,"f");

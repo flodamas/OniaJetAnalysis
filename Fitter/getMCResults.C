@@ -600,3 +600,247 @@ void drawXiPlot() {
   gSystem->mkdir("Output/MCResults");
   c->SaveAs("Output/MCResults/fwdXiPlot.pdf");
 }
+
+
+void GetJES (bool isPbPb, bool isPr)
+{
+  int ny2D = sizeof(ybins2D)/sizeof(double)-1;
+  int npt2D = sizeof(ptbins2D)/sizeof(double)-1;
+
+  double sefer=0;
+
+  //TFile *treeFile = TFile::Open(Form("/data_CMS/cms/mnguyen/jPsiJet/mc/%s/merged_HiForestAOD.root", isPr?"prompt/v9_ext":"nonprompt/v9_ext_bHadronGen"));
+  //cout << Form("[INFO] Reading tree from file /data_CMS/cms/mnguyen/jPsiJet/mc/%s/merged_HiForestAOD.root", isPr?"prompt/v9_ext":"nonprompt/v9_ext_bHadronGen")<<endl;
+  TFile *treeFile = TFile::Open(Form("/data_CMS/cms/diab/JpsiJet/MC/pp/%s/HiForestAOD%s_merged.root", isPr?"prompt/v3":"nonprompt/v4",isPr?"_ext":""));
+
+  TTree* oniaTree = (TTree*) treeFile->Get("hionia/myTree");
+  TTree* jetTree = (TTree*) treeFile->Get("ak4PFJetAnalyzer/t");
+
+  oniaTree->AddFriend(jetTree);
+
+  TH1F* zMidHist = new TH1F ("zMidHist","", 7, 0.02, 1); zMidHist->Sumw2();
+  TH1F* zFwdHist = new TH1F ("zFwdHist","", 5, 0, 1); zFwdHist->Sumw2();
+  TH1F* nMidHist = new TH1F ("nMidHist","", 10, 0, 1); nMidHist->Sumw2();
+  TH1F* nFwdHist = new TH1F ("nFwdHist","", 10, 0, 1); nFwdHist->Sumw2();
+
+  
+  cout <<"[INFO] Importing AccFiles to correct"<<endl;
+  TFile *corrFile = TFile::Open("Input/correction_AccEff_centMaps_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights.root");
+
+  TEfficiency* accCorr = (TEfficiency*) corrFile->Get(Form("hcorr_Jpsi_PP_%s_Acc",isPr?"pr":"npr"));
+  
+  double accWeight;
+  double zed;
+  double drmin;
+
+  TTree* fChain;
+
+  Int_t           Gen_QQ_size;
+  TClonesArray    *Gen_QQ_4mom;
+  TClonesArray    *Gen_QQ_mupl_4mom;
+  TClonesArray    *Gen_QQ_mumi_4mom;
+  TClonesArray    *Gen_mu_4mom;
+  Int_t           Gen_QQ_mupl_idx[99];
+  Int_t           Gen_QQ_mumi_idx[99];
+  Float_t         Gen_weight;
+
+  Int_t           ngen;
+  Float_t         genpt[99];   //[ngen]
+  Float_t         geneta[99];   //[ngen]
+  Float_t         geny[99];   //[ngen]
+  Float_t         genphi[99];   //[ngen]
+  Float_t         genm[99];   //[ngen]
+
+
+  TBranch        *b_Gen_QQ_size;   //!
+  TBranch        *b_Gen_QQ_4mom;   //!
+  TBranch        *b_Gen_QQ_mupl_4mom;   //!
+  TBranch        *b_Gen_QQ_mumi_4mom;   //!
+  TBranch        *b_Gen_mu_4mom;
+  TBranch        *b_Gen_QQ_mupl_idx;
+  TBranch        *b_Gen_QQ_mumi_idx;
+  TBranch        *b_Gen_weight;
+  TBranch        *b_ngen;   //!
+  TBranch        *b_genpt;   //!
+  TBranch        *b_geneta;   //!
+  TBranch        *b_geny;   //!
+  TBranch        *b_genphi;   //!
+  TBranch        *b_genm;   //!
+
+
+  Gen_QQ_4mom = 0;
+  Gen_QQ_mupl_4mom = 0;
+  Gen_QQ_mumi_4mom = 0;
+  Gen_mu_4mom = 0;
+  //jtbHadronPt = 0;
+
+  if (!oniaTree) { cout<<"[ERROR] no tree found"<<endl; return;}
+
+  fChain = oniaTree;
+  if (fChain->GetBranch("Gen_QQ_size")) fChain->SetBranchAddress("Gen_QQ_size", &Gen_QQ_size, &b_Gen_QQ_size);
+  if (fChain->GetBranch("Gen_QQ_4mom")) fChain->SetBranchAddress("Gen_QQ_4mom", &Gen_QQ_4mom, &b_Gen_QQ_4mom);
+  //if (fChain->GetBranch("Gen_QQ_mupl_4mom")) fChain->SetBranchAddress("Gen_QQ_mupl_4mom", &Gen_QQ_mupl_4mom, &b_Gen_QQ_mupl_4mom);
+  //if (fChain->GetBranch("Gen_QQ_mumi_4mom")) fChain->SetBranchAddress("Gen_QQ_mumi_4mom", &Gen_QQ_mumi_4mom, &b_Gen_QQ_mumi_4mom);
+  if (fChain->GetBranch("Gen_mu_4mom")) fChain->SetBranchAddress("Gen_mu_4mom", &Gen_mu_4mom, &b_Gen_mu_4mom);
+  if (fChain->GetBranch("Gen_QQ_mupl_idx")) fChain->SetBranchAddress("Gen_QQ_mupl_idx", Gen_QQ_mupl_idx, &b_Gen_QQ_mupl_idx);
+  if (fChain->GetBranch("Gen_QQ_mumi_idx")) fChain->SetBranchAddress("Gen_QQ_mumi_idx", Gen_QQ_mumi_idx, &b_Gen_QQ_mumi_idx);
+  if (fChain->GetBranch("Gen_weight")) fChain->SetBranchAddress("Gen_weight", &Gen_weight, &b_Gen_weight);
+  
+  if (fChain->GetBranch("ngen")) fChain->SetBranchAddress("ngen", &ngen, &b_ngen);
+  if (fChain->GetBranch("genpt")) fChain->SetBranchAddress("genpt", genpt, &b_genpt);
+  if (fChain->GetBranch("geneta")) fChain->SetBranchAddress("geneta", geneta, &b_geneta);
+  if (fChain->GetBranch("geny")) fChain->SetBranchAddress("geny", geny, &b_geny);
+  if (fChain->GetBranch("genphi")) fChain->SetBranchAddress("genphi", genphi, &b_genphi);
+  if (fChain->GetBranch("genm")) fChain->SetBranchAddress("genm", genm, &b_genm);
+
+  cout<<"[INFO] all branch addresses set"<<endl;
+
+  /*
+  fChain->SetBranchStatus("*",0);
+  if (fChain->GetBranch("Gen_QQ_size")) fChain->SetBranchStatus("Gen_QQ_size",1);
+  if (fChain->GetBranch("Gen_QQ_4mom")) fChain->SetBranchStatus("Gen_QQ_4mom",1);
+  if (fChain->GetBranch("Gen_QQ_mupl_4mom")) fChain->SetBranchStatus("Gen_QQ_mupl_4mom",1);
+  if (fChain->GetBranch("Gen_QQ_mumi_4mom")) fChain->SetBranchStatus("Gen_QQ_mumi_4mom",1);
+  if (fChain->GetBranch("Gen_mu_4mom")) fChain->SetBranchStatus("Gen_mu_4mom",1); 
+  if (fChain->GetBranch("Gen_QQ_mupl_idx")) fChain->SetBranchStatus("Gen_QQ_mupl_idx",1);
+  if (fChain->GetBranch("Gen_QQ_mumi_idx")) fChain->SetBranchStatus("Gen_QQ_mumi_idx",1);
+  if (fChain->GetBranch("Gen_weight")) fChain->SetBranchStatus("Gen_weight",1);
+  if (fChain->GetBranch("ngen")) fChain->SetBranchStatus("ngen",1);
+  if (fChain->GetBranch("genpt")) fChain->SetBranchStatus("genpt",1);
+  if (fChain->GetBranch("geneta")) fChain->SetBranchStatus("geneta",1);
+  if (fChain->GetBranch("geny")) fChain->SetBranchStatus("geny",1);
+  if (fChain->GetBranch("genphi")) fChain->SetBranchStatus("genphi",1);
+  if (fChain->GetBranch("genm")) fChain->SetBranchStatus("genm",1);
+  */
+
+
+  Long64_t nentries =fChain->GetEntries();
+  //nentries = 1000000;
+  Long64_t nbytes = 0, nb = 0;
+  for (Long64_t jentry=0; jentry<nentries;jentry++) 
+    {
+      if (jentry%1000000==0) cout<<"[INFO] "<<jentry<<"/"<<nentries<<Form(" for %s",isPr?"prompt":"nonprompt")<<endl;
+      nb = fChain->GetEntry(jentry); 
+      nbytes += fChain->GetEntry(jentry);
+      fChain->GetEntry(jentry);
+      
+      for (int iQQ=0; iQQ<Gen_QQ_size; iQQ++)
+	{
+	  zed = -1;
+	  drmin = 0.5;
+	  TLorentzVector *GenQQ4mom = (TLorentzVector*) Gen_QQ_4mom->At(iQQ);
+	  TLorentzVector *GenQQmupl = (TLorentzVector*) Gen_mu_4mom->At(Gen_QQ_mupl_idx[iQQ]);
+	  TLorentzVector *GenQQmumi = (TLorentzVector*) Gen_mu_4mom->At(Gen_QQ_mumi_idx[iQQ]);
+
+	  if (GenQQ4mom->M()<2.6 || GenQQ4mom->M()>3.5) continue;
+	  if (GenQQ4mom->Pt() < 3 || GenQQ4mom->Pt() > 100) continue;
+	  if (abs(GenQQ4mom->Rapidity())>2.4) continue;
+	  if (!isGlobalMuonInAccept2019(GenQQmupl) || !isGlobalMuonInAccept2019(GenQQmumi)) continue;
+
+	  accWeight = 1.0/(accCorr->GetEfficiency(accCorr->FindFixBin(GenQQ4mom->Rapidity(), GenQQ4mom->Pt())));
+	  if (isPr) Gen_weight=1;
+	  accWeight = accWeight * Gen_weight;
+
+	  float jPsiPt = GenQQ4mom->Pt();
+
+
+	  if(iBin == 1 || jPsiPt > binCent)
+	    {
+	      float x1 = binCent;
+	      float x2 = hPythiaMid->GetBinCenter(iBin+1);
+	      float y1 = hPythiaMid->GetBinContent(iBin);
+	      float y2 = hPythiaMid->GetBinContent(iBin+1);
+	      if (abs(GenQQ4mom->Rapidity())>1.6) {
+		x2 = hPythiaFwd->GetBinCenter(iBin+1);
+		y1 = hPythiaFwd->GetBinContent(iBin);
+		y2 = hPythiaFwd->GetBinContent(iBin+1);
+	      }
+	      float m = (y2-y1)/(x2-x1);
+	      float b = y1 - m*x1;
+	      pythiaXs = m*jPsiPt + b;
+	    }
+	  else{
+	    float x1 = hPythiaMid->GetBinCenter(iBin-1);
+	    if (abs(GenQQ4mom->Rapidity())>1.6) x1 = hPythiaFwd->GetBinCenter(iBin-1);
+	    float x2 = binCent;
+	    float y1 = hPythiaMid->GetBinContent(iBin-1);
+	    float y2 = hPythiaMid->GetBinContent(iBin);
+	    if (abs(GenQQ4mom->Rapidity())>1.6) {
+	      y1 = hPythiaFwd->GetBinContent(iBin-1);
+	      y2 = hPythiaFwd->GetBinContent(iBin);
+	    }
+	    float m = (y2-y1)/(x2-x1);
+	    float b = y1 - m*x1;
+	    pythiaXs = m*jPsiPt + b;
+	  }
+
+	  //if (pythiaXs==0)
+	  //cout<<"[INFO] pythiaXS =0"<<endl;
+	  //if (!isPr && pythiaXs>0)
+	  //accWeight = accWeight*fonllXs/pythiaXs;
+
+	  if (abs(GenQQ4mom->Rapidity())>1.6)
+	    nFwdHist->Fill(sefer, accWeight);
+	  if (abs(GenQQ4mom->Rapidity())<1.6 && GenQQ4mom->Pt() > 6.5)
+	    nMidHist->Fill(sefer, accWeight);
+
+	  for (int iJet=0; iJet<ngen; iJet++) {
+	    if (genpt[iJet]<25 || genpt[iJet]>35) continue;
+	    if (abs(geny[iJet])>2.4) continue;
+	    
+	    TLorentzVector v_jet;
+	    v_jet.SetPtEtaPhiM(genpt[iJet], geneta[iJet], genphi[iJet], genm[iJet]);
+	    if (GenQQ4mom->DeltaR (v_jet)<=drmin) {
+	      drmin = GenQQ4mom->DeltaR (v_jet);
+	      if (!plotBpt)
+		zed = GenQQ4mom->Pt()*1.0/genpt[iJet];
+	      if (plotBpt) {
+		int ibestB = -1;
+		float drminb = 999;
+		
+		for (int ib = 0; ib<mult; ib++) {
+		  float deta = eta->at(ib);
+		  deta = eta->at(ib) - geneta[iJet];
+		  float dphi = phi->at(ib) - genphi[iJet];
+		  dphi = acos(cos(dphi));
+		  float dR = sqrt(deta*deta + dphi*dphi);
+		  if (dR < drminb) {
+		    drminb = dR;
+		    ibestB = ib;
+		  }
+		}// end of b loop 
+		if (ibestB > 0)
+		  zed = pt->at(ibestB)*1.0/genpt[iJet];
+		if (ibestB > 0 && drminb>0.4) cout <<"[WARNING] Bbig dR(b-jet) = "<<drminb<<"for pt(b) = "<<pt->at(ibestB)<<endl;
+	      }// end of b cond
+	    }	      
+	  }// end of gen jet loop
+	  if (zed == -1) continue;
+	  if (zed > 1 && zed <= 1.000001) zed = 0.9999999;
+	  
+	  if (plotXi) zed = log(1.0/zed);
+	  
+	  if (underflowOff  && zed<0.2) continue;
+	  if (abs(GenQQ4mom->Rapidity())>1.6)
+	    zFwdHist->Fill(zed, accWeight);
+	  if (underflowOff  && zed<0.44) continue;
+	  if (abs(GenQQ4mom->Rapidity())<1.6 && GenQQ4mom->Pt()>6.5)
+	    zMidHist->Fill(zed, accWeight);
+	} //end of genQQ loop 
+    }//end of events loop
+  //if (underflowOff)
+  //{
+  //zMidHist->Scale(1.0/zMidHist->Integral("width"));
+  //zFwdHist->Scale(1.0/zFwdHist->Integral("width"));
+  //}
+  //zHist->Scale(1.0/0.2);
+  gSystem->mkdir("Output/MCResults");
+  //gSystem->mkdir("Output/MCResults/fonllCorr");
+  //TFile *fsave = new TFile(Form("Output/MCResults/fonllCorr/mcResult_%s_%s%s%s.root",isPr?"prompt":"nonprompt", underflowOff?"underflowOff":"all", plotBpt?"_bHadronPt":"", plotXi?"_xi":""),"RECREATE");
+  TFile *fsave = new TFile(Form("Output/MCResults/mcResult_%s_%s_%s%s%s.root",isPbPb?"PbPb":"PP",isPr?"prompt":"nonprompt", underflowOff?"underflowOff":"all", plotBpt?"_bHadronPt":"", plotXi?"_xi":""),"RECREATE");
+  zMidHist->Write("zDist_mid");
+  nMidHist->Write("Ntot_mid");
+  zFwdHist->Write("zDist_fwd");
+  nFwdHist->Write("Ntot_fwd");
+  fsave->Close();
+}

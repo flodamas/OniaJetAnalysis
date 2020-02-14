@@ -335,12 +335,12 @@ void plotNJJ(vector<anabin> thecats, string xaxis, string outputDir) {
   //if (plotUnfolded)
   //{
   TFile* funf_pp = TFile::Open("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/finalResults/UnfoldedDistributions_PP_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
-  TH1D* unfHist_pp = (TH1D*) funf_pp->Get("zUnfSI3");
+  TH1D* unfHist_pp = (TH1D*) funf_pp->Get("zUnfSI6");
   //unfHist_pp->Draw();
   funf_ppSyst = TFile::Open("Output/finalResults/UnfoldedDistributions_PP_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
   unfSyst = (TH1D*) unfHist_pp->Clone("unfSyst");//(TH1D*) funf_ppSyst->Get("zUnfSI3");
   funf_aa = TFile::Open("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/finalResults/UnfoldedDistributions_PbPb_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
-  unfHist_aa = (TH1D*) funf_aa->Get("zUnfSI29");
+  unfHist_aa = (TH1D*) funf_aa->Get("zUnfSI99");
   //unfHist_aa->Draw();
   //}
 
@@ -752,7 +752,7 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
     int style = cnt;
     int colorI = cnt;
     int colorF = color(colorI)-11;
-    //if (plotUnfolded) colorF = 17;
+    if (color(colorI) == 904) colorF = 902;
     if (intervals2Plot==2)
     {
       style = 4;
@@ -1136,22 +1136,22 @@ void centrality2npart(TGraphAsymmErrors* tg, bool issyst, double xshift) {
 }
 
 int color(int i) {
-  if (i==0) return kMagenta+2;
-  else if (i==1) return kBlue+2;
-  else if (i==2) return kRed+2;
-  else if (i==3) return kCyan+2;
-  else if (i==4) return kGreen+2;
-  else if (i==5) return kOrange+2;
-  else if (i==6) return kRed+1;
-  else if (i==7) return kYellow+1;
-  else if (i==8) return kAzure+1;
-  else if (i==9) return kBlack;
+  if (i==0) return 904;//892;
+  else if (i==1) return kMagenta+2;
+  else if (i==2) return kBlue+2;
+  else if (i==3) return kRed+2;
+  else if (i==4) return kCyan+2;
+  else if (i==5) return kGreen+2;
+  else if (i==6) return kOrange+2;
+  else if (i==7) return kRed+1;
+  else if (i==8) return kYellow+1;
+  else if (i==9) return kAzure+1;
   else return kBlack;
 }
 
 int markerstyle(int i) {
-  if (i==0) return kFullSquare;
-  else if (i==1) return kFullCircle;
+  if (i==0) return kFullCircle;
+  else if (i==1) return kFullSquare;
   else if (i==2) return kFullStar;
   else if (i==3) return kFullCross;
   else if (i==4) return kFullDiamond;

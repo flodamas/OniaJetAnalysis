@@ -224,9 +224,9 @@ bool fitCharmoniaCtauResDataModel( RooWorkspace& myws,             // Local Work
     if(!drawCtauResDataPlot(myws, outputDir, opt, cut, parIni, plotLabel, DSTAG, dsName2Fit.c_str(), isPbPb, setLogScale, incSS, binWidth["CTAURES"])) { return false; }
     // Save the results
     string FileName = ""; setCtauResDataFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
-    cout <<"saving snapshot"<<endl;
+    //cout <<"saving snapshot"<<endl;
     myws.saveSnapshot(Form("%s_parFit", pdfName.c_str()),*newpars,kTRUE);
-    cout <<"saving the workspace"<<endl;
+    //cout <<"saving the workspace"<<endl;
     saveWorkSpace(myws, Form("%sctauRes/%s/result", outputDir.c_str(), DSTAG.c_str()), FileName);
   }
   

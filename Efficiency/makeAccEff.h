@@ -43,6 +43,12 @@ public :
    bool          isPr;
    bool          isAcc;
 
+   Double_t *ybins = new Double_t[100];
+   int nybins;
+   Double_t *ptbins =  new Double_t[100]; 
+   int nptbins;
+   int *centbins = new int[100];
+   int ncentbins;
    //my additional variables
    
    int cent;
@@ -57,8 +63,8 @@ public :
    Float_t deta;
    Float_t drmin;
    Float_t z=100;
-   int triggerIndex_PP = 3;
-   int triggerIndex_PbPb = 12;
+   int triggerIndex_PP = 3; // HLT_HIL1DoubleMu0_v1
+   int triggerIndex_PbPb = 12; // HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1
 
    Float_t weight;
    Float_t tnp_weight;
@@ -306,13 +312,17 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 
-   virtual void     AccEffCalc();
-   virtual void     EffCalc();
-   virtual void     AccCalc();
+   virtual void     AccEffCalc(string caseTag="");
+   virtual void     EffCalc(string caseTag="");
+   virtual void     AccCalc(string caseTag="");
    virtual void     Plot();
-   virtual void     ClosureTest();
+   virtual void     ClosureTest(string caseTag="");
+   virtual void     ClosureTestPtWeights();
    virtual void     TnpSyst(string caseLabel ="");
    virtual void     AccEffStatToy(int nToys=100);
+   virtual void     AccEffStatToy_Acc(int nToys=100,string caseLabel ="");
+   virtual void     AccEffStatToy_Eff(int nToys=100,string caseLabel ="");
+   virtual void     AccEffStatToy_1D(int nToys=100,string caseLabel ="");
    virtual void     AccEffStat(string caseLabel ="");
    virtual void     TnpToy(int min=0, int max=100);
    virtual void     TnpStat(string caseLabel ="");
@@ -334,9 +344,11 @@ public :
    virtual Bool_t   areMuonsInAcceptance2015 (Int_t iRecoQQ);
    virtual Bool_t   areGenMuonsInAcceptance2015 (Int_t iGenQQ);
    virtual Bool_t   passQualityCuts2015 (Int_t iRecoQQ);
+   virtual void     setBins(string caseTag ="");
 
    virtual Int_t    getMCHiBinFromhiHF(const Double_t hiHF);
    virtual Double_t findNcoll(int hiBin);
+   virtual vector<TObjArray*> ReadFileWeight(bool ispbpb, bool isprompt);
 };
 
 #endif
@@ -356,7 +368,7 @@ oniaTree::oniaTree(Bool_t pbpb, Bool_t pr, Bool_t acc) : fChain(0)
     //"root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_BJpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //pp nonprompt
     "/data_CMS/cms/mnguyen/jPsiJet/mc/nonprompt/acc/merged_acc.root",
     "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_JpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb prompt
-    "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_BJpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb  nonprompt
+   "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_BJpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb  nonprompt
     //Eff files
     "/data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v3/HiForestAOD_merged.root", //pp prompt
     "/data_CMS/cms/diab/JpsiJet/MC/pp/nonprompt/v5/HiForestAOD_merged.root", //pp nonprompt 
@@ -600,6 +612,7 @@ void oniaTree::Init(TTree *tree)
    if (fChain->GetBranch("pPAprimaryVertexFilter")) fChain->SetBranchStatus("pPAprimaryVertexFilter",1);
    if (fChain->GetBranch("pprimaryVertexFilter")) fChain->SetBranchStatus("pprimaryVertexFilter",1);
    if (fChain->GetBranch("pBeamScrapingFilter")) fChain->SetBranchStatus("pBeamScrapingFilter",1);
+   if (fChain->GetBranch("pclusterCompatibilityFilter")) fChain->SetBranchStatus("pclusterCompatibilityFilter",1);
    if (fChain->GetBranch("phfCoincFilter2Th4")) fChain->SetBranchStatus("phfCoincFilter2Th4",1);
    if (fChain->GetBranch("hiBin")) fChain->SetBranchStatus("hiBin",1);
    if (fChain->GetBranch("Gen_weight")) fChain->SetBranchStatus("Gen_weight",1);
@@ -855,4 +868,45 @@ Double_t oniaTree::findNcoll(int hiBin) {
   return Ncoll[hiBin];
 };
 
+TH1D* makePull(TH1D* oldHist, TH1D* newHist, bool systErr=false){
+  TH1D* pullHist = (TH1D*)oldHist->Clone("pullHist");
+
+  pullHist->Divide(newHist);
+
+  if (systErr) {
+    int nbin = pullHist->GetNbinsX();
+    for (int i=0;i<=nbin;i++) {
+      pullHist->SetBinError(i, oldHist->GetBinError(i)/newHist->GetBinContent(i));
+    }
+  }
+
+  pullHist->SetTitle("");
+  pullHist->GetYaxis()->SetRangeUser(0.78, 1.22);
+  pullHist->GetYaxis()->SetTitle("old/new");
+  pullHist->GetYaxis()->SetNdivisions(505);
+  pullHist->GetYaxis()->CenterTitle(true);
+  pullHist->GetYaxis()->SetNdivisions(505);
+  pullHist->GetYaxis()->SetTitleSize(25);
+  pullHist->GetYaxis()->SetTitleFont(43);
+  pullHist->GetYaxis()->SetTitleOffset(1.4);
+  pullHist->GetYaxis()->SetLabelFont(43);
+  pullHist->GetYaxis()->SetLabelSize(20);
+
+  pullHist->GetXaxis()->CenterTitle(true);
+  //pullHist->GetXaxis()->SetTitle("");
+  pullHist->GetXaxis()->SetNdivisions(510);
+  pullHist->GetXaxis()->SetTitleSize(25);
+  pullHist->GetXaxis()->SetTitleFont(43);
+  pullHist->GetXaxis()->SetTitleOffset(2.5);
+  pullHist->GetXaxis()->SetLabelFont(43);
+  pullHist->GetXaxis()->SetLabelSize(25);
+  //pullHist->SetMarkerColor(kBlack);
+  //pullHist->SetMarkerStyle(kFullCircle);
+  pullHist->SetMarkerSize(1);
+  //pullHist->SetLineColor(kBlack);
+  pullHist->SetLineWidth(2);
+  return pullHist;
+}
+
 #endif // #ifdef makeAccEff_cxx
+

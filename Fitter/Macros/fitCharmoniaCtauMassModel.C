@@ -404,12 +404,12 @@ bool fitCharmoniaCtauMassModel( RooWorkspace& myws,             // Local Workspa
   RooFitResult* fitResult = myws.pdf(pdfName.c_str())->fitTo(*myws.data(dsNameCut.c_str()), Extended(kTRUE), ExternalConstraints(*myws.set("ConstrainPdfList")), NumCPU(numCores), SumW2Error(isWeighted), Save());
   fitResult->Print("v");
   myws.import(*fitResult, Form("fitResult_%s", pdfName.c_str()));
-cout << "[1] the fits are done start with ctauFrom2DPlot" << endl;
+  //cout << "[1] the fits are done start with ctauFrom2DPlot" << endl;
   // Draw the mass plot
   drawCtauFrom2DPlot(myws, outputDir, opt, cut, parIni, plotLabel, DSTAG, isPbPb, incJpsi, incPsi2S, incBkg, setLogScale, incSS, binWidth["CTAU"]);
-cout << "[2] ctauFrom2DPlot Done start with massFrom2DPlot" <<endl;
+  //cout << "[2] ctauFrom2DPlot Done start with massFrom2DPlot" <<endl;
   drawMassFrom2DPlot(myws, outputDir, opt, cut, parIni, plotLabel, DSTAG, isPbPb, incJpsi, incPsi2S, incBkg, setLogScale, incSS, binWidth["MASS"]);
-cout << "[3] ctau and mass done separately start with the 2D plot" << endl;
+  //cout << "[3] ctau and mass done separately start with the 2D plot" << endl;
   drawCtauMass2DPlot(myws, outputDir, cut, plotLabel, DSTAG, isPbPb, binWidth);
   // Save the results
   myws.saveSnapshot(Form("%s_parFit", pdfName.c_str()),*newpars,kTRUE);
