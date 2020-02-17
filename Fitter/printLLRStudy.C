@@ -391,18 +391,27 @@ vector<string> printNLL(map< string, setModels_t > content, string outputDir, st
 
     if (binName.find("pt30500")!=std::string::npos){ ptStr = "3.0 $\\leq \\PT <$ 50.0 $\\GeVc$"; }                                                                                                    
     else if (binName.find("pt65500")!=std::string::npos){ ptStr = "6.5 $\\leq \\PT <$ 50.0 $\\GeVc$"; }
+    else if (binName.find("pt65500")!=std::string::npos){ ptStr = "6.5 $\\leq \\PT <$ 50.0 $\\GeVc$"; }
+    else if (binName.find("pt651000")!=std::string::npos){ ptStr = "6.5 $\\leq \\PT <$ 100.0 $\\GeVc$"; }
 
-    if (binName.find("z010")!=std::string::npos){ ptStr = "$ 0 \\leq \\z <$ 1 $\\GeVc$"; }
-    else if (binName.find("z01")!=std::string::npos){ ptStr = "0 $\\leq \\z <$ 0.1 $\\GeVc$"; }
-    else if (binName.find("z12")!=std::string::npos){ ptStr = "0.1 $\\leq \\z <$ 0.2 $\\GeVc$"; }
-    else if (binName.find("z23")!=std::string::npos){ ptStr = "0.2 $\\leq \\z <$ 0.3 $\\GeVc$"; }
-    else if (binName.find("z34")!=std::string::npos){ ptStr = "0.3 $\\leq \\z <$ 0.4 $\\GeVc$"; }
-    else if (binName.find("z45")!=std::string::npos){ ptStr = "0.4 $\\leq \\z <$ 0.5 $\\GeVc$"; }
-    else if (binName.find("z56")!=std::string::npos){ ptStr = "0.5 $\\leq \\z <$ 0.6 $\\GeVc$"; }
-    else if (binName.find("z67")!=std::string::npos){ ptStr = "0.6 $\\leq \\z <$ 0.7 $\\GeVc$"; }
-    else if (binName.find("z78")!=std::string::npos){ ptStr = "0.7 $\\leq \\z <$ 0.8 $\\GeVc$"; }
-    else if (binName.find("z89")!=std::string::npos){ ptStr = "0.8 $\\leq \\z <$ 0.9 $\\GeVc$"; }
-    else if (binName.find("z910")!=std::string::npos){ ptStr = "0.9 $\\leq \\z <$ 1 $\\GeVc$"; }
+    if (binName.find("z622")!=std::string::npos){ zStr = "0.064 $\\leq \\z <$ 0.220"; }
+    else if (binName.find("z2238")!=std::string::npos){ zStr = "0.220 $\\leq \\z <$ 0.376"; }
+    else if (binName.find("z3853")!=std::string::npos){ zStr = "0.376 $\\leq \\z <$ 0.532"; }
+    else if (binName.find("z5369")!=std::string::npos){ zStr = "0.532 $\\leq \\z <$ 0.688"; }
+    else if (binName.find("z6984")!=std::string::npos){ zStr = "0.688 $\\leq \\z <$ 0.844"; }
+    else if (binName.find("z84100")!=std::string::npos){ zStr = "0.844 $\\leq \\z <$ 1"; }
+    else if (binName.find("z0100")!=std::string::npos){ zStr = "0 $\\leq \\z <$ 1"; }
+    //if (binName.find("z010")!=std::string::npos){ zStr = "$ 0 \\leq \\z <$ 1 $\\GeVc$"; }
+    //else if (binName.find("z01")!=std::string::npos){ zStr = "0 $\\leq \\z <$ 0.1 $\\GeVc$"; }
+    //else if (binName.find("z12")!=std::string::npos){ zStr = "0.1 $\\leq \\z <$ 0.2 $\\GeVc$"; }
+    //else if (binName.find("z23")!=std::string::npos){ zStr = "0.2 $\\leq \\z <$ 0.3 $\\GeVc$"; }
+    //else if (binName.find("z34")!=std::string::npos){ zStr = "0.3 $\\leq \\z <$ 0.4 $\\GeVc$"; }
+    //else if (binName.find("z45")!=std::string::npos){ zStr = "0.4 $\\leq \\z <$ 0.5 $\\GeVc$"; }
+    //else if (binName.find("z56")!=std::string::npos){ zStr = "0.5 $\\leq \\z <$ 0.6 $\\GeVc$"; }
+    //else if (binName.find("z67")!=std::string::npos){ zStr = "0.6 $\\leq \\z <$ 0.7 $\\GeVc$"; }
+    //else if (binName.find("z78")!=std::string::npos){ zStr = "0.7 $\\leq \\z <$ 0.8 $\\GeVc$"; }
+    //else if (binName.find("z89")!=std::string::npos){ zStr = "0.8 $\\leq \\z <$ 0.9 $\\GeVc$"; }
+    //else if (binName.find("z910")!=std::string::npos){ zStr = "0.9 $\\leq \\z <$ 1 $\\GeVc$"; }
 
     //if (binName.find("rap06")!=std::string::npos){ rapStr = "$\\abs{y} <$ 0.6"; }
     //else if (binName.find("rap024")!=std::string::npos){ rapStr = "$\\abs{y} <$ 2.4"; }
@@ -744,7 +753,7 @@ bool extractWinnerLabel(string fileName, string& winnerLabel)
     cout << "[ERROR] Workspace not found in " << fileName << endl; return false;
   }
   
-  winnerLabel = Form("%.1f-%.1f;%.1f-%.1f;%.2f-%.2f;%.1f-%.1f;%.1f-%.1f;%.0f-%.0f;",
+  winnerLabel = Form("%.1f-%.1f;%.1f-%.1f;%.3f-%.3f;%.1f-%.1f;%.1f-%.1f;%.0f-%.0f;",
                      ws->var("rap")->getMin(), ws->var("rap")->getMax(),
                      ws->var("pt")->getMin(), ws->var("pt")->getMax(),
 		     ws->var("zed")->getMin(), ws->var("zed")->getMax(),
