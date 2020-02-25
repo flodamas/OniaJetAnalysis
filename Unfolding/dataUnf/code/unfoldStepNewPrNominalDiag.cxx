@@ -1,4 +1,6 @@
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
+#endif
 
 void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 3) {
   if (!setSystTag()) return;
@@ -10,12 +12,9 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 3) {
   string trainInputName = "";
   string outputName = "";
   
-  //string SF_name = "";
-  //SF_name = "_nominal";
-
-  testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin%s.root",iterMax,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
-  trainInputName = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/code/diag4DMatrixResponseInv.root";
-  outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin_Diag%s.root",iterMax,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  testInputName = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(), iterMax,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  trainInputName = Form("%s/dataUnf/code/diag4DMatrixResponseInv.root",unfPath.c_str());
+  outputName = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_Diag%s.root",unfPath.c_str(), iterMax,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   
   
   TFile *f_measured = new TFile(testInputName.c_str());

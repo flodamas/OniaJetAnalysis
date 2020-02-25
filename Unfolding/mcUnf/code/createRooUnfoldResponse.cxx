@@ -1,19 +1,21 @@
-//#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
-//#endif
+#endif
 
-void create(bool doPrompt = true, bool doPbPb = true, bool doTrain = false, Int_t stepNumber = 1){  
+void create(bool doPrompt = true, bool doPbPb = true, bool doTrain = false, Int_t stepNumber = 1){
+  if (!setCaseTag()) return;
   string inputName = "";
   string outputName = "";
   string partOfOutput = "response";
 
-  inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_%s_%s_%s_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root", stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", doTrain?"Train":"Test", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
-  
-  outputName = inputName;
-  if (stepNumber > 9) outputName.replace(91,9,partOfOutput);
-  else if (stepNumber > 99) outputName.replace(92,9,partOfOutput);
-  else outputName.replace(90,9,partOfOutput);
+  inputName = Form("%s/mcUnf/unfInput/step%i/unfolding_4D_%s_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", doTrain?"Train":"Test", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
 
+  outputName = inputName;
+  int idxReplace = inputName.find("unfolding_4D");
+  cout <<"idxReplace "<<idxReplace<<endl;
+  outputName.replace(idxReplace,9,partOfOutput);
+
+  cout <<"input = "<<inputName<<", output = "<<outputName<<endl;
   TFile *f = new TFile(inputName.c_str());
   f->ls();
 
@@ -168,6 +170,15 @@ void createRooUnfoldResponse(Int_t step = 1){
   if (step<=nSIter_pp && centShift ==0){
     create(true,false,true,step);
     create(true,false,false,step);
+  }
+
+  //nonprompt PbPb
+  create(false,true,true,step);
+  create(false,true,false,step);
+  //nonprompt pp
+  if (step<=nSIter_pp && centShift ==0){
+    create(false,false,true,step);
+    create(false,false,false,step);
   }
 
 }

@@ -1,4 +1,7 @@
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
+#endif
+
 
 TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominalHist);
 
@@ -6,11 +9,11 @@ void plotFinalResults(bool doPrompt = true)
 {
   gStyle->SetOptStat(0);
     
-  string filePPName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PP_%s_8iter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.root",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter_pp, "_nominal");
+  string filePPName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PP_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.root",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter_pp, "_nominal");
   
-  string filePbPbName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PbPb_%s_8iter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.root",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, "_nominal");
+  string filePbPbName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PbPb_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.root",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, "_nominal");
     
-  string fileOutputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PPvsPbPbvsCentShift_%s_8iter_%dz%dptBins%dz%dptMeasBin_SIterPbPb%i_SIterPP%i_statError.pdf",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, nSIter_pp);
+  string fileOutputName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PPvsPbPbvsCentShift_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIterPbPb%i_SIterPP%i_statError.pdf",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, nSIter_pp);
 
   TFile* filePP = TFile::Open(filePPName.c_str());
   TFile* filePbPb = TFile::Open(filePbPbName.c_str());
@@ -93,7 +96,7 @@ void plotFinalResults(bool doPrompt = true)
   leg->Draw("same");
   c->SaveAs(fileOutputName.c_str());
   
-  fileOutputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/finalResults/UnfoldedDistributions_Raa_%s_8iter_%dz%dptBins%dz%dptMeasBin_SIterPbPb%i_SIterPP%i_statError.pdf",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, nSIter_pp);
+  fileOutputName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_Raa_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIterPbPb%i_SIterPP%i_statError.pdf",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, nSIter_pp);
   Double_t x[5] = {0,0,0,0,0};
   Double_t y[5] = {0,0,0,0,0};
   Double_t exl[5] = {0,0,0,0,0};
@@ -164,8 +167,8 @@ TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominal
   Double_t eyh[5] = {0,0,0,0,0};
   
   for (int i=0; i<nSyst; i++) {
-    string fileUpName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin_SIter%i%sUp_statError.root",doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter:nSIter_pp, systNames[i].c_str());
-    string fileDownName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin_SIter%i%sDown_statError.root",doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter:nSIter_pp, systNames[i].c_str());
+    string fileUpName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%sUp_statError.root",unfPath.c_str(),doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter:nSIter_pp, systNames[i].c_str());
+    string fileDownName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%sDown_statError.root",unfPath.c_str(),doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter:nSIter_pp, systNames[i].c_str());
     TFile* fileUp = TFile::Open(fileUpName.c_str());
     TFile* fileDown = TFile::Open(fileDownName.c_str());
     if (!fileUp || !fileDown) {cout<<"[WARNING] systematic file not found:"<<systNames[i]<<endl; continue;}
@@ -251,7 +254,7 @@ TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominal
     }
   }
   legSyst->Draw("same");
-  cSyst->SaveAs(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/finalResults/SystematicDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin_SIter%i.pdf",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco,doPbPb?nSIter:nSIter_pp));
+  cSyst->SaveAs(Form("%s/dataUnf/unfOutput/finalResults/SystematicDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco,doPbPb?nSIter:nSIter_pp));
   TGraphAsymmErrors* systHist = new TGraphAsymmErrors(nBinZ_reco-1,x,y,exl,exh,eyl,eyh);
   return systHist;
 }

@@ -13,7 +13,7 @@ void plot(bool doPrompt = true, bool doPbPb = false){
   string outputfile = "";
 
   cout <<"iterFinal = "<<iterFinal<<endl;
-  outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/plots/UnfoldingConvergence_%s_%s_jetR%d_%dz%dptBins%dz%dptMeasBins%s%s%s_%dIter%dSIter_startFromSI%d.pdf",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",nIter,iterFinal,plotStart);
+  outputfile = Form("%s/mcUnf/plots/UnfoldingConvergence_%s_%s_jetR%d_%dz%dptBins%dz%dptMeasBins%s%s%s_%dIter%dSIter_startFromSI%d.pdf",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",nIter,iterFinal,plotStart);
 
   TFile *file1=NULL;
   TFile *file2=NULL;
@@ -54,8 +54,8 @@ void plot(bool doPrompt = true, bool doPbPb = false){
   legend2->SetTextSize(0.02);
 
   for(int i=1+plotStart; i<iterFinal+plotStart; i++){
-  filename1 = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s.root", i, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"");
-  filename2 = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s.root", i+1, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"");
+    filename1 = Form("%s/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s.root", unfPath.c_str(), i, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"");
+  filename2 = Form("%s/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s.root", unfPath.c_str(), i+1, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"");
   file1 = new TFile(filename1.c_str());
   file2 = new TFile(filename2.c_str());
 

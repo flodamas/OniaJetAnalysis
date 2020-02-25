@@ -1,9 +1,9 @@
-//#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
-//#endif
+#endif
 
 void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t stepNumber = 1) {
-
+  if (!setCaseTag()) return;
   Int_t iterMin =1;
   Int_t iterDef = iterMax - 2;
   
@@ -11,15 +11,60 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
   string trainInputName = "";
   string outputName = "";
 
-  testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_%s_%s_Test_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
-  trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/response_4D_%s_%s_Train_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
-  outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
+  testInputName = Form("%s/mcUnf/unfInput/step%i/response_4D_%s_%s_Test_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(), stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
+  trainInputName = Form("%s/mcUnf/unfInput/step%i/response_4D_%s_%s_Train_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
+  outputName = Form("%s/mcUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
   
   TFile *f_measured = new TFile(testInputName.c_str());
   f_measured->ls();
   TH2D *hMeasured = (TH2D*)f_measured->Get("fh2RespDimM;1");
   TH2D *hTrueInd = (TH2D*)f_measured->Get("fh2RespDimT;1");
-     
+
+  //////// if we want to smear MC errors to match data
+    if (smearMeas) {
+      if (stepNumber==1) {
+	cout <<"[INFO] Smearing the MC measured distribution to match data stats"<<endl;
+	TFile* dataFile = TFile::Open(Form("%s/dataUnf/data_results/meas_%s_data_%s_statErrs.root",doPbPb?"PbPb":"PP",doPrompt?"prompt":"prompt")); //use prompt data for prompt and nonprompt
+	TRandom* rnd = new TRandom3();
+	TH2D *hMeasuredData = (TH2D*) dataFile->Get("h_Meas;1");
+	TFile* saveFile = new TFile(Form("%s/mcUnf/unfOutput/step%i/statSmearing_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str()),"RECREATE");
+	saveFile->cd();
+	hMeasuredData->Write("data");
+	hMeasured->Write("mc");
+	int nBinsX = hMeasuredData->GetNbinsX();
+	int nBinsY = hMeasuredData->GetNbinsY();
+	TF1* fRand = new TF1("fRand","TMath::Gaus(x,[0],[1],1)",-100,100);
+	fRand->SetNpx(10000);
+	for (int ix = 0; ix<=nBinsX; ix++) {
+	  for (int iy = 0; iy<=nBinsY; iy++) {
+	    if (hMeasuredData->GetXaxis()->GetBinCenter(ix)<min_z || hMeasuredData->GetXaxis()->GetBinCenter(ix)>max_z) continue;
+	    if (hMeasuredData->GetYaxis()->GetBinCenter(iy)<min_jetpt || hMeasuredData->GetYaxis()->GetBinCenter(iy)>max_jetpt ) continue;
+	    int bin = hMeasuredData->GetBin(ix,iy);
+	    if (hMeasuredData->GetBinContent(bin)==0) continue;
+	    double dataErr = hMeasuredData->GetBinError(bin)*1.0/hMeasuredData->GetBinContent(bin);
+	    double mcVal = hMeasured->GetBinContent(bin);
+	    if (dataDist) mcVal = hMeasuredData->GetBinContent(bin);
+	    double mcErr = dataErr*mcVal;
+	    fRand->SetRange(mcVal-6.*mcErr,mcVal+6.*mcErr);
+	    fRand->SetParameter(0,mcVal);
+	    fRand->SetParameter(1,mcErr);
+	    double newMcVal = fRand->GetRandom();	  
+	    while (newMcVal<=0.) {newMcVal = fRand->GetRandom();}
+	    cout <<"dataVal = "<<hMeasuredData->GetBinContent(bin)<<", dataErr = "<<hMeasuredData->GetBinError(bin)<<", rel dataErr = "<<dataErr<<", mcVal = "<<mcVal<<", newMcVal = "<<newMcVal<<", old rel mcErr = "<<hMeasured->GetBinError(bin)*1.0/hMeasured->GetBinContent(bin)<<", set as "<<dataErr*newMcVal<<endl;
+	    hMeasured->SetBinContent(bin, newMcVal);
+	    hMeasured->SetBinError(bin, dataErr*newMcVal);
+	    cout <<"new mc error = "<<hMeasured->GetBinError(bin)/hMeasured->GetBinContent(bin)<<endl;
+	  }
+	}
+	hMeasured->Write("smearedMC");
+	saveFile->Close();
+      }
+      else {
+	TFile* inFile = TFile::Open(Form("%s/mcUnf/unfOutput/step1/statSmearing_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str()));
+	hMeasured = (TH2D*) inFile->Get("smearedMC");
+      }
+  }
+    
   TFile *f = new TFile(trainInputName.c_str());
   RooUnfoldResponse *resp = (RooUnfoldResponse*)f->Get("resp;1");
   TH2F *hSmear = (TH2F*)f->Get("fh2RespDimM;1");
@@ -221,4 +266,9 @@ void unfoldStep(Int_t step = 1){
   unfold(true,true,nIter,step);
   if (step<=nSIter_pp && centShift == 0)
     unfold(true,false,nIter,step);
+
+  //nonprompt
+  unfold(false,true,nIter,step);
+  if (step<=nSIter_pp && centShift == 0)
+    unfold(false,false,nIter,step);
 }

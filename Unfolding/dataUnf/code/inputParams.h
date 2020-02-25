@@ -25,6 +25,7 @@
 #include "TProfile.h"
 #include "THnSparse.h"
 #include "TRandom.h"
+#include "TRandom3.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TColor.h"
@@ -45,11 +46,12 @@ using namespace std;
 ///////////////////////////////////////////////
 //           general parameters              //
 ///////////////////////////////////////////////
+string unfPath = "/data_CMS/cms/diab/JpsiJet/Unfolding";
 bool sameSample = false;
 bool mc2015 = false;
 bool flatPrior = true;
 int nIter = 3;
-int nSIter = 99;
+int nSIter = 20;
 int nSIter_pp = 6;
 
 double normPP = 3.4058383e-09;
@@ -64,6 +66,9 @@ int JESsyst = 0; // 0 is nominal, -1 for systDown and +1 for systUp
 int JERsyst = 0; // 0 is nominal, -1 for systDown and +1 for systUp
 double SF = 1.1; // 1.1 is nominal, 1.0 for systDown, 1.2 for systUp
 
+double SFvalPP[3][7];
+double SFvalPbPb[3][14];
+
 string systTag = "";
 
 ///////////////////////////////////////////////
@@ -76,6 +81,8 @@ float max_z = 1.0;
 
 float min_jetpt = 10.;
 float max_jetpt = 60.;
+
+float max_jt_pt = 2.0;
 
 int nBinZ_gen = 48;
 int nBinZ_reco = 6;
@@ -182,4 +189,50 @@ bool setSystTag () {
   else if (centShift == -1) systTag = systTag + "_centShiftSystDown";
   
   return true;
+}
+
+void setSFVal() {
+  SFvalPP[0][0] = 1.1432 - 0.0222;
+  SFvalPP[1][0] = 1.1432;
+  SFvalPP[2][0] = 1.1432 + 0.0222;
+  SFvalPP[0][1] = 1.1815 - 0.0484;
+  SFvalPP[1][1] = 1.1815;
+  SFvalPP[2][1] = 1.1815 + 0.0484;
+  SFvalPP[0][2] = 1.0989 - 0.0456;
+  SFvalPP[1][2] = 1.0989;
+  SFvalPP[2][2] = 1.0989 + 0.0456;
+  SFvalPP[0][3] = 1.1137 - 0.1397;
+  SFvalPP[1][3] = 1.1137;
+  SFvalPP[2][3] = 1.1137 + 0.1397;
+  SFvalPP[0][4] = 1.1307 - 0.1470;
+  SFvalPP[1][4] = 1.1307;
+  SFvalPP[2][4] = 1.1307 + 0.1470;
+  SFvalPP[0][5] = 1.1600 - 0.0976;
+  SFvalPP[1][5] = 1.1600;
+  SFvalPP[2][5] = 1.1600 + 0.0976;
+  SFvalPP[0][6] = 1.2393 - 0.1909;
+  SFvalPP[1][6] = 1.2393;
+  SFvalPP[2][6] = 1.2393 + 0.1909;
+  
+  SFvalPbPb[0][0] = 1.1415;
+  SFvalPbPb[1][0] = 1.1742;
+  SFvalPbPb[2][0] = 1.2069;
+  SFvalPbPb[0][1] = 1.1559;
+  SFvalPbPb[1][1] = 1.1930;
+  SFvalPbPb[2][1] = 1.2302;
+  SFvalPbPb[0][2] = 1.0812;
+  SFvalPbPb[1][2] = 1.1451;
+  SFvalPbPb[2][2] = 1.2089;
+  SFvalPbPb[0][3] = 1.1086;
+  SFvalPbPb[1][3] = 1.1618;
+  SFvalPbPb[2][3] = 1.2150;
+  SFvalPbPb[0][4] = 1.0838;
+  SFvalPbPb[1][4] = 1.1455;
+  SFvalPbPb[2][4] = 1.2072;
+  SFvalPbPb[0][5] = 1.0748;
+  SFvalPbPb[1][5] = 1.1117;
+  SFvalPbPb[2][5] = 1.1486;
+  SFvalPbPb[0][6] = 1.0888;
+  SFvalPbPb[1][6] = 1.1581;
+  SFvalPbPb[2][6] = 1.2274;
 }

@@ -1,6 +1,6 @@
-//#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
-//#endif
+#endif
 
 void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
   if (!setSystTag()) return;
@@ -16,13 +16,12 @@ void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
 
   cout << "step # =" << stepNumber << endl;
     
-  inputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%dz%dptBins%dz%dptMeasBins%s.root", stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  inputName = Form("%s/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
 
   outputName = inputName;
-  if (stepNumber > 9) outputName.replace(93,9,partOfOutput);
-  else if (stepNumber > 99) outputName.replace(94,9,partOfOutput);
-  else outputName.replace(92,9,partOfOutput);
-
+  int idxReplace = inputName.find("unfolding_4D");
+  cout <<"idxReplace "<<idxReplace<<endl;
+  outputName.replace(idxReplace,9,partOfOutput);
   cout << "outputName = " << outputName << endl;
   
   TFile *f = new TFile(inputName.c_str());

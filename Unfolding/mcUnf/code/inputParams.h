@@ -25,6 +25,7 @@
 #include "TProfile.h"
 #include "THnSparse.h"
 #include "TRandom.h"
+#include "TRandom3.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TColor.h"
@@ -44,14 +45,19 @@ using namespace std;
 ///////////////////////////////////////////////
 //           general parameters              //
 ///////////////////////////////////////////////
-bool sameSample = false;
+//string unfPath = "/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding";
+string unfPath = "/data_CMS/cms/diab/JpsiJet/Unfolding";
+bool sameSample = true;
 bool mc2015 = false;
 bool flatPrior = true;
 int nIter = 3;
-int nSIter = 99;
+int nSIter = 30;
 int nSIter_pp = 6;
 
 int centShift = -1; // 0 is nominal, -1 for systDown and +1 for systUp
+bool smearMeas = true;
+bool dataDist = true;
+string caseTag = "";
 ///////////////////////////////////////////////
 //             jet parameters                //
 ///////////////////////////////////////////////
@@ -61,6 +67,8 @@ float max_z = 1.0;
 
 float min_jetpt = 10.;
 float max_jetpt = 60.;
+
+float max_jt_eta = 2.0;//2.4 
 
 int nBinZ_gen = 48;
 int nBinZ_reco = 6;
@@ -118,11 +126,11 @@ Int_t korangeLight  = pal->GetColor(255,168,104);
 Int_t kredLight     = pal->GetColor(253,169,179);
 Int_t kpinkLight    = pal->GetColor(255,192,224);
 
-Int_t col[] = {kBlack, kblue, kGreen+2, kCyan+2, kred, kGray+1};
-int markerStyle[] = {kFullSquare,kFullCircle,kOpenTriangleUp,kOpenTriangleDown,kOpenCross,kOpenCrossX};
-int markerSize[] = {1,1,1,1,1,1};
-int lineStyle[] = {1, 1, 7, 7, 8, 7};
-int lineWidth[] = {1,1,1,1,1,1};
+Int_t col[] = {kBlack, kblue, kGreen+2, kCyan+2, kred, kGray+1, kyellow, korange, kpink,kmagenta};
+int markerStyle[] = {kFullSquare,kFullCircle,kOpenTriangleUp,kOpenTriangleDown,kOpenCross,kOpenCrossX,kOpenSquare,kOpenCircle,kFullStar,kFullCross};
+int markerSize[] = {1,1,1,1,1,1,1,1,1,1};
+int lineStyle[] = {1, 1, 7, 7, 8, 7, 7, 8, 7,7};
+int lineWidth[] = {1,1,1,1,1,1,1,1,1,1};
 
 ///////////////////////////////////////////////
 //               functions                   //
@@ -142,4 +150,9 @@ void printInput() {
   cout << "### midLowerId = "<<midLowerId<<endl;
   cout << "### unfStart = "<<unfStart<<endl;
   cout << "###############################################"<<endl;
+}
+
+bool setCaseTag() {
+  caseTag = Form("%s%s%s%s%s%s",sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp",smearMeas?"_smearedMeasured":"",dataDist?"_dataDist":"");
+  return true;
 }

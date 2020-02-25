@@ -1,41 +1,60 @@
-//#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
-//#endif
+#endif
 
 void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t stepNumber = 1){
   printInput();
-
+  if (!setCaseTag()) return;
+  
   string filename = "";
   string outputfile = "";
   string filenamePrevStep = "";
 
-  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput");
-  gSystem->mkdir(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i",stepNumber));
-  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput");
-  gSystem->mkdir(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i",stepNumber));
+  gSystem->mkdir(Form("%s/mcUnf/unfInput",unfPath.c_str()));
+  gSystem->mkdir(Form("%s/mcUnf/unfInput/step%i",unfPath.c_str(),stepNumber));
+  gSystem->mkdir(Form("%s/mcUnf/unfOutput",unfPath.c_str()));
+  gSystem->mkdir(Form("%s/mcUnf/unfOutput/step%i",unfPath.c_str(),stepNumber));
 
-  filename = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_%s_%s_NoBkg%s_AccEff_JEC.root",doPrompt?"MCJPSIPR":"MCJPSINOPR",doPbPb?"PbPb":"PP",mc2015?"":Form("_jetR%d",(int)(jetR*10)));
-  outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfInput/step%i/unfolding_4D_%s_%s_%s_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", doTrain?"Train":"Test", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
-  if(stepNumber > 1) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root",stepNumber-1,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
+  filename = Form("~/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_%s_%s_NoBkg%s_AccEff_JEC.root",doPrompt?"MCJPSIPR":"MCJPSINOPR",doPbPb?"PbPb":"PP",mc2015?"":Form("_jetR%d",(int)(jetR*10)));
+  outputfile = Form("%s/mcUnf/unfInput/step%i/unfolding_4D_%s_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(), stepNumber, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", doTrain?"Train":"Test", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
+  
+  if(stepNumber > 1) filenamePrevStep = Form("%s/mcUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(), stepNumber-1,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
 
-  //cout <<"filename = "<<filename<<endl;
-  //cout <<"outputfile = "<<outputfile<<endl;
-  //cout <<"filenamePrevStep = "<<filenamePrevStep<<endl;
+  cout <<"filename = "<<filename<<endl;
+  cout <<"outputfile = "<<outputfile<<endl;
+  cout <<"filenamePrevStep = "<<filenamePrevStep<<endl;
 
   TFile *file = new TFile(filename.c_str());
   TTree *t_unf = (TTree*)file->Get("treeForUnfolding");
 
   int n_entries = t_unf->GetEntries();
     
+  Double_t z_frac_JetPtBin_dataMC[nBinJet_reco][nBinZ_reco];
+  TH2D* mcDataWeight = NULL;
+  if (dataDist) {
+    if (stepNumber==1) {
+      TFile *fileData = TFile::Open(Form("%s/dataUnf/data_results/meas_%s_data_%s_statErrs.root",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"prompt")); //use prompt data always 
+      TH2D *hMeasuredData = (TH2D*) fileData->Get("h_Meas;1");
+      TH2D *hMeasuredMC = (TH2D*) hMeasuredData->Clone("hMeasuredMC");
+      mcDataWeight = (TH2D*) hMeasuredData->Clone("mcDataWeight");
+      t_unf->Draw("jt_pt:z>>hMeasuredMC",Form("corr_AccEff*corr_ptw*((centr>=%d && centr<%d) && (jp_pt>%f && jp_pt<%f) && (TMath::Abs(jp_eta)<%f) && (jp_mass>2.6 && jp_mass<3.5) && (jt_pt>%f && jt_pt<%f) && (jt_ref_pt>%f && jt_ref_pt<%f) && (TMath::Abs(jt_eta)<2.4) && gen_z <=1. && z<=1)",centShift==0?10:centShift==-1?5:15, centShift==0?190:centShift==-1?185:195, min_jp_pt, max_jp_pt, max_jp_eta, min_jetpt, max_jetpt, min_jetpt, max_jetpt));
+      mcDataWeight->Divide(hMeasuredMC);
+    }//end of (stepNumber==1)
+    else {
+      TFile *fileW = TFile::Open(Form("%s/mcUnf/unfInput/step1/unfolding_4D_%s_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", doTrain?"Train":"Test", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str()));
+      mcDataWeight = (TH2D*) fileW->Get("mcDataWeight");
+    }
+  }//end of if (dataDist)
+  
   Double_t z_frac_JetPtBin[nBinJet_gen][nBinZ_gen];
   
   //only for prompt fwd in steps > 1, until the stats are better in mc
   Double_t *z_frac_allJetPtBins = new Double_t[nBinZ_gen];
-
-  // if this is step 2, 3, 4 ... take the z unfolded and use it for the prior, else put z prior to flat  
+  
+  // if this is step 2, 3, 4 ... take the z unfolded and use it for the prior, else put z prior to flat    
   if(stepNumber > 1) {
     TFile *filePrevStep = new TFile(filenamePrevStep.c_str());
-    //    cout << "file OK" << endl;
+    // cout << "file OK" << endl;
     TH1D *h_z_unf_jetPtBin[nBinJet_gen];
 
     for(int ibin = 0; ibin < nBinJet_gen; ibin++){
@@ -144,12 +163,16 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   fSparse->Sumw2();
   fSparse->CalculateErrors();
 
+  THnSparseF * fSparseOrig = new THnSparseF("hs_orig", "hs_orig", fDim, bins_sparce, xmin_sparce, xmax_sparce);
+  fSparseOrig->Sumw2();
+  fSparseOrig->CalculateErrors();
+
   //4D with z gen flat
   THnSparseF * fSparse_newZNorm = new THnSparseF("hs_newZNorm", "hs_newZNorm", fDim, bins_sparce, xmin_sparce, xmax_sparce);
   fSparse_newZNorm->Sumw2();
   fSparse_newZNorm->CalculateErrors();
 
-  //4D with z gen flat and gen pt flat
+  //4D with z gen flat and gen pt = truth
   THnSparseF * fSparse_newJetPtNorm = new THnSparseF("hs_newJetPtNorm", "hs_newJetPtNorm", fDim, bins_sparce, xmin_sparce, xmax_sparce);
   fSparse_newJetPtNorm->Sumw2();
   fSparse_newJetPtNorm->CalculateErrors();
@@ -158,29 +181,33 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
         
     if (!sameSample) {
       if (doPbPb) {
-      if(doTrain && nEv%10 >= 8) continue;
-      if(!doTrain && nEv%10 < 8) continue;
-    }
+	if(doTrain && nEv%10 >= 8) continue;
+	if(!doTrain && nEv%10 < 8) continue;
+      }
       else {
-      if(doTrain && nEv%2 == 1) continue;
-      if(!doTrain && nEv%2 == 0) continue;
+	if(doTrain && nEv%2 == 1) continue;
+	if(!doTrain && nEv%2 == 0) continue;
       }
     }
-
+    
     t_unf->GetEntry(nEv);
 
     //if (doPbPb && (centr<10 || centr>=190)) continue;
-    if (doPbPb && centShift==-1 && (centr<5 || centr>=185)) continue;
-    if (doPbPb && centShift==0 && (centr<10 || centr>=190)) continue;
-    if (doPbPb && centShift==1 && (centr<15 || centr>=195)) continue;
-
+    if (!doTrain) {
+      if (doPbPb && centShift==-1 && (centr<5 || centr>=185)) continue;
+      if (doPbPb && centShift==0 && (centr<10 || centr>=190)) continue;
+      if (doPbPb && centShift==1 && (centr<15 || centr>=195)) continue;
+    }
+    else {
+      if (doPbPb && (centr<10 || centr>=190)) continue;
+    }
     // check event content
     if(jp_pt < min_jp_pt || jp_pt > max_jp_pt) continue;    
     if(TMath::Abs(jp_eta) > max_jp_eta ) continue;
     if(jp_mass < 2.6 || jp_mass > 3.5) continue;
     if(jt_pt < min_jetpt || jt_pt > max_jetpt) continue;
     if(jt_ref_pt < min_jetpt || jt_ref_pt > max_jetpt) continue;
-    if(TMath::Abs(jt_eta) > 2.4) continue;    
+    if(TMath::Abs(jt_eta) > max_jt_eta) continue;    
 
     double gen_z2 = gen_z;
     if(gen_z == 1.) gen_z2 = 0.99;
@@ -218,13 +245,15 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
     fValue[3] = z2;
 
     finalCorr = corr_AccEff*corr_ptw;
+    fSparseOrig->Fill(fValue,finalCorr);
+    if (dataDist) finalCorr = finalCorr*mcDataWeight->GetBinContent(mcDataWeight->FindBin(z2,jt_pt));
     fSparse->Fill(fValue,finalCorr);
   }
 
   
   // check 4D content
   cout << "number of bins :" << fSparse->GetNbins() <<endl;
-
+  
   ///
   for(int iz = 0; iz < nBinZ_gen; iz++){
     for(int ijet = 0; ijet < nBinJet_gen; ijet++){
@@ -246,8 +275,8 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
 
 	  int bin = fSparse->GetBin(x);
 	  valIntegral+=fSparse->GetBinContent(bin);
-	}
-      }
+	} // end of jz < nBinZ_reco
+      }// end of jjet < nBinJet_reco
       
       double scaleFactor = 0;
       //if(valIntegral>0) scaleFactor = 1./valIntegral;
@@ -278,13 +307,10 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
 	    fSparse_newZNorm->SetBinContent(bin2, newBinCont);
 	    fSparse_newZNorm->SetBinError(bin2, newBinErr);
 	    
-	  }
-      }
-    }  
-  }
-  
-
-  
+	  } //end of jz < nBinZ_reco
+      } //end of jjet < nBinJet_reco
+    }  //end of ijet < nBinJet_gen
+  } //end of iz < nBinZ_gen  
   
   TH1D *gTruth1DX = dynamic_cast<TH1D*>(fSparse_newZNorm->Projection(0,"E"));
   TH1D *gTruth1DY = dynamic_cast<TH1D*>(fSparse_newZNorm->Projection(1,"E"));
@@ -298,7 +324,6 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   can1->SaveAs("matrixTest.png");
   
   
-
   /// jet pt normalization -> put it to match jet pt truth
 
   for(int ijet = 0; ijet < nBinJet_gen; ijet++){      
@@ -322,9 +347,9 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
 	  const double x2[4] = {ijetMid,izMid,jjetMid,jzMid};
 	  int bin2 = fSparse_newZNorm->GetBin(x2);
 	  valIntegralZNorm+=fSparse_newZNorm->GetBinContent(bin2);	  	  
-	}
-      }
-    }
+	} //end of jz < nBinZ_reco
+      } //end of jjet < nBinJet_reco
+    } //end of iz < nBinZ_gen
 
     double scaleFactor = 0;
     if(valIntegralZNorm>0) scaleFactor = valIntegralOrig/valIntegralZNorm;
@@ -352,10 +377,10 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
 
 	    fSparse_newJetPtNorm->SetBinContent(bin4, newBinCont);
 	    fSparse_newJetPtNorm->SetBinError(bin4, newBinErr);
-	  }
-	}
-      }        
-  }
+	  }//end of jz < nBinZ_reco
+	}//end of jjet < nBinJet_reco
+      }//end of iz < nBinZ_gen
+  }//end of ijet < nBinJet_gen
 
   
   TH2D *gTruth2D = dynamic_cast<TH2D*>(fSparse_newJetPtNorm->Projection(0,1));
@@ -379,7 +404,7 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   h_jetpPtGen_jetPtReco->Write();
   
   fSparse->Write();
-
+  fSparseOrig->Write();
   fSparse_newZNorm->Write();
   fSparse_newJetPtNorm->Write();
   h_z_gen->Write();
@@ -392,6 +417,8 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   hRespZJetPtLowBin->Write();
   hRespZJetPtHighBin->Write();
 
+  mcDataWeight->Write();
+  
   file_forProf_varBin->Close();
 }
 
@@ -401,8 +428,16 @@ void prepareInputs(Int_t step = 1){
   prepare(true,true,false,step);
 
   if (step<=nSIter_pp && centShift == 0){
-  prepare(true,false,true,step);
-  prepare(true,false,false,step);
+    prepare(true,false,true,step);
+    prepare(true,false,false,step);
+  }
+  //nonprompt
+  prepare(false,true,true,step);
+  prepare(false,true,false,step);
+  
+  if (step<=nSIter_pp && centShift == 0){
+    prepare(false,false,true,step);
+    prepare(false,false,false,step);
   }
 
 }

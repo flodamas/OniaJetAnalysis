@@ -1,4 +1,6 @@
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
+#endif
 
 TF1* promptJESFunc() {
   TF1 *zFunc = new TF1("pol4","pol4",0.15,1.);
@@ -26,19 +28,20 @@ float getZWeight(float z_gen = 0){
 void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) { 
   printInput();
   if (!setSystTag()) return;
+  setSFVal();
   
   string filename = "";
   string outputfile = "";
   string filenamePrevStep = "";
   
-  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfInput");
-  gSystem->mkdir(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfInput/step%i",stepNumber));
-  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput");
-  gSystem->mkdir(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i",stepNumber));
+  gSystem->mkdir(Form("%s/dataUnf/unfInput",unfPath.c_str()));
+  gSystem->mkdir(Form("%s/dataUnf/unfInput/step%i",stepNumber,unfPath.c_str()));
+  gSystem->mkdir(Form("%s/dataUnf/unfOutput",unfPath.c_str()));
+  gSystem->mkdir(Form("%s/dataUnf/unfOutput/step%i",stepNumber,unfPath.c_str()));
 
-  filename = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_%s_%s_NoBkg%s_AccEff_JEC.root",doPrompt?"MCJPSIPR":"MCJPSINOPR",doPbPb?"PbPb":"PP",Form("_jetR%d",(int)(jetR*10)));
-  outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%dz%dptBins%dz%dptMeasBins%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
-  if(stepNumber > 1) filenamePrevStep = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin%s.root",stepNumber-1,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());  
+  filename = Form("~/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_%s_%s_NoBkg%s_AccEff_JEC.root",doPrompt?"MCJPSIPR":"MCJPSINOPR",doPbPb?"PbPb":"PP",Form("_jetR%d",(int)(jetR*10)));
+  outputfile = Form("%s/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  if(stepNumber > 1) filenamePrevStep = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),stepNumber-1,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());  
 
   cout <<"filename = "<<filename<<endl;
   cout <<"outputfile = "<<outputfile<<endl;
@@ -199,7 +202,7 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
 
   int nBins_Y = nBinJet_gen*nBinZ_gen;
   double min_Y = 0;
-  double max_Y =  nBinJet_reco*nBinZ_reco;
+  double max_Y =  nBinJet_gen*nBinZ_gen;
   
   TH2D *h_trMatrix = new TH2D("h_trMatrix","h_trMatrix",nBins_X,min_X,max_X,nBins_Y,min_Y,max_Y);
   h_trMatrix->Sumw2();
@@ -221,6 +224,11 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
   double c2 = 0.06*0.06;
   double s2 = 0.8*0.8;
 
+  int sfBin = -1;
+  if(SF<1.05) sfBin=0;
+  else if(SF<1.15) sfBin=1;
+  else sfBin=2;
+  
   for(int nEv = 0; nEv < n_entries; nEv++) {
     if (nEv%100000==0) cout<<"processing evt "<<nEv<<"/"<<n_entries<<endl;
     t_unf->GetEntry(nEv);
@@ -240,13 +248,27 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
     //!!!!!!!!!!!!!!!!!!!!!!!!!! to check !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if(jt_pt < min_jetpt || jt_pt > max_jetpt) continue;
     if(jt_ref_pt < min_jetpt || jt_ref_pt > max_jetpt) continue;
-    if(TMath::Abs(jt_eta) > 2.4) continue;
+    float absJtEta = TMath::Abs(jt_eta);
+    if(absJtEta > max_jt_pt) continue;
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    // get eta bin for resolution
+    int etaBin = -1;
+    if(absJtEta < 0.522) etaBin=0;
+    else if(absJtEta < 0.783) etaBin=1;
+    else if(absJtEta < 1.131) etaBin=2;
+    else if(absJtEta < 1.305) etaBin=3;
+    else if(absJtEta < 1.740) etaBin=4;
+    else if(absJtEta < 1.930) etaBin=5;
+    else etaBin=6;
+
+    float sfVal = 0.;
+    if(doPbPb) sfVal = SFvalPbPb[sfBin][etaBin];
+    else sfVal = SFvalPbPb[sfBin][etaBin];
     
-   
     //smear reco jet pt here, and recompute z reco before filling the matrix
-    double pTres = TMath::Sqrt(c2+s2/(jt_ref_pt*(1.-gen_z)));
-    double sigmaSmear = pTres*TMath::Sqrt(SF*SF - 1);
+    double pTres = TMath::Sqrt(c2+s2/(jt_ref_pt*(1.-gen_z)));    
+    double sigmaSmear = pTres*TMath::Sqrt(sfVal*sfVal - 1.);
     double smearPt  = (1.-gen_z)*jt_ref_pt*rand->Gaus(0.,sigmaSmear);
     jt_pt = jt_pt+smearPt;
     z = jp_pt/jt_pt;
@@ -282,8 +304,8 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
     finalCorr = corr_AccEff*corr_ptw;
     fSparse->Fill(fValue,finalCorr);
 
-    double ijt = (double)(TMath::Floor((jt_ref_pt-min_jetpt)/2.));
-    double jjt = (double)(TMath::Floor((jt_pt-min_jetpt)/10.));
+    double ijt = (double)(TMath::Floor((jt_ref_pt-min_jetpt)/jetPt_gen_binWidth));
+    double jjt = (double)(TMath::Floor((jt_pt-min_jetpt)/jetPt_reco_binWidth));
 
     double iz = (double)(TMath::Floor(gen_z*nBinZ_gen));
     double jz = (double)(TMath::Floor(z*nBinZ_reco));

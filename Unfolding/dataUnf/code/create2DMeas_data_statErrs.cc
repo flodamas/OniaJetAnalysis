@@ -1,9 +1,11 @@
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
+#endif
 
 void create2DMeas_data_statErrs(bool doPrompt = true, bool doPbPb = false){
 
-  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/plots");
-  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/data_results");
+  gSystem->mkdir(Form("%s/dataUnf/plots",unfPath.c_str()));
+  gSystem->mkdir(Form("%s/dataUnf/data_results",unfPath.c_str()));
     
   string filename1 = "";
   string filename2 = "";
@@ -11,12 +13,17 @@ void create2DMeas_data_statErrs(bool doPrompt = true, bool doPbPb = false){
   string filename4 = "";
   string filename5 = "";
   
-  filename1 = "../../../../Output/DataFits/DataFits_lowerJtPt/ctauMass/DATA/fitsPars/unfoldingInput_lowerJtPt_rap_jetR3_statErr.root";
-  filename2 = "../../../../Output/DataFits/DataFits_lowJtPt/ctauMass/DATA/fitsPars/unfoldingInput_lowJtPt_rap_jetR3_statErr.root";
-  filename3 = "../../../../Output/DataFits/DataFits_midJtPt/ctauMass/DATA/fitsPars/unfoldingInput_midJtPt_rap_jetR3_statErr.root";
-  filename4 = "../../../../Output/DataFits/DataFits_highJtPt/ctauMass/DATA/fitsPars/unfoldingInput_highJtPt_rap_jetR3_statErr.root";
-  filename5 = "../../../../Output/DataFits/DataFits_higherJtPt/ctauMass/DATA/fitsPars/unfoldingInput_higherJtPt_rap_jetR3_statErr.root";
-    
+  filename1 = "/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/DataFits/DataFits_lowerJtPt/ctauMass/DATA/fitsPars/unfoldingInput_lowerJtPt_rap_jetR3_statErr.root";
+  filename2 = "/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/DataFits/DataFits_lowJtPt/ctauMass/DATA/fitsPars/unfoldingInput_lowJtPt_rap_jetR3_statErr.root";
+  filename3 = "/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/DataFits/DataFits_midJtPt/ctauMass/DATA/fitsPars/unfoldingInput_midJtPt_rap_jetR3_statErr.root";
+  filename4 = "/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/DataFits/DataFits_highJtPt/ctauMass/DATA/fitsPars/unfoldingInput_highJtPt_rap_jetR3_statErr.root";
+  filename5 = "/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/DataFits/DataFits_higherJtPt/ctauMass/DATA/fitsPars/unfoldingInput_higherJtPt_rap_jetR3_statErr.root";
+  //filename1 = "../../../../Output/FromLizardo/DataFits_lowerJtPt/ctauMass/DATA/fitsPars/unfoldingInput_lowerJtPt_rap_jetR3_statErr.root";
+  //filename2 = "../../../../Output/FromLizardo/DataFits_lowJtPt/ctauMass/DATA/fitsPars/unfoldingInput_lowJtPt_rap_jetR3_statErr.root";
+  //filename3 = "../../../../Output/FromLizardo/DataFits_midJtPt/ctauMass/DATA/fitsPars/unfoldingInput_midJtPt_rap_jetR3_statErr.root";
+  //filename4 = "../../../../Output/FromLizardo/DataFits_highJtPt/ctauMass/DATA/fitsPars/unfoldingInput_highJtPt_rap_jetR3_statErr.root";
+  //filename5 = "../../../../Output/FromLizardo/DataFits_higherJtPt/ctauMass/DATA/fitsPars/unfoldingInput_higherJtPt_rap_jetR3_statErr.root";
+  
   TFile *file1 = new TFile(filename1.c_str(),"UPDATE");
   TFile *file2 = new TFile(filename2.c_str(),"UPDATE");
   TFile *file3 = new TFile(filename3.c_str(),"UPDATE");
@@ -167,7 +174,7 @@ void create2DMeas_data_statErrs(bool doPrompt = true, bool doPbPb = false){
 
   
   string outputfile = "";
-  outputfile = Form("../data_results/meas_%s_data_%s_statErrs.root",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt");
+  outputfile = Form("%s/dataUnf/data_results/meas_%s_data_%s_statErrs.root",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt");
   
   TFile *file_data_meas = new TFile(outputfile.c_str(),"RECREATE");
 

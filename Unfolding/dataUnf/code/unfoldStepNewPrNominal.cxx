@@ -1,4 +1,6 @@
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
+#endif
 
 void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t stepNumber = 1) {
   if (!setSystTag()) return;
@@ -10,14 +12,9 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
   string trainInputName = "";
   string outputName = "";
 
-  //string SF_name = "";
-  //if(SF == 1.1) SF_name = "_nominal";
-  //if(SF == 1.2) SF_name = "_up";
-  //if(SF == 1.0) SF_name = "_down";
-
-  testInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/data_results/meas_%s_data_%s_statErrs.root",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt");
-  trainInputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfInput/step%i/response_4D_%s_%s_%dz%dptBins%dz%dptMeasBins%s.root", stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
-  outputName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  testInputName = Form("%s/dataUnf/data_results/meas_%s_data_%s_statErrs.root",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt");
+  trainInputName = Form("%s/dataUnf/unfInput/step%i/response_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  outputName = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(), stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   
   TFile *f_measured = new TFile(testInputName.c_str());
   f_measured->ls();

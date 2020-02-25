@@ -1,9 +1,10 @@
-//#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
-//#endif
+#endif
 
 void plot(bool doPrompt = false, bool doPbPb = true){
-  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/plots/");
+  if (!setCaseTag()) return;
+  gSystem->mkdir(Form("%s/mcUnf/plots/",unfPath.c_str()));
   string filename1 = "";
   string filename2 = "";
   string filename3 = "";
@@ -12,10 +13,10 @@ void plot(bool doPrompt = false, bool doPbPb = true){
   int iterFinal = nSIter;
   if (!doPbPb) iterFinal = nSIter_pp;
 
-  filename1 = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step1/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root", doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
-  filename2 = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step2/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root", doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
-  filename3 = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root", iterFinal-1, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
-  filename4 = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBins%s%s%s%s.root", iterFinal, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp");
+  filename1 = Form("%s/mcUnf/unfOutput/step1/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
+  filename2 = Form("%s/mcUnf/unfOutput/step2/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
+  filename3 = Form("%s/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), iterFinal-1, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
+  filename4 = Form("%s/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), iterFinal, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
   
   TFile *file1 = new TFile(filename1.c_str());
   TFile *file2 = new TFile(filename2.c_str());
@@ -241,12 +242,12 @@ void plot(bool doPrompt = false, bool doPbPb = true){
 
   mycan1->Update();
   
-  mycan1->SaveAs(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/plots/unf_mc_%s_%s_jetR%d_ratioMeasured_%dz%dptBins%dz%dptMeasBins%s%s%s_%dIter%dSIter.pdf",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",nIter,iterFinal));
+  mycan1->SaveAs(Form("%s/mcUnf/plots/unf_mc_%s_%s_jetR%d_ratioMeasured_%dz%dptBins%dz%dptMeasBins%s_%dIter%dSIter.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter,iterFinal));
 
   hZUnf_SI1_ratioTruth->SetStats(0);
   hZUnf_SI1_ratioTruth->GetYaxis()->SetTitle("ratio to truth");
   hZUnf_SI1_ratioTruth->GetYaxis()->SetTitleOffset(1.6);
-  hZUnf_SI1_ratioTruth->GetYaxis()->SetRangeUser(0.,1.4);
+  hZUnf_SI1_ratioTruth->GetYaxis()->SetRangeUser(0.,2.4);
   hZUnf_SI1_ratioTruth->GetXaxis()->SetTitle("z");
 
   hZMeas_ratioTruth->SetLineColor(col[0]);
@@ -294,15 +295,16 @@ void plot(bool doPrompt = false, bool doPbPb = true){
 
   mycan1->Update();
   
-  mycan1->SaveAs(Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/mcUnf/plots/unf_mc_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s%s%s%s_%dIter%dSIter.pdf",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, sameSample?"_sameSample":"_splitSample",flatPrior?"_flatPrior":"_truePrior",mc2015?"_2015MC":"",(centShift==0)?"":(centShift==-1)?"_centShiftSystDown":"_centShiftSystUp",nIter,iterFinal));
+  mycan1->SaveAs(Form("%s/mcUnf/plots/unf_mc_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter%dSIter.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter,iterFinal));
 }
 
 void PlotRatios_MCUnfoldedTruth(){
   //plot(bool doPrompt, bool doPbPb)
   plot(true,true);
-  if (centShift ==0)
+  if (centShift == 0)
     plot(true,false);
 
-  //plot(false,true);
-  //plot(false,false);
+  plot(false,true);
+  if (centShift == 0)
+    plot(false,false);
 }
