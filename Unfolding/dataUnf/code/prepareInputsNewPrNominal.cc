@@ -35,9 +35,9 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
   string filenamePrevStep = "";
   
   gSystem->mkdir(Form("%s/dataUnf/unfInput",unfPath.c_str()));
-  gSystem->mkdir(Form("%s/dataUnf/unfInput/step%i",stepNumber,unfPath.c_str()));
+  gSystem->mkdir(Form("%s/dataUnf/unfInput/step%i",unfPath.c_str(),stepNumber));
   gSystem->mkdir(Form("%s/dataUnf/unfOutput",unfPath.c_str()));
-  gSystem->mkdir(Form("%s/dataUnf/unfOutput/step%i",stepNumber,unfPath.c_str()));
+  gSystem->mkdir(Form("%s/dataUnf/unfOutput/step%i",unfPath.c_str(),stepNumber));
 
   filename = Form("~/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_%s_%s_NoBkg%s_AccEff_JEC.root",doPrompt?"MCJPSIPR":"MCJPSINOPR",doPbPb?"PbPb":"PP",Form("_jetR%d",(int)(jetR*10)));
   outputfile = Form("%s/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
@@ -50,7 +50,7 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
   TTree *t_unf = (TTree*)file->Get("treeForUnfolding");
 
   int n_entries = t_unf->GetEntries();
-  //n_entries=1000;  
+  //n_entries=10;  
   Double_t z_frac_JetPtBin[nBinJet_gen][nBinZ_gen];
   
   //only for prompt fwd in steps > 1, until the stats are better in mc
@@ -264,15 +264,18 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
 
     float sfVal = 0.;
     if(doPbPb) sfVal = SFvalPbPb[sfBin][etaBin];
-    else sfVal = SFvalPbPb[sfBin][etaBin];
+    else sfVal = SFvalPP[sfBin][etaBin];
     
     //smear reco jet pt here, and recompute z reco before filling the matrix
     double pTres = TMath::Sqrt(c2+s2/(jt_ref_pt*(1.-gen_z)));    
     double sigmaSmear = pTres*TMath::Sqrt(sfVal*sfVal - 1.);
     double smearPt  = (1.-gen_z)*jt_ref_pt*rand->Gaus(0.,sigmaSmear);
+    //cout <<"[INFO] sfVal = "<<sfVal<<", orig jtpt= "<<jt_pt<<", orig z = "<<", smearPt = "<<smearPt;
     jt_pt = jt_pt+smearPt;
     z = jp_pt/jt_pt;
-    
+    //cout <<", new jtpt = "<<jt_pt<<"new z = "<<z<<endl;
+    if(z<0) z=0;
+    if (z>1) z=1;
     //double scaleFactor_JES = nonpromptJES->Eval(gen_z)/promptJES->Eval(gen_z);//nonpromptJESVal(gen_z)/promptJESVal(gen_z);
     //double corr_scaleFactor_JES = (1. - scaleFactor_JES)/2.;
     //double new_scaleFactor_JES = scaleFactor_JES+corr_scaleFactor_JES;
@@ -513,7 +516,8 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
 }
 
 void prepareInputsNewPrNominal(Int_t step = 1) { 
-  prepare(true,true,step);
+  if (!matrixInv)
+    prepare(true,true,step);
   if (step<=nSIter_pp && centShift==0)
     prepare(true,false,step);
 }

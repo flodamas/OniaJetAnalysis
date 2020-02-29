@@ -50,9 +50,13 @@ string unfPath = "/data_CMS/cms/diab/JpsiJet/Unfolding";
 bool sameSample = false;
 bool mc2015 = false;
 bool flatPrior = true;
-int nIter = 3;
-int nSIter = 20;
-int nSIter_pp = 6;
+
+bool matrixInv = false;
+
+int nIter = 7;
+int nIter_pp = 3;
+int nSIter = 25;
+int nSIter_pp = 1;
 
 double normPP = 3.4058383e-09;
 double normPbPb = 1.5292e-08;
@@ -68,6 +72,12 @@ double SF = 1.1; // 1.1 is nominal, 1.0 for systDown, 1.2 for systUp
 
 double SFvalPP[3][7];
 double SFvalPbPb[3][14];
+
+int nIter_syst = 10;
+int nSIter_syst = 9;
+
+int nIter_syst_pp = 10;
+int nSIter_syst_pp = 1;
 
 string systTag = "";
 
@@ -140,11 +150,11 @@ Int_t korangeLight  = pal->GetColor(255,168,104);
 Int_t kredLight     = pal->GetColor(253,169,179);
 Int_t kpinkLight    = pal->GetColor(255,192,224);
 
-Int_t col[] = {kBlack, kblue, kGreen+2, kCyan+2, kred, kGray+1};
-int markerStyle[] = {kFullSquare,kFullCircle,kOpenTriangleUp,kOpenTriangleDown,kOpenCross,kOpenCrossX};
-int markerSize[] = {1,1,1,1,1,1};
-int lineStyle[] = {1, 1, 7, 7, 8, 7};
-int lineWidth[] = {1,1,1,1,1,1};
+Int_t col[] = {kBlack, kblue, kGreen+2, kCyan+2, kred, kGray+1, kyellow};
+int markerStyle[] = {kFullSquare,kFullCircle,kOpenTriangleUp,kOpenTriangleDown,kOpenCross,kOpenCrossX,kOpenStar};
+int markerSize[] = {1,1,1,1,1,1,1};
+int lineStyle[] = {1, 1, 7, 7, 8, 7,7};
+int lineWidth[] = {1,1,1,1,1,1,1};
 
 ///////////////////////////////////////////////
 //               functions                   //
@@ -173,7 +183,7 @@ bool setSystTag () {
   if (JERsyst!=0 && (JESsyst!=0 || SF!=1.1 || centShift!=0) ) { cout <<"[ERROR] please check your systematic options"<<endl; return false;}
   if (SF!=1.1 && (JERsyst!=0 || JESsyst!=0 || centShift!=0) ) { cout <<"[ERROR] please check your systematic options"<<endl; return false;}
   if (centShift!=0 && (JERsyst!=0 || JESsyst!=0 || SF!=1.1) ) { cout <<"[ERROR] please check your systematic options"<<endl; return false;}
-  
+  if (matrixInv && (nSIter_pp > 1 || nIter>1)) {cout <<"[ERROR] please check your systematic options"<<endl; return false;}  
   if (JESsyst == 1) systTag = systTag + "_JESSystUp";
   else if (JESsyst == -1) systTag = systTag + "_JESSystDown";
   
@@ -184,7 +194,9 @@ bool setSystTag () {
   else if (SF == 1.0) systTag = systTag + "_SFSystDown";
   
   if (systTag == "") systTag = "_nominal";
-  
+
+  if (matrixInv) systTag = systTag + "_matrixInv";  
+
   if (centShift == 1) systTag = systTag + "_centShiftSystUp";
   else if (centShift == -1) systTag = systTag + "_centShiftSystDown";
   

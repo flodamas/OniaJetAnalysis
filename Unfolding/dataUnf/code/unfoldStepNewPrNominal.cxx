@@ -38,6 +38,7 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
   TH2D *hFolded[nIter];
   TMatrixD covmat[nIter];
   RooUnfoldBayes unfold[nIter];
+  //RooUnfoldInvert unfoldInv[nIter];
   TMatrixD transfmat[nIter];
   
   TH1D *hJetPtTrue;
@@ -53,6 +54,7 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
     
     // RooUnfoldBayes    unfold (resp, hMeas, iter);
     unfold[iter-iterMin] = RooUnfoldBayes(resp, hMeasured, iter);
+    //if (matrixInv) unfoldInv[iter-iterMin] = RooUnfoldInvert(resp, hMeasured);
 
     // unfold using response matrix
     
@@ -60,7 +62,9 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
     hReco[iter-iterMin]->SetName(Form("hReco_Iter%d",iter));
     unfold[iter-iterMin].Print();
 
-    //    unfold[iter-iterMin].PrintTable(cout,hTrue,RooUnfold::kCovariance);
+    //if (matrixInv) hReco[iter-iterMin] = (TH2D*)unfoldInv[iter-iterMin].Hreco(errorTreatment);
+
+    // unfold[iter-iterMin].PrintTable(cout,hTrue,RooUnfold::kCovariance);
     
     // fold using just unfolded result
     
@@ -73,6 +77,10 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
     cout << "before covmat[iter-iterMin]" << endl;
     covmat[iter-iterMin].ResizeTo(unfold[iter-iterMin].Ereco(errorTreatment));
     covmat[iter-iterMin] = unfold[iter-iterMin].Ereco(errorTreatment);
+    //if (matrixInv) {
+    //covmat[iter-iterMin].ResizeTo(unfoldInv[iter-iterMin].Ereco(errorTreatment));
+    //covmat[iter-iterMin] = unfoldInv[iter-iterMin].Ereco(errorTreatment);
+    //}
     cout << "cols : "<< covmat[iter-iterMin].GetNcols() << endl;
     cout << "raws : "<< covmat[iter-iterMin].GetNrows() << endl;
     cout << "after covmat[iter-iterMin]" << endl;
@@ -80,6 +88,10 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
     transfmat[iter-iterMin].ResizeTo(unfold[iter-iterMin].UnfoldingMatrix());
     transfmat[iter-iterMin] = unfold[iter-iterMin].UnfoldingMatrix();
     
+    //if (matrixInv) {
+    //transfmat[iter-iterMin].ResizeTo(unfoldInv[iter-iterMin].UnfoldingMatrix());
+    //transfmat[iter-iterMin] = unfoldInv[iter-iterMin].UnfoldingMatrix();
+    //}
     
     //cout << "covmat[iter-iterMin](0,0) " << covmat[iter-iterMin](0,0) << endl;
     //cout << "covmat[iter-iterMin](1,20) " << covmat[iter-iterMin](1,20) << endl;
@@ -216,11 +228,12 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
     hFolded[iter-iterMin]->Write();
     covmat[iter-iterMin].Write(Form("covmat%d",iter));
     unfold[iter-iterMin].Write(Form("unfold%d",iter));
+    //if (matrixInv) 
+    //unfoldInv[iter-iterMin].Write(Form("unfoldInv%d",iter));
     transfmat[iter-iterMin].Write(Form("invtrmat%d",iter));
     hJetPtUnf[iter-iterMin]->Write();
     hJetPtFol[iter-iterMin]->Write();
   }
-
 
   for(Int_t i = 0; i<nBinJet_gen; i++) {
     //hMPri[i]->Write();
@@ -237,7 +250,8 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
 }
 
 void unfoldStepNewPrNominal(Int_t step = 1) { //, double SF = 1.1){
-  unfold(true,true,nIter,step);
+  if (!matrixInv)
+    unfold(true,true,nIter,step);
   if (step<=nSIter_pp && centShift==0)
     unfold(true,false,nIter,step);
 }

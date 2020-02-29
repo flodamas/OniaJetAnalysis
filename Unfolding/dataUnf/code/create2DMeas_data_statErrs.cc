@@ -158,7 +158,7 @@ void create2DMeas_data_statErrs(bool doPrompt = true, bool doPbPb = false){
   h_higherBin->SetTitle(Form("%d < jet p_{T} < %d",(int) (min_jetpt+4*jetPt_reco_binWidth), (int)(min_jetpt+5*jetPt_reco_binWidth)));
   h_higherBin->Draw();
 
-  can0->SaveAs(Form("../plots/data_%s_z_distr_%s_statErr.pdf",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt"));
+  can0->SaveAs(Form("%s/dataUnf/plots/data_%s_z_distr_%s_statErr.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt"));
 
   TCanvas * can1 = new TCanvas ("can1","can1",600,600);
   can1->SetRightMargin(0.2);
@@ -170,7 +170,7 @@ void create2DMeas_data_statErrs(bool doPrompt = true, bool doPbPb = false){
   h_Meas->GetYaxis()->SetTitle("jet p_{T}");
   h_Meas->GetYaxis()->SetTitleOffset(1.2);
   h_Meas->Draw("TEXTcolz");
-  can1->SaveAs(Form("../plots/data_%s_meas_%s_statErr.pdf",doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt"));
+  can1->SaveAs(Form("%s/dataUnf/plots/data_%s_meas_%s_statErr.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt"));
 
   
   string outputfile = "";
@@ -184,5 +184,5 @@ void create2DMeas_data_statErrs(bool doPrompt = true, bool doPbPb = false){
   h_centBin->Write("zMeasCentBin");
   h_highBin->Write("zMeasHighBin");
   h_higherBin->Write("zMeasHigherBin");
-
+  file_data_meas->Close();
 }

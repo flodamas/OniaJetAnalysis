@@ -24,7 +24,7 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
     if (smearMeas) {
       if (stepNumber==1) {
 	cout <<"[INFO] Smearing the MC measured distribution to match data stats"<<endl;
-	TFile* dataFile = TFile::Open(Form("%s/dataUnf/data_results/meas_%s_data_%s_statErrs.root",doPbPb?"PbPb":"PP",doPrompt?"prompt":"prompt")); //use prompt data for prompt and nonprompt
+	TFile* dataFile = TFile::Open(Form("%s/dataUnf/data_results/meas_%s_data_%s_statErrs.root",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"prompt")); //use prompt data for prompt and nonprompt
 	TRandom* rnd = new TRandom3();
 	TH2D *hMeasuredData = (TH2D*) dataFile->Get("h_Meas;1");
 	TFile* saveFile = new TFile(Form("%s/mcUnf/unfOutput/step%i/statSmearing_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str()),"RECREATE");

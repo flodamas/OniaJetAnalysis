@@ -2,18 +2,19 @@
 #include "inputParams.h"
 #endif
 
-
-TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominalHist);
+TGraphAsymmErrors* systUncertaintyHistAll(bool doPbPb, bool doPrompt, TH1D* nominalHist);
+void systUncertaintyHistReg(bool doPbPb, bool doPrompt, TH1D* nominalHist);
+void systUncertaintyHistTrStat(bool doPbPb, bool doPrompt);
 
 void plotFinalResults(bool doPrompt = true)
 {
   gStyle->SetOptStat(0);
     
-  string filePPName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PP_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.root",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter_pp, "_nominal");
+  string filePPName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PP_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.root",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter_pp, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter_pp, "_nominal");
   
   string filePbPbName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PbPb_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.root",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, "_nominal");
     
-  string fileOutputName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PPvsPbPbvsCentShift_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIterPbPb%i_SIterPP%i_statError.pdf",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, nSIter_pp);
+  string fileOutputName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_PPvsPbPb_%s_%diter_%dz%dptBins%dz%dptMeasBin_PbPbnIter%inSIter%i_PPnIter%inSIter%i_statError.pdf",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nIter, nSIter, nIter_pp, nSIter_pp);
 
   TFile* filePP = TFile::Open(filePPName.c_str());
   TFile* filePbPb = TFile::Open(filePbPbName.c_str());
@@ -33,29 +34,18 @@ void plotFinalResults(bool doPrompt = true)
       histPbPb->SetBinError(iBin,0);
       continue;
     }
-    //x_pp[iBin] = histPP->GetBinCenter(iBin);
-    //y_pp[iBin] = histPP->GetBinContent(iBin);
-    //exl_pp[iBin] = z_reco_binWidth/2.;
-    //exh_pp[iBin] = z_reco_binWidth/2.;
-    //eyl_pp[iBin] = histPP->GetBinError(iBin);
-    //eyh_pp[iBin] = histPP->GetBinError(iBin);
-
-    //x_pbpb[iBin] = histPbPb->GetBinCenter(iBin);
-    //y_pbpb[iBin] = histPbPb->GetBinContent(iBin);
-    //exl_pbpb[iBin] = z_reco_binWidth/2.;
-    //exh_pbpb[iBin] = z_reco_binWidth/2.;
-    //eyl_pbpb[iBin] = histPbPb->GetBinError(iBin);
-    //eyh_pbpb[iBin] = histPbPb->GetBinError(iBin);
   }
-  
+
+  histPP->SetTitle("");
+  histPbPb->SetTitle("");
   TGraphAsymmErrors* graphPP = new TGraphAsymmErrors(histPP);//(nBin,x_pp,y_pp,exl_pp,exh_pp,eyl_pp,eyh_pp);
   TGraphAsymmErrors* graphPbPb = new TGraphAsymmErrors(histPbPb);//(nBin,x_pbpb,y_pbpb,exl_pbpb,exh_pbpb,eyl_pbpb,eyh_pbpb);
 
-  TGraphAsymmErrors* graphPPSyst = systUncertaintyHist(false, doPrompt, histPP);//new TGraphAsymmErrors(histPPSyst);
-  TGraphAsymmErrors* graphPbPbSyst = systUncertaintyHist(true, doPrompt, histPbPb);//new TGraphAsymmErrors(histPbPbSyst);
+  TGraphAsymmErrors* graphPPSyst = systUncertaintyHistAll(false, doPrompt, histPP);//new TGraphAsymmErrors(histPPSyst);
+  TGraphAsymmErrors* graphPbPbSyst = systUncertaintyHistAll(true, doPrompt, histPbPb);//new TGraphAsymmErrors(histPbPbSyst);
   
-  graphPP->SetLineColor(kred);
-  graphPP->SetMarkerColor(kred);
+  graphPP->SetLineColor(kpink);
+  graphPP->SetMarkerColor(kpink);
   graphPP->SetMarkerStyle(kFullSquare);
   graphPP->SetMarkerSize(1.5);
   graphPP->SetTitle("");
@@ -63,40 +53,41 @@ void plotFinalResults(bool doPrompt = true)
   graphPP->GetYaxis()->SetTitle("#frac{d#sigma^{pp}}{dz}, #frac{1}{N_{evt} T_{AA}} #frac{dN^{PbPb}}{dz}");
   //graphPP->GetYaxis()->SetRangeUser(0, graphPP->GetMaximum()*1.5);
   
-  graphPbPb->SetLineColor(kgreen);
-  graphPbPb->SetMarkerColor(kgreen);
+  graphPbPb->SetLineColor(kazure);
+  graphPbPb->SetMarkerColor(kazure);
   graphPbPb->SetMarkerStyle(kFullCircle);
   graphPbPb->SetMarkerSize(1.5);
   
-  graphPbPbSyst->SetLineColor(kgreen);
-  graphPbPbSyst->SetMarkerColor(kgreen);
+  graphPbPbSyst->SetLineColor(kazure);
+  graphPbPbSyst->SetMarkerColor(kazure);
   graphPbPbSyst->SetMarkerStyle(kFullCircle);
-  graphPbPbSyst->SetFillColorAlpha(kgreen, 0.35);
+  graphPbPbSyst->SetFillColorAlpha(kazureLight, 0.75);
   
-  graphPPSyst->SetLineColor(kred);
-  graphPPSyst->SetMarkerColor(kred);
+  graphPPSyst->SetLineColor(kpink);
+  graphPPSyst->SetMarkerColor(kpink);
   graphPPSyst->SetMarkerStyle(kFullSquare);
-  graphPPSyst->SetFillColorAlpha(kred, 0.35);
+  graphPPSyst->SetFillColorAlpha(kpinkLight, 0.75);
   
   TLegend* leg = new TLegend(0.6,0.7,0.9,0.85);
   leg->SetBorderSize(0);
   leg->SetFillStyle(0);
   leg->AddEntry(graphPP, "pp","lp");
   leg->AddEntry(graphPbPb, "PbPb","lp");
-  //leg->AddEntry(graphPPSyst, "PbPb, 2.5% cent shift","lp");
-  //leg->AddEntry(graphPbPbSyst, "PbPb, 7.5% cent shift","lp");
   TCanvas* c = new TCanvas("c","",1200,900);
   c->cd();
   graphPP->Draw("AP");
   graphPbPbSyst->Draw("5");
   graphPPSyst->Draw("5");
-  //graphPbPb->SetDrawOption("AP");
   graphPbPb->Draw("P");
   graphPP->Draw("P");
   leg->Draw("same");
   c->SaveAs(fileOutputName.c_str());
-  
-  fileOutputName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_Raa_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIterPbPb%i_SIterPP%i_statError.pdf",unfPath.c_str(),doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, nSIter, nSIter_pp);
+  fileOutputName.replace(fileOutputName.find(".pdf"),4,".png");
+  c->SaveAs(fileOutputName.c_str());
+
+  fileOutputName.replace(fileOutputName.find(".png"),4,".pdf");
+  fileOutputName.replace(fileOutputName.find("PPvsPbPb"),8,"Raa");
+
   Double_t x[5] = {0,0,0,0,0};
   Double_t y[5] = {0,0,0,0,0};
   Double_t exl[5] = {0,0,0,0,0};
@@ -107,7 +98,7 @@ void plotFinalResults(bool doPrompt = true)
   Double_t eyh_syst[5] = {0,0,0,0,0};
 
   for (int iBin = 0; iBin < nBinZ_reco-1; iBin++) {
-    int bin = histPbPb->FindBin(iBin*z_reco_binWidth+min_z+0.22);
+    int bin = histPbPb->FindBin(iBin*z_reco_binWidth+min_z+unfStart);
     x[iBin] = histPbPb->GetBinCenter(bin);//graphPPSyst->GetPointX(iBin);
     y[iBin] = histPbPb->GetBinContent(bin)/histPP->GetBinContent(histPP->FindBin(x[iBin]));//graphPPSyst->GetPointY(iBin)/graphPbPbSyst->GetPointY(iBin);
     exl[iBin] = z_reco_binWidth/3.;
@@ -142,23 +133,29 @@ void plotFinalResults(bool doPrompt = true)
   graphRaaSyst->Draw("A5");
   graphRaa->Draw("P");
   c->SaveAs(fileOutputName.c_str());
+  fileOutputName.replace(fileOutputName.find(".pdf"),4,".png");
+  c->SaveAs(fileOutputName.c_str());
 }
 
-TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominalHist) {
+TGraphAsymmErrors* systUncertaintyHistAll(bool doPbPb, bool doPrompt, TH1D* nominalHist) {
+  gStyle->SetOptStat(0);
+  systUncertaintyHistReg(doPbPb, doPrompt, nominalHist);
+  systUncertaintyHistTrStat(doPbPb, doPrompt);
   TCanvas* cSyst = new TCanvas("cSyst","",800,800);
   nominalHist->SetLineColor(col[0]);
   nominalHist->SetMarkerColor(col[0]);
   nominalHist->SetMarkerStyle(markerStyle[0]);
   cSyst->cd();
+  nominalHist->SetStats(0);
   nominalHist->Draw();
-  TLegend* legSyst = new TLegend(0.45,0.45,0.75,0.75);
-  if (!doPbPb) legSyst = new TLegend(0.4,0.25,0.6,0.45);
+  double maxSyst = nominalHist->GetMaximum();
+  TLegend* legSyst = new TLegend(0.7,0.6,0.9,0.9);
+  //if (!doPbPb) legSyst = new TLegend(0.4,0.25,0.6,0.45);
   legSyst->SetBorderSize(0);
   legSyst->SetFillStyle(0);
   legSyst->AddEntry(nominalHist,"nominal","lp");
-  string systNames [] = {"_JESSyst","_JERSyst","_SFSyst","_nominal_centShiftSyst"};
+  string systNames [] = {"_JESSyst","_JERSyst","_SFSyst","_nominal_centShiftSyst","_Regularisation", "_TrStat"};
   int nSyst = sizeof(systNames)/sizeof(systNames[0]);
-  //int nBin = nominalHist->GetNbinsX();
   Double_t x[5] = {0,0,0,0,0};
   Double_t y[5] = {0,0,0,0,0};
   Double_t exl[5] = {0,0,0,0,0};
@@ -176,8 +173,16 @@ TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominal
     TH1D* histDown = (TH1D*) fileDown->Get(Form("zUnfSI%d",doPbPb?nSIter:nSIter_pp));
     if (!histUp || !histDown) {cout<<"[WARNING] systematic histogram not found:"<<systNames[i]<<endl; continue;}
 
+    histUp->SetStats(0);
+    histDown->SetStats(0);
+
     histUp->Scale(doPbPb?(normPbPb*1./z_reco_binWidth):(normPP*1./z_reco_binWidth));
     histDown->Scale(doPbPb?(normPbPb*1./z_reco_binWidth):(normPP*1./z_reco_binWidth));
+
+    if (histUp->GetMaximum() > maxSyst) maxSyst = histUp->GetMaximum();
+    if (histDown->GetMaximum() > maxSyst) maxSyst = histDown->GetMaximum();
+
+    nominalHist->GetYaxis()->SetRangeUser(0,1.5*maxSyst);
 
     histUp->SetLineColor(col[i+1]);
     histUp->SetMarkerColor(col[i+1]);
@@ -194,7 +199,7 @@ TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominal
     for (int iBin = 0; iBin < nBinZ_reco-1; iBin++) { //-1 for the underflow
       double errUp=0;
       double errDown=0;
-      int nBin = nominalHist->FindBin(iBin*z_reco_binWidth+min_z+0.22);
+      int nBin = nominalHist->FindBin(iBin*z_reco_binWidth+min_z+unfStart);
       if (nominalHist->GetBinContent(nBin) == 0) continue;
 
       if (histUp->GetBinContent(nBin) > nominalHist->GetBinContent(nBin)) {
@@ -221,26 +226,9 @@ TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominal
 	  errDown = nominalHist->GetBinContent(nBin) - histUp->GetBinContent(nBin);
 	}
       }
-
-      //errUp =  fabs(errUp = histUp->GetBinContent(nBin) - nominalHist->GetBinContent(nBin));
-      //errDown = fabs(histDown->GetBinContent(nBin) - nominalHist->GetBinContent(nBin));
-      //errUp = max(errUp,errDown);
-      //errDown = errUp;
-      //cout <<"nominal = "<<nominalHist->GetBinContent(nBin)<<", histUp = "<<histUp->GetBinContent(nBin)<<", histDown = "<<histDown->GetBinContent(nBin)<<", for syst = "<<systNames[i]<<", for z = "<<nominalHist->GetBinCenter(nBin)<<endl;
-      //if (errUp < 0 || errDown < 0) cout <<"[WARNING] something is wrong: negative systematic error! errUp = "<<errUp<<", errDown = "<<errDown<<endl;
       errUp = errUp/nominalHist->GetBinContent(nBin);
       errDown = errDown/nominalHist->GetBinContent(nBin);
-      
-      //errUp = pow(errUp/nominalHist->GetBinContent(nBin),2) + pow(systHist->GetErrorYhigh(nBin)/nominalHist->GetBinContent(nBin),2);
-      //errDown = pow(errDown/nominalHist->GetBinContent(nBin),2) + pow(systHist->GetErrorYlow(nBin)/nominalHist->GetBinContent(nBin),2);
-      //errUp = sqrt(errUp);
-      //errDown = sqrt(errDown);
-      //cout <<"error Up = "<<errUp<<", error Down = "<<errDown<<", for syst = "<<systNames[i]<<", for z = "<<nominalHist->GetBinCenter(nBin)<<endl;
-      //errUp = errUp*nominalHist->GetBinContent(nBin);
-      //errDown = errDown*nominalHist->GetBinContent(nBin);
-      //systHist->SetPointEYhigh(nBin,errUp);
-      //systHist->SetPointEYlow(nBin,errDown);
-      
+            
       if (i==0) {
 	x[iBin] = nominalHist->GetBinCenter(nBin);
 	y[iBin] = nominalHist->GetBinContent(nBin);
@@ -249,7 +237,6 @@ TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominal
 	}
       eyl[iBin] = y[iBin]*sqrt(pow(errDown,2) + pow(eyl[iBin]/y[iBin],2));
       eyh[iBin] = y[iBin]*sqrt(pow(errUp,2) + pow(eyh[iBin]/y[iBin],2));
-      //eyh[iBin] = sqrt(errUp*errUp + eyh[iBin]*eyh[iBin]);
       cout << "x = "<<x[iBin]<<", y = "<<y[iBin]<<", eyl = "<<eyl[iBin]<<", eyh = "<<eyh[iBin]<<endl;
     }
   }
@@ -257,4 +244,56 @@ TGraphAsymmErrors* systUncertaintyHist(bool doPbPb, bool doPrompt, TH1D* nominal
   cSyst->SaveAs(Form("%s/dataUnf/unfOutput/finalResults/SystematicDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco,doPbPb?nSIter:nSIter_pp));
   TGraphAsymmErrors* systHist = new TGraphAsymmErrors(nBinZ_reco-1,x,y,exl,exh,eyl,eyh);
   return systHist;
+}
+
+void systUncertaintyHistReg(bool doPbPb, bool doPrompt, TH1D* nominalHist) {
+  gStyle->SetOptStat(0);
+  string fileSystName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.root",unfPath.c_str(),doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", doPbPb?nIter_syst:nIter_syst_pp, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter_syst:nSIter_syst_pp, "_nominal");
+  TFile* fileSyst = TFile::Open(fileSystName.c_str());
+  TH1D* systHist = (TH1D*) fileSyst->Get(Form("zUnfSI%d",doPbPb?nSIter_syst:nSIter_syst_pp));
+  TH1D* histUp = (TH1D*) systHist->Clone("histUp");
+  TH1D* histDown = (TH1D*) systHist->Clone("histDown");
+  TH1D* nomHist = (TH1D*) nominalHist->Clone("nomHist");
+  //systHist->Scale(doPbPb?(normPbPb*1./z_reco_binWidth):(normPP*1./z_reco_binWidth));
+  nomHist->Scale(doPbPb?(z_reco_binWidth*1./normPbPb):(z_reco_binWidth*1./normPP));
+  int nBin = systHist->GetNbinsX();
+  for (int i=0; i<=nBin;i++) {
+    double binCenter = systHist->GetBinCenter(i);
+    double err = fabs(nomHist->GetBinContent(nomHist->FindBin(binCenter))-systHist->GetBinContent(i));
+    histUp->SetBinContent(i, nomHist->GetBinContent(i)+err);
+    histDown->SetBinContent(i, nomHist->GetBinContent(i)-err);
+  }
+  
+  string fileUpName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%sUp_statError.root",unfPath.c_str(),doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter:nSIter_pp, "_Regularisation");
+  string fileDownName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%sDown_statError.root",unfPath.c_str(),doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter:nSIter_pp, "_Regularisation");
+  TFile* fileUp = new TFile(fileUpName.c_str(),"RECREATE");
+  histUp->Write(Form("zUnfSI%d",doPbPb?nSIter:nSIter_pp));
+  nomHist->Write("nominal");
+  systHist->Write("syst");
+  fileUp->Close();
+  TFile* fileDown = new TFile(fileDownName.c_str(),"RECREATE");
+  histDown->Write(Form("zUnfSI%d",doPbPb?nSIter:nSIter_pp));
+  fileDown->Close();
+}
+
+void systUncertaintyHistTrStat(bool doPbPb, bool doPrompt) {
+  gStyle->SetOptStat(0);
+  string fileSystName = Form("%s/dataUnf/unfOutput/matrixOper/systUnc_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, "_nominal");
+  TFile* fileSyst = TFile::Open(fileSystName.c_str());
+  TH1D* systHist = (TH1D*) fileSyst->Get("zUnf_trMatrixSyst");
+  TH1D* histUp = (TH1D*) systHist->Clone("histUp");
+  TH1D* histDown = (TH1D*) systHist->Clone("histDown");
+  int nBin = systHist->GetNbinsX();
+  for (int i=0; i<=nBin;i++) {
+    histUp->SetBinContent(i, histUp->GetBinContent(i)+histUp->GetBinError(i));
+    histDown->SetBinContent(i, histDown->GetBinContent(i)-histDown->GetBinError(i));
+  }
+  string fileUpName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%sUp_statError.root",unfPath.c_str(),doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter:nSIter_pp, "_TrStat");
+  string fileDownName = Form("%s/dataUnf/unfOutput/finalResults/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%sDown_statError.root",unfPath.c_str(),doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, doPbPb?nSIter:nSIter_pp, "_TrStat");
+  TFile* fileUp = new TFile(fileUpName.c_str(),"RECREATE");
+  histUp->Write(Form("zUnfSI%d",doPbPb?nSIter:nSIter_pp));
+  fileUp->Close();
+  TFile* fileDown = new TFile(fileDownName.c_str(),"RECREATE");
+  histDown->Write(Form("zUnfSI%d",doPbPb?nSIter:nSIter_pp));
+  fileDown->Close();
 }

@@ -50,13 +50,13 @@ string unfPath = "/data_CMS/cms/diab/JpsiJet/Unfolding";
 bool sameSample = true;
 bool mc2015 = false;
 bool flatPrior = true;
-int nIter = 3;
-int nSIter = 30;
-int nSIter_pp = 6;
+int nIter = 10;
+int nSIter = 9;
+int nSIter_pp = 4;
 
-int centShift = -1; // 0 is nominal, -1 for systDown and +1 for systUp
+int centShift = 0; // 0 is nominal, -1 for systDown and +1 for systUp
 bool smearMeas = true;
-bool dataDist = true;
+bool dataDist = false;
 string caseTag = "";
 ///////////////////////////////////////////////
 //             jet parameters                //

@@ -417,7 +417,8 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   hRespZJetPtLowBin->Write();
   hRespZJetPtHighBin->Write();
 
-  mcDataWeight->Write();
+  if (dataDist)
+    mcDataWeight->Write();
   
   file_forProf_varBin->Close();
 }

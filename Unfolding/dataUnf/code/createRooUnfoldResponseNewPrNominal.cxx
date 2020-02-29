@@ -16,7 +16,7 @@ void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
 
   cout << "step # =" << stepNumber << endl;
     
-  inputName = Form("%s/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  inputName = Form("%s/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
 
   outputName = inputName;
   int idxReplace = inputName.find("unfolding_4D");
@@ -169,7 +169,8 @@ void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
 }
 
 void createRooUnfoldResponseNewPrNominal(Int_t step = 1) { //, double SF = 1.1){
-  create(true,true,step);
+  if (!matrixInv)
+    create(true,true,step);
   if (step<=nSIter_pp && centShift==0)
     create(true,false,step);
 }

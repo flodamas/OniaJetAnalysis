@@ -1,7 +1,7 @@
-cd /Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/code
-root -l -q -b  prepareInputsNewPrNominal.cc+\($1\)
+cd /home/llr/cms/diab/JpsiInJetsPbPb/Unfolding/dataUnf/code
+root -b -l -q  ~/LoadUnfoldinLib.C+ prepareInputsNewPrNominal.cc+\($1\)
 
-cd /Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/
-root -l -q -b  dataUnf/code/createRooUnfoldResponseNewPrNominal.cxx+\($1\)
-root -l -q -b  dataUnf/code/unfoldStepNewPrNominal.cxx+\($1\)
-root -l -q -b  dataUnf/code/unfoldStepNewPrNominalDiag.cxx+\($1\)
+cd /home/llr/cms/diab/JpsiInJetsPbPb/Unfolding
+root -b -l -q  ~/LoadUnfoldinLib.C+ dataUnf/code/createRooUnfoldResponseNewPrNominal.cxx+\($1\)
+root -b -l -q  ~/LoadUnfoldinLib.C+ dataUnf/code/unfoldStepNewPrNominal.cxx+\($1\)
+root -b -l -q  ~/LoadUnfoldinLib.C+ dataUnf/code/unfoldStepNewPrNominalDiag.cxx+\($1\)

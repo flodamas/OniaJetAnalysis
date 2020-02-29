@@ -8,7 +8,7 @@
 #include "PlotRatios_MCUnfoldedTruth.cc"
 
 
-void unfoldAllSteps(bool setSameSample = true, bool setMc2015 = false, bool setFlatPrior=true, int SetCentShift = 0, bool setSmearMeas = false, bool setDataDist = false, int nIt = 3, int nSI = 99, int nSI_pp = 6) {
+void unfoldAllSteps_Def(bool setSameSample = true, bool setMc2015 = false, bool setFlatPrior=true, int SetCentShift = 0, bool setSmearMeas = false, bool setDataDist = false, int nIt = 3, int nSI = 99, int nSI_pp = 6) {
   sameSample = setSameSample;
   mc2015 = setMc2015;
   flatPrior = setFlatPrior;
@@ -31,7 +31,8 @@ void unfoldAllSteps(bool setSameSample = true, bool setMc2015 = false, bool setF
 }
 
 
-void unfoldAllSteps_withSmearing(int SetCentShift = 0, bool setDataDist = false, int nIt = 3, int nSI = 99, int nSI_pp = 6, int istart=1, int istop=20) {
+//void unfoldAllSteps_withSmearing(int SetCentShift = 0, bool setDataDist = false, int nIt = 3, int nSI = 99, int nSI_pp = 6, int istart=1, int istop=20) {
+void unfoldAllSteps(int SetCentShift = 0, bool setDataDist = false, int nIt = 3, int nSI = 99, int nSI_pp = 6, int istart=1, int istop=20) {
   sameSample = true;
   mc2015 = false;
   flatPrior = true;
