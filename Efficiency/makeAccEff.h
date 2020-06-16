@@ -49,6 +49,12 @@ public :
    int nptbins;
    int *centbins = new int[100];
    int ncentbins;
+   Double_t *zbins = new Double_t[100];
+   int nzbins;
+   Double_t *jtptbins = new Double_t[100];
+   int njtptbins;
+
+   int centCut=40;
    //my additional variables
    
    int cent;
@@ -312,24 +318,24 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 
-   virtual void     AccEffCalc(string caseTag="");
-   virtual void     EffCalc(string caseTag="");
-   virtual void     AccCalc(string caseTag="");
-   virtual void     Plot();
-   virtual void     ClosureTest(string caseTag="");
+   virtual void     AccEffCalc(string caseTag="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
+   virtual void     EffCalc(string caseTag="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
+   virtual void     AccCalc(string caseTag="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
+   virtual void     Plot(string caseTag="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
+   virtual void     ClosureTest(string caseTag="",bool onlyPlot=false);
    virtual void     ClosureTestPtWeights();
-   virtual void     TnpSyst(string caseLabel ="");
-   virtual void     AccEffStatToy(int nToys=100);
-   virtual void     AccEffStatToy_Acc(int nToys=100,string caseLabel ="");
-   virtual void     AccEffStatToy_Eff(int nToys=100,string caseLabel ="");
-   virtual void     AccEffStatToy_1D(int nToys=100,string caseLabel ="");
-   virtual void     AccEffStat(string caseLabel ="");
+   virtual void     TnpSyst(string caseTag ="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
+   //virtual void     AccEffStatToy(int nToys=100);
+   virtual void     AccEffStatToy_Acc(int nToys=100,string caseLabel ="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
+   virtual void     AccEffStatToy_Eff(int nToys=100,string caseLabel ="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
+   //virtual void     AccEffStatToy_1D(int nToys=100,string caseLabel ="");
+   virtual void     AccEffStat(string caseLabel ="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
    virtual void     TnpToy(int min=0, int max=100);
-   virtual void     TnpStat(string caseLabel ="");
-   virtual void     AccEffMisMod(string caseLabel ="");
+   virtual void     TnpStat(string caseLabel ="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
+   virtual void     AccEffMisMod(string caseLabel ="_pt_SizeDoubled_rap_1bin1010_15Bins_centBins_NoWeights");
    //virtual void     FullAccEffSyst(string caseLabel ="");
    virtual void     AccEffSyst_all();
-   virtual double   readSyst(const char* systfile, double zedmin, double zedmax, double ymin, double ymax);
+   virtual double   readSyst(const char* systfile, double zedmin, double zedmax, double ymin, double ymax, int centrmin, int centrmax);
    virtual double   rms(vector<double> v, bool isrelative);
    virtual double   maxdiff(vector<double> v, bool isrelative);
    virtual Bool_t   isTriggerMatch (Int_t iRecoQQ, Int_t TriggerBit);
@@ -367,8 +373,10 @@ oniaTree::oniaTree(Bool_t pbpb, Bool_t pr, Bool_t acc) : fChain(0)
     "/data_CMS/cms/mnguyen/jPsiJet/mc/prompt/acc/merged_acc.root",
     //"root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_BJpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //pp nonprompt
     "/data_CMS/cms/mnguyen/jPsiJet/mc/nonprompt/acc/merged_acc.root",
-    "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_JpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb prompt
-   "root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_BJpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb  nonprompt
+    //"root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_JpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb prompt
+    "/data_CMS/cms/mnguyen/jPsiJet/mc/prompt/acc/merged_acc.root",
+    //"root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/pp502TeV/TTrees/OniaTree_BJpsiMM_5p02TeV_TuneCUETP8M1_nofilter_pp502Fall15-MCRUN2_71_V1-v1_GENONLY.root", //PbPb  nonprompt
+    "/data_CMS/cms/mnguyen/jPsiJet/mc/nonprompt/acc/merged_acc.root",
     //Eff files
     "/data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v3/HiForestAOD_merged.root", //pp prompt
     "/data_CMS/cms/diab/JpsiJet/MC/pp/nonprompt/v5/HiForestAOD_merged.root", //pp nonprompt 
@@ -752,7 +760,7 @@ double oniaTree::maxdiff(vector<double> v, bool isrelative) {
   return ans;
 }
 
-double oniaTree::readSyst(const char* systfile, double zedmin, double zedmax, double ymin, double ymax) {
+double oniaTree::readSyst(const char* systfile, double zedmin, double zedmax, double ymin, double ymax, int centrmin, int centrmax) {
   double ans = 0;
   ifstream file(systfile);
   if (!(file.good())) return ans;
@@ -784,7 +792,7 @@ double oniaTree::readSyst(const char* systfile, double zedmin, double zedmax, do
       }
       cnt++;
     }
-    if (zmin<zedmin+0.001 && zmin>zedmin-0.001 && zmax<zedmax+0.001 && zmax>zedmax-0.001 && rapmin<ymin+0.001 && rapmin>ymin-0.001 && rapmax<ymax+0.001 && rapmax>ymax-0.001) {
+    if (zmin<zedmin+0.001 && zmin>zedmin-0.001 && zmax<zedmax+0.001 && zmax>zedmax-0.001 && rapmin<ymin+0.001 && rapmin>ymin-0.001 && rapmax<ymax+0.001 && rapmax>ymax-0.001 && centmin<centrmin+0.001 && centmin>centrmin-0.001 && centmax<centrmax+0.001 && centmax>centrmax-0.001) {
       cout<<"zmin = "<<zmin<<", zmax = "<<zmax<<", syst = "<<value<<endl;
       ans = value;
     }

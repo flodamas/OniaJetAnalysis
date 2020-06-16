@@ -204,6 +204,7 @@ void oniaTree::EffCalc (string caseTag) {
   TH2F* hnum_trk_plus1sig_stat = new TH2F ("hnum_trk_plus1sig_stat", "Eff vs p_{T} and y; y; p_{T}; Eff", nybins, ybins, nptbins, ptbins); hnum_trk_plus1sig_stat->Sumw2();
   TH2F* hnum_trk_minus1sig_stat = new TH2F ("hnum_trk_minus1sig_stat", "Eff vs p_{T} and y; y; p_{T}; Eff", nybins, ybins, nptbins, ptbins); hnum_trk_minus1sig_stat->Sumw2();
   
+  TH2F* hnum_tag_syst = new TH2F ("hnum_tag_syst", "Eff vs p_{T} and y; y; p_{T}; Eff", nybins, ybins, nptbins, ptbins); hnum_tag_syst->Sumw2();
 
   vector<TObjArray *> wHistograms;
   TH1D *curve = NULL;
@@ -416,6 +417,11 @@ void oniaTree::EffCalc (string caseTag) {
 		}
 	      }
 	    }
+
+	    tnp_weight = tnp_weight_trk_pbpb(muplY,99)*tnp_weight_muid_pbpb(muplPt,muplY,99)*tnp_weight_trg_pbpb(muplPt,muplY,filterIdxMuPl,99)
+              * tnp_weight_trk_pbpb(mumiY,99)*tnp_weight_muid_pbpb(mumiPt,mumiY,99)*tnp_weight_trg_pbpb(mumiPt,mumiY,filterIdxMuMi,99);
+	    hnum_tag_syst->Fill(reco_rap, reco_pt, tnp_weight*weight*ptW);
+
 	    tnp_weight = tnp_weight_trk_pbpb(muplY,0)*tnp_weight_muid_pbpb(muplPt,muplY,-1)*tnp_weight_trg_pbpb(muplPt,muplY,filterIdxMuPl,0)
 	      * tnp_weight_trk_pbpb(mumiY,0)*tnp_weight_muid_pbpb(mumiPt,mumiY,-1)*tnp_weight_trg_pbpb(mumiPt,mumiY,filterIdxMuMi,0);
 	    hnum_muid_plus1sig_syst->Fill(reco_rap, reco_pt, tnp_weight*weight*ptW);
@@ -546,12 +552,14 @@ void oniaTree::EffCalc (string caseTag) {
     hnum_trk_minus1sig_syst->Write();
     hnum_trk_plus1sig_stat->Write();
     hnum_trk_minus1sig_stat->Write();
+    hnum_tag_syst->Write();
+
     for (int i=0; i<ncentbins; i++) {
       hdeno_pty_cent[i]->Write();
       hnum_nominal_cent[i]->Write();
-    }
-    
+    }    
   }
+
   else {
     hnum_muidtrg_plus1sig_syst->Write();
     hnum_muidtrg_minus1sig_syst->Write();
@@ -687,8 +695,7 @@ void oniaTree::AccCalc (string caseTag) {
   delete fsave; delete hdeno_pt; delete hnum_pt; delete hdeno_y; delete hnum_y; delete hdeno_pty; delete hnum_nominal;
 }//end of AccCalc function
 
-void oniaTree::ClosureTest(string caseTag)
-{
+void oniaTree::ClosureTest(string caseTag, bool onlyPlot) {
   setBins(caseTag);
 
   int nptbinsAna = sizeof(ptbinsAna)/sizeof(double)-1;
@@ -722,7 +729,7 @@ void oniaTree::ClosureTest(string caseTag)
 
   int cent=0;
   double normF = 1.0;
-
+  if (!onlyPlot) {
   Long64_t nentries = fChain->GetEntries();
   //nentries = 10000000;
   Long64_t nbytes = 0, nb = 0;
@@ -821,22 +828,29 @@ void oniaTree::ClosureTest(string caseTag)
 	  ptPass->Fill(jpsi_pt,Gen_weight*weight);
 	}
     }
+  }
+
+  TFile* saveFile = NULL;
+  if (onlyPlot) {
+    saveFile = TFile::Open(Form("FilesAccxEff%s/ClosureTest/ClosureTest_StatisticallyIdependentSamples_%s_%s_%s.root",caseTag.c_str(),isPbPb?"PbPb":"PP",isPr?"pr":"npr",isAcc?"acc":"eff"));
+    ptTotal = (TH1D*) saveFile->Get("ptTotal");
+    ptPass = (TH1D*) saveFile->Get("ptPass");
+  }
+  else {
+    gSystem->mkdir(Form("FilesAccxEff%s/ClosureTest",caseTag.c_str()));
+    saveFile = new TFile (Form("FilesAccxEff%s/ClosureTest/ClosureTest_StatisticallyIdependentSamples_%s_%s_%s.root",caseTag.c_str(),isPbPb?"PbPb":"PP",isPr?"pr":"npr",isAcc?"acc":"eff"),"RECREATE");
+    ptTotal->Write();
+    ptPass->Write();
+    saveFile->Close();
+  }
   
-  gSystem->mkdir(Form("FilesAccxEff%s/ClosureTest",caseTag.c_str()));
-
-  TFile* saveFile = new TFile (Form("FilesAccxEff%s/ClosureTest/ClosureTest_StatisticallyIdependentSamples_%s_%s_%s.root",caseTag.c_str(),isPbPb?"PbPb":"PP",isPr?"pr":"npr",isAcc?"acc":"eff"),"RECREATE");
-
-  ptTotal->Write();
-  ptPass->Write();
-  saveFile->Close();
-
   ptTotal->Scale(1.,"width");
   ptPass->Scale(1.,"width");
-
+  
   ptTotal->SetLineColor(kRed);
   ptTotal->SetMarkerColor(kRed);
   ptTotal->SetMarkerStyle(kFullCircle);
-
+  
   ptPass->SetLineColor(kBlue);
   ptPass->SetMarkerColor(kBlue);
   ptPass->SetMarkerStyle(kOpenCircle);
@@ -876,6 +890,7 @@ void oniaTree::ClosureTest(string caseTag)
   pad2->cd();
   pull = makePull(ptPass,ptTotal);
   pull->GetYaxis()->SetTitle("pass/total");
+  pull->GetYaxis()->SetRangeUser(0.89,1.11);
   pull->Draw();
   ly1->Draw("same");
   pull->Draw("same");
@@ -996,6 +1011,8 @@ void oniaTree::ClosureTestPtWeights()
 
   testfile->Close();
   
+
+ 
   genHist->SetLineColor(kRed);
   genHist_ptw->SetLineColor(kGreen+2);
   hist->SetLineColor(kBlue);
@@ -1023,7 +1040,132 @@ void oniaTree::ClosureTestPtWeights()
   c->SaveAs(Form("FilesAccxEff/ClosureTest/GenRecoComparison_ptWeights_%s_%s.pdf",isPbPb?"PbPb":"PP",isPr?"pr":"npr"));
 }
 
-void oniaTree::Plot() {cout << "[INFO] This function is empty at the moment. It can be used to make nice plots for the analysis notes"<< endl;}
+void oniaTree::Plot(string caseTag) {
+  setBins(caseTag);
+  gStyle->SetOptStat(false);
+
+  cout<<"[INFO] Importing the numerators and denominators of the corrections."<<endl;
+  TFile*prAccFile_pbpb = TFile::Open(Form("FilesAccxEff%s/Acc/prAccHists_PP.root",caseTag.c_str()));
+  if (!prAccFile_pbpb) {
+    cout<<"[ERROR] pbpb prompt acceptance file not found!"<<endl;
+    if (isAcc && isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+      AccCalc(caseTag);
+      prAccFile_pbpb = TFile::Open(Form("FilesAccxEff%s/Acc/prAccHists_PP.root",caseTag.c_str()));
+    }
+    else {
+      cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
+  }
+  TFile*prEffFile_pbpb = TFile::Open(Form("FilesAccxEff%s/Eff/prEffHists_PbPb.root",caseTag.c_str()));
+  if (!prEffFile_pbpb) {
+    cout<<"[ERROR] pbpb prompt efficiency file not found!"<<endl;
+    if (!isAcc && isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+      EffCalc(caseTag);
+      prEffFile_pbpb = TFile::Open(Form("FilesAccxEff%s/Eff/prEffHists_PbPb.root",caseTag.c_str()));
+    }
+    else {
+      cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
+  }
+  ////////////////////////////////////pp/////////////////////////////////
+  TFile*prAccFile_pp = TFile::Open(Form("FilesAccxEff%s/Acc/prAccHists_PP.root",caseTag.c_str()));
+  if (!prAccFile_pp) {
+    cout<<"[ERROR] pp prompt acceptance file not found!"<<endl;
+    if (isAcc && !isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+      AccCalc(caseTag);
+      prAccFile_pp = TFile::Open(Form("FilesAccxEff%s/Acc/prAccHists_PP.root",caseTag.c_str()));
+    }
+    else {
+      cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+    }
+  }
+  TFile*prEffFile_pp = TFile::Open(Form("FilesAccxEff%s/Eff/prEffHists_PP.root",caseTag.c_str()));
+  if (!prEffFile_pp) {
+    cout<<"[ERROR] pp prompt efficiency file not found!"<<endl;
+    if (!isAcc && !isPbPb && isPr) {cout<<"[INFO] since the settings are good I will make it"<<endl;
+      EffCalc(caseTag);
+      prEffFile_pp = TFile::Open(Form("FilesAccxEff%s/Eff/prEffHists_PP.root",caseTag.c_str()));
+    }
+    else 
+      cout<<"[ERROR] Please change your settings and retry."<<endl; return;
+  }
+
+  TH2F *prAccNum_pbpb = (TH2F*) prAccFile_pbpb->Get("hnum_2d_nominal");
+  TH2F *prAccDen_pbpb = (TH2F*) prAccFile_pbpb->Get("hdeno_2d");
+  TH2F *prEffNum_pbpb = (TH2F*) prEffFile_pbpb->Get("hnum_nominal");
+  if (caseTag.find("noTnpWeights")!=std::string::npos)
+    prEffNum_pbpb = (TH2F*) prEffFile_pbpb->Get("hnum_noweights");
+  TH2F *prEffDen_pbpb = (TH2F*) prEffFile_pbpb->Get("hdeno_pty");
+
+  TH2F *prAccNum_pp = (TH2F*) prAccFile_pp->Get("hnum_2d_nominal");
+  TH2F *prAccDen_pp = (TH2F*) prAccFile_pp->Get("hdeno_2d");
+  TH2F *prEffNum_pp = (TH2F*) prEffFile_pp->Get("hnum_nominal");
+  if (caseTag.find("noTnpWeights")!=std::string::npos)
+    prEffNum_pp = (TH2F*) prEffFile_pp->Get("hnum_noweights");
+  TH2F *prEffDen_pp = (TH2F*) prEffFile_pp->Get("hdeno_pty");
+
+  TCanvas* c = new TCanvas("c","",1000,900);
+  prAccNum_pbpb->Divide(prAccDen_pbpb);
+  prEffNum_pbpb->Divide(prEffDen_pbpb);
+  prAccNum_pp->Divide(prAccDen_pp);
+  prEffNum_pp->Divide(prEffDen_pp);
+  
+  prAccNum_pbpb->SetTitle("Acceptance");
+  prEffNum_pbpb->SetTitle("PbPb Efficiency");
+  prAccNum_pp->SetTitle("Acceptance");
+  prEffNum_pp->SetTitle("pp Efficiency");
+
+  prAccNum_pbpb->GetZaxis()->SetTitle("");
+  prEffNum_pbpb->GetZaxis()->SetTitle("");
+  prAccNum_pp->GetZaxis()->SetTitle("");
+  prEffNum_pp->GetZaxis()->SetTitle("");
+
+  prAccNum_pbpb->GetYaxis()->SetRangeUser(6.5,100);
+  prEffNum_pbpb->GetYaxis()->SetRangeUser(6.5,100);
+  prAccNum_pp->GetYaxis()->SetRangeUser(6.5,100);
+  prEffNum_pp->GetYaxis()->SetRangeUser(6.5,100);
+
+  prAccNum_pbpb->GetZaxis()->SetRangeUser(0,1);
+  prEffNum_pbpb->GetZaxis()->SetRangeUser(0,1);
+  prAccNum_pp->GetZaxis()->SetRangeUser(0,1);
+  prEffNum_pp->GetZaxis()->SetRangeUser(0,1);
+
+  c->cd();
+  c->SetLogy();
+  prAccNum_pbpb->Draw("colz");
+  c->SaveAs("Utilities/pbpbAcc2D.pdf");
+  prEffNum_pbpb->Draw("colz");
+  c->SaveAs("Utilities/pbpbEff2D.pdf");
+  prAccNum_pp->Draw("colz");
+  c->SaveAs("Utilities/ppAcc2D.pdf");
+  prEffNum_pp->Draw("colz");
+  c->SaveAs("Utilities/ppEff2D.pdf");
+
+  if (caseTag.find("centBins")!=std::string::npos) {
+    for (int i=0; i<ncentbins; i++) {
+      prEffNum_pbpb = (TH2F*) prEffFile_pbpb->Get(Form("hnum_nominal_cent%d%d",centbins[i],centbins[i+1]));
+      prEffDen_pbpb = (TH2F*) prEffFile_pbpb->Get(Form("hdeno_pty_cent%d%d",centbins[i],centbins[i+1]));
+      prEffNum_pbpb->Divide(prEffDen_pbpb);
+      /*
+      int nBinX=prEffNum_pbpb->GetNbinsX();
+      int nBinY=prEffNum_pbpb->GetNbinsY();
+      for (int iX=0; iX<nBinX; iX++) {
+	for (int iY=0; iY<nBinY; iY++) {
+	  int iBin = prEffNum_pbpb->GetBin(iX,iY);
+	  if (prEffNum_pbpb->GetBinContent(iBin)< 0.0001) prEffNum_pbpb->SetBinContent(iBin, 0.0001);
+	  if (prEffNum_pbpb->GetBinError(iBin)< 0.001) prEffNum_pbpb->SetBinError(iBin, 0.001);
+	}
+      }
+      */
+      prEffNum_pbpb->SetTitle(Form("PbPb Efficiency hiBin %d-%d",centbins[i],centbins[i+1]));
+      prEffNum_pbpb->GetZaxis()->SetTitle("");
+      prEffNum_pbpb->GetYaxis()->SetRangeUser(6.5,100);
+      prEffNum_pbpb->GetZaxis()->SetRangeUser(0,1);
+      prEffNum_pbpb->Draw("colz");
+      c->SaveAs(Form("Utilities/pbpbEff2D_cent%d%d.pdf",centbins[i],centbins[i+1]));
+    }
+  }
+}
       
 vector<TObjArray*> oniaTree::ReadFileWeight(bool ispbpb, bool isprompt) {
   string wfilePbPb_prompt[] = {"weights_JPsi_PbPb_006_prompt.root","weights_JPsi_PbPb_0612_prompt.root","weights_JPsi_PbPb_1218_prompt.root","weights_JPsi_PbPb_1824_prompt.root"};
