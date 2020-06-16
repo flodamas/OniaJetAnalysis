@@ -232,121 +232,24 @@ void plotAll(string workDirName, string poiname) {
 //  if (dononprompt) nameTag_base = "_nonprompt";
   if (!doprompt && !dononprompt) nameTag_base = "";
   plotPt(workDirName,poiname,0);//,DSTag,prependPath,fitType);
-  /*
-  if (is16004)
-  {
-    plotPt(workDirName,poiname,3);
-    plotCent(workDirName,poiname,3);
-  }
-  else{
-    plotPt(workDirName,poiname,0);
-    plotPt(workDirName,poiname,1);
-    plotPt(workDirName,poiname,2);
-    if ((poiname.find("XS")==std::string::npos) && (poiname.find("BF")==std::string::npos))
-    {
-      plotCent(workDirName,poiname,0);
-      plotCent(workDirName,poiname,1);
-      plotCent(workDirName,poiname,2);
-    }
-    plotRap(workDirName,poiname);
-  }
-  */
+
 };
 
 void doAllplots(bool is16004=false) {
   //bool adoprompt, bool adononprompt, bool aplotFwdMid, bool ais16004, bool aplotPsi2S, bool aplot14005, bool aapplyEff, bool aapplyAcc, bool adoLogPt, bool aincludeEffSyst, bool  aexcludeNonFitSyst, string anameTag_base=""
   setOptions(true, false, false, false, false, false, false, false, false, false, true, "");
-  //setOptions(true, false, false, false, false, false, false, false, false, false, false, true,"");
   printOptions();
-  plotAll("DataFits_Raa_PDFix","RAA");//, "DATA", "", "ctauMass");
-  plotAll("DataFits_Raa_PDFix","XS");//, "DATA", "", "ctauMass");
+  plotAll("DataFits_Raa_crazyRush","RAA");//, "DATA", "", "ctauMass");
+  plotAll("DataFits_Raa_crazyRush","XS");//, "DATA", "", "ctauMass");
 
-  //if (!is16004)
-  //{
+  setOptions(false, true, false, false, false, false, false, false, false, false, true, "");
+  printOptions();
+  plotAll("DataFits_Raa_crazyRush","RAA");//, "DATA", "", "ctauMass");
+  plotAll("DataFits_Raa_crazyRush","XS");//, "DATA", "", "ctauMass");
 
-    /*
-    // pr J/psi
-    // noCorr with fitSyst
-    setOptions(true,false,false,false,false,false,false,false,false,true,false);
-    printOptions();
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","RAA");
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","XS");
-    
-    // accEffCorr with all syst
-    setOptions(true,false,false,false,false,false,true,true,false,true,false);
-    printOptions();
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","RAA");
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","XS");
-    
-    setOptions(true,false,false,false,false,true,true,true,false,true,false);
-    printOptions();
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","RAA"); // Comparison with 2.76
-    
-    // accEffCorr only 2 rap ranges
-    setOptions(true,false,true,false,false,false,true,true,false,true,false);
-    printOptions();
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","RAA");
-    
-    // np J/psi
-    // noCorr with fitSyst
-    setOptions(false,true,false,false,false,false,false,false,false,true,false);
-    printOptions();
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","RAA");
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","XS");
-    
-    // accEffCorr with all syst -> Systematics on POINTS are not working for RAA vs. pT and |y|
-    setOptions(false,true,false,false,false,false,true,true,false,true,false);
-    printOptions();
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","RAA");
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","XS");
-   
-    setOptions(false,true,false,false,false,true,true,true,false,true,false);
-    printOptions();
-      plotAll("DataFits_16025_2D_2CB_polBkg_nominal","RAA"); // Comparison with 2.76
-    
-    // accEffCorr only 2 rap ranges
-    setOptions(false,true,true,false,false,false,true,true,false,true,false);
-    printOptions();
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","RAA");
+  setOptions(false, false, false, false, false, false, false, false, false, false, true, "");
+  plotAll("DataFits_Raa_crazyRush","BF");//, "DATA", "", "ctauMass");
 
-    
-    // noCorr with fitSyst
-    setOptions(false,false,false,false,false,false,false,false,false,true,false,"");
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","BF");
-    
-    // accEffCorr with all syst
-    setOptions(false,false,false,false,false,false,true,true,false,true,false,"");
-    plotAll("DataFits_16025_2D_2CB_polBkg_nominal","BF");
-    */
-    // Tables of systematics
-//    map<anabin, syst> syst_PP = readSyst_all("PP","NJpsi_prompt","16025",true,true,"",true,"Systematics/systs_PP_prompt_all.tex");
-//    syst_PP = readSyst_all("PP","NJpsi_nonprompt","16025",true,true,"",true,"Systematics/systs_PP_nonprompt_all.tex");
-//    
-//    map<anabin, syst> syst_PbPb = readSyst_all("PbPb","NJpsi_prompt","16025",true,true,"",true,"Systematics/systs_PbPb_prompt_all.tex");
-//    syst_PbPb = readSyst_all("PbPb","NJpsi_nonprompt","16025",true,true,"",true,"Systematics/systs_PbPb_nonprompt_all.tex");
-  //}
-  //else
-  //{
-//    setOptions(true,false,true,false,false,false,false,false,false,true);
-//    printOptions();
-//    plotAll("DataFits_16004_2D_2CB_polBkg_nominal","RAA");
-//    
-//    
-//    setOptions(true,false,true,false,false,true,false,false,false,true);
-//    printOptions();
-//    plotAll("DataFits_16004_2D_2CB_polBkg_nominal","RAA");
-    
-//    setOptions(true,false,true,false,false,true,true,false,true,false);
-//    printOptions();
-//    plotAll("DataFits_16004_2D_2CB_polBkg_nominal","RAA");
-    
-  //bool adoprompt, bool adononprompt, bool ais16004, bool aplotPsi2S, bool aplot14005, bool aapplyEff, bool aapplyAcc, bool adoLogPt, bool aincludeEffSyst, bool  aexcludeNonFitSyst, string anameTag_base=""
-    /*
-    setOptions(true,false,false,true,true,false,true,true,false,true,false);
-    printOptions();
-    plotAll("DataFits_16004_2D_2CB_polBkg_nominal","RAA");
-    */
-  //}
 
 };
 
@@ -517,18 +420,25 @@ void plotRAA(vector<anabin> thecats, string xaxis, string outputDir) {
     
     double normfactorpp = 1., normfactoraa = 1.;
     normfactorpp = 1./spp.lumipp;
-    
+    double lumiPP = 301783968;
+    normfactorpp = 1./lumiPP;
+
     if (useNcoll) {
       normfactoraa = 1./s.lumiaa;
       normfactoraa *= 1./(208.*208.*(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)));
     } else {
-      double myNmb = NMB;//* s.lumiaa / lumipbpb_ABCD;
+      double myNmb = NMB * s.lumiaa / lumipbpb_ABCD;
       normfactoraa = 1./(myNmb*s.taa*1e-3); // the 1e-3 factor is because taa is in mb-1 while lumis are in mub-1
+      cout <<"myNmb = "<<myNmb<<endl;
 //      thebinOrig.print();
 //      cout << "Taa = " << s.taa << endl;
     }
-    normfactoraa *= /*200.*/180./(it->first.centbin().high()-it->first.centbin().low());
-    
+    cout <<"(it->first.centbin().high()-it->first.centbin().low()) = "<<(it->first.centbin().high()-it->first.centbin().low())<<endl;
+    normfactoraa *= 180./(it->first.centbin().high()-it->first.centbin().low());
+
+    cout <<"s.lumiaa / lumipbpb_ABCD = "<<s.lumiaa / lumipbpb_ABCD<<endl;
+    cout <<"normfactoraa = "<<normfactoraa<<", normfactorpp = "<<normfactorpp<<endl;
+    cout <<"normfactoraa = 1/("<<NMB<<"*"<<s.taa<<"*1e-3) = "<<normfactoraa<<endl;
     if (applyEff && applyAcc)
     {
       normfactorpp = normfactorpp / (spp.effpp*spp.accpp);
@@ -881,18 +791,36 @@ void plotXS(vector<anabin> thecats, string xaxis, string outputDir) {
 //    cout << "deltaPt = " << deltaPt << " ; deltaY = " << deltaRap << endl;
     
     double normfactorpp = 1., normfactoraa = 1.;
-    normfactorpp = 1./(spp.lumipp*deltaPt*deltaRap*1e-3); // the 1e-3 factor is because lumis are in mub-1 and we give xsection in nb-1
-    normfactoraa = 1./(deltaPt*deltaRap*1e-3);
-    
+    normfactorpp = 1./spp.lumipp;
+    double lumiPP = 301783968;
+    normfactorpp = 1./(lumiPP*deltaPt*deltaRap*1e-3);
+
     if (useNcoll) {
-      normfactoraa = 1./(s.lumiaa*deltaPt*deltaRap*1e-3);
+      normfactoraa = 1./(s.lumiaa);
       normfactoraa *= 1./(208.*208.*(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)));
     } else {
-      double myNmb = NMB ;// s.lumiaa / lumipbpb_ABCD;
-      normfactoraa *= 1./(myNmb*s.taa*1e-3); // the 1e-3 factor is because taa is in mb-1 while lumis are in mub-1
+      double myNmb = NMB * s.lumiaa / lumipbpb_ABCD;
+      normfactoraa = 1./(myNmb*s.taa*1e-3*deltaPt*deltaRap*1e-3); // the 1e-3 factor is because taa is in mb-1 while lumis are in mub-1
+      cout <<"myNmb = "<<myNmb<<endl;
+//      thebinOrig.print();
+//      cout << "Taa = " << s.taa << endl;
     }
+    cout <<"(it->first.centbin().high()-it->first.centbin().low()) = "<<(it->first.centbin().high()-it->first.centbin().low())<<endl;
+    normfactoraa *= 180./(it->first.centbin().high()-it->first.centbin().low());
     
-    normfactoraa *= /*200.*/180./(it->first.centbin().high()-it->first.centbin().low());
+    //double normfactorpp = 1., normfactoraa = 1.;
+    //normfactorpp = 1./(spp.lumipp*deltaPt*deltaRap*1e-3); // the 1e-3 factor is because lumis are in mub-1 and we give xsection in nb-1
+    //normfactoraa = 1./(deltaPt*deltaRap*1e-3);
+    
+    //if (useNcoll) {
+      //normfactoraa = 1./(s.lumiaa*deltaPt*deltaRap*1e-3);
+      //normfactoraa *= 1./(208.*208.*(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)));
+    //} else {
+      //double myNmb = NMB ;// s.lumiaa / lumipbpb_ABCD;
+      //normfactoraa *= 1./(myNmb*s.taa*1e-3); // the 1e-3 factor is because taa is in mb-1 while lumis are in mub-1
+    //}
+    
+    //normfactoraa *= /*200.*/180./(it->first.centbin().high()-it->first.centbin().low());
     
     if (applyEff && applyAcc)
     {
@@ -941,7 +869,7 @@ void plotXS(vector<anabin> thecats, string xaxis, string outputDir) {
     double syst_xsec_aa = xsec_aa*sqrt(pow(s.systaa,2));
     double syst_xsec_pp = xsec_pp*sqrt(pow(spp.systpp,2));
     
-    cout << "PbPb: " << xsec_aa <<" \pm "<<delta_xsec_aa<< " pp : " << xsec_pp <<" \pm "<<delta_xsec_pp<< endl;
+    cout << "PbPb: " << xsec_aa <<" +- "<<delta_xsec_aa<< " pp : " << xsec_pp <<" +- "<<delta_xsec_pp<< endl;
     
     theVarsBinned_aa[thebin].push_back(xsec_aa);
     theVarsBinned_pp[thebin].push_back(xsec_pp);

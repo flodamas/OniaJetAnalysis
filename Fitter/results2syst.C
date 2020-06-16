@@ -59,12 +59,12 @@ void results2syst(const char* workDirNames, const char* systFileName, const char
   int cnt=0;
   set<anabin> thebins;
   bool is16004 = false;
-  if (is16004) thebins = allbins16004();
-  else thebins = allbins();
+  //if (is16004) thebins = allbins16004();
+  //else thebins = allbins();
 
   thebins = allbins19xxx();
 
-  if (isXS) thebins = totbins18012();
+  //if (isXS) thebins = totbins18012();
   
   TString spoiname(poiname);
   bool isPrompt = spoiname.Contains("_prompt");
@@ -76,7 +76,7 @@ void results2syst(const char* workDirNames, const char* systFileName, const char
       
       anabin trbin = *it;
       if (string(collTag)=="PP" && trbin.centbin()!=binI(0,200)) continue;
-      
+      //if (string(collTag)=="PbPb" && trbin.centbin()!=binI(0,200)) continue;
       // if this is the first time we see this bin: create it
       if (mapvals.find(trbin)==mapvals.end()) {
         mapvals[trbin] = vector<double>();

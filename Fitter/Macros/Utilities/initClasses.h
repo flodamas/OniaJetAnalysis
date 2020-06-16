@@ -817,7 +817,7 @@ void printChi2(RooWorkspace& myws, TPad* Pad, RooPlot* frame, string varLabel, s
 {
   double chi2=0; unsigned int ndof=0;
   Pad->cd();
-  TLatex *t = new TLatex(); t->SetNDC(); t->SetTextSize(0.1); 
+  TLatex *t = new TLatex(); t->SetNDC(); t->SetTextSize(0.15); 
   unsigned int nFitPar = myws.pdf(pdfLabel.c_str())->getParameters(*myws.data(dataLabel.c_str()))->selectByAttrib("Constant",kFALSE)->getSize();
   TH1* hdatact = myws.data(dataLabel.c_str())->createHistogram("hdatact", *myws.var(varLabel.c_str()), Binning(frame->GetNbinsX(),frame->GetXaxis()->GetXmin(),frame->GetXaxis()->GetXmax()));
 //  RooHist *hpull = frame->pullHist("hdatact",pdfLabel.c_str(), true);

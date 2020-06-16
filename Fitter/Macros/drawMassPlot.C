@@ -583,7 +583,7 @@ void printMassParameters(RooWorkspace myws, TPad* Pad, bool isPbPb, string pdfNa
     }
     // Print the parameter's results
     bool limClose = false;
-    //if ((it->getValV()+3*it->getError() > it->getMax())||(it->getValV()-3*it->getError() < it->getMin())||(abs(it->getError()/it->getValV()) > 0.5)) limClose = true;
+    if ((it->getValV()+3*it->getError() > it->getMax())||(it->getValV()-3*it->getError() < it->getMin())||(abs(it->getError()/it->getValV()) > 0.5)) limClose = true;
     if(s1=="N"){ 
       t->DrawLatex(0.20, 0.76-dy, Form((isWeighted?"%s = %.6f#pm%.6f %s":"%s = %.0f#pm%.0f %s "), label.c_str(), it->getValV(), it->getError(), (limClose?"T-T":""))); dy+=0.045; 
     }

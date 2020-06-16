@@ -25,8 +25,10 @@ void plotSystsAll(const char* apoiname, bool plotEffSyst, bool plotSigSyst, bool
 
   //mid JtPt
   nameTag = "midJtPt";
-  plotSysts(anabin(0.064,1.0,0,2.4,6.5,100,0,200),"z","PP",plotEffSyst,plotSigSyst,plotGlobalSysts);
-  plotSysts(anabin(0.064,1.0,0,2.4,6.5,100,0,180),"z","PbPb",plotEffSyst,plotSigSyst,plotGlobalSysts);
+  //plotSysts(anabin(0.064,1.0,0,2.4,6.5,100,0,200),"z","PP",plotEffSyst,plotSigSyst,plotGlobalSysts);
+  plotSysts(anabin(0.22,1.0,0,2.4,6.5,100,0,200),"z","PP",plotEffSyst,plotSigSyst,plotGlobalSysts);
+  //plotSysts(anabin(0.064,1.0,0,2.4,6.5,100,0,180),"z","PbPb",plotEffSyst,plotSigSyst,plotGlobalSysts);
+  plotSysts(anabin(0.22,1.0,0,2.4,6.5,100,0,180),"z","PbPb",plotEffSyst,plotSigSyst,plotGlobalSysts);
 }
 
 void plotSysts(anabin thebin, string xaxis, string collTag, bool plotEffSyst, bool plotSigSyst, bool plotGlobalSysts) {
@@ -125,6 +127,8 @@ void plotSysts(anabin thebin, string xaxis, string collTag, bool plotEffSyst, bo
   else if (plotEffSyst)
     {
       if (collTag=="PbPb") {
+	systs.push_back(readSyst(Form("csv/syst_%s_%s_PbPb_tnptagSyst.csv",nameTag.Data(),spoiname.Data())));
+	tags.push_back(systs.back().begin()->second.name);
 	systs.push_back(readSyst(Form("csv/syst_%s_%s_PbPb_tnpmuidSyst.csv",nameTag.Data(),spoiname.Data())));
 	tags.push_back(systs.back().begin()->second.name);
 	systs.push_back(readSyst(Form("csv/syst_%s_%s_PbPb_tnpmuidStat.csv",nameTag.Data(),spoiname.Data())));
@@ -137,10 +141,13 @@ void plotSysts(anabin thebin, string xaxis, string collTag, bool plotEffSyst, bo
 	tags.push_back(systs.back().begin()->second.name);
 	systs.push_back(readSyst(Form("csv/syst_%s_%s_PbPb_tnptrkStat.csv",nameTag.Data(),spoiname.Data())));
 	tags.push_back(systs.back().begin()->second.name);
-	systs.push_back(readSyst(Form("csv/syst_%s_%s_PbPb_AccEffStat.csv",nameTag.Data(),spoiname.Data())));
+	systs.push_back(readSyst(Form("csv/syst_%s_%s_PbPb_EffStat.csv",nameTag.Data(),spoiname.Data())));
 	tags.push_back(systs.back().begin()->second.name);
-	//systs.push_back(readSyst(Form("csv/syst_%s_%s_PP_AccEffMisMod.csv",nameTag.Data(),spoiname.Data())));
-	//tags.push_back(systs.back().begin()->second.name);
+
+	systs.push_back(readSyst(Form("csv/syst_%s_%s_PbPb_AccStat.csv",nameTag.Data(),spoiname.Data())));
+	tags.push_back(systs.back().begin()->second.name);
+	systs.push_back(readSyst(Form("csv/syst_%s_%s_PbPb_EffMisMod.csv",nameTag.Data(),spoiname.Data())));
+	tags.push_back(systs.back().begin()->second.name);
       }
       else {
 	systs.push_back(readSyst(Form("csv/syst_%s_%s_PP_tnpglbSyst.csv",nameTag.Data(),spoiname.Data())));
@@ -151,10 +158,14 @@ void plotSysts(anabin thebin, string xaxis, string collTag, bool plotEffSyst, bo
 	tags.push_back(systs.back().begin()->second.name);
 	systs.push_back(readSyst(Form("csv/syst_%s_%s_PP_tnpmuidtrgStat.csv",nameTag.Data(),spoiname.Data())));
 	tags.push_back(systs.back().begin()->second.name);
-	systs.push_back(readSyst(Form("csv/syst_%s_%s_PP_AccEffStat.csv",nameTag.Data(),spoiname.Data())));
+	systs.push_back(readSyst(Form("csv/syst_%s_%s_PP_EffStat.csv",nameTag.Data(),spoiname.Data())));
+	tags.push_back(systs.back().begin()->second.name)
+;
+	systs.push_back(readSyst(Form("csv/syst_%s_%s_PP_AccStat.csv",nameTag.Data(),spoiname.Data())));
+	tags.push_back(systs.back().begin()->second.name)
+;
+	systs.push_back(readSyst(Form("csv/syst_%s_%s_PP_EffMisMod.csv",nameTag.Data(),spoiname.Data())));
 	tags.push_back(systs.back().begin()->second.name);
-	//systs.push_back(readSyst(Form("csv/syst_%s_%s_PP_AccEffMisMod.csv",nameTag.Data(),spoiname.Data())));
-	//tags.push_back(systs.back().begin()->second.name);
       }
       //else cout << "[WARNING] you have to specify the type of uncertainties to plot";
     }
@@ -195,6 +206,7 @@ void plotSysts(anabin thebin, string xaxis, string collTag, bool plotEffSyst, bo
       if (xaxis=="z") {
 	low= it->zbin().low();
 	high = it->zbin().high();
+        if (high<=0.22) continue;
       }
       else if (xaxis=="pt") {
         low= it->ptbin().low();

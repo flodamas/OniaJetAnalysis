@@ -28,7 +28,7 @@ void drawMassFrom2DPlot(RooWorkspace& myws,   // Local workspace
                   bool paperStyle=false // if true, print less info
                   ) 
 {
-  bool pasStyle = false;
+  bool pasStyle = true;
   RooMsgService::instance().getStream(0).removeTopic(Caching);  
   RooMsgService::instance().getStream(1).removeTopic(Caching);
   RooMsgService::instance().getStream(0).removeTopic(Plotting);
@@ -227,12 +227,13 @@ void drawMassFrom2DPlot(RooWorkspace& myws,   // Local workspace
 
   else {
     if (cut.dMuon.Zed.Max<100) {t->DrawLatex(0.2175, 0.86-dy, Form("%g < z_{#mu#mu} < %g",cut.dMuon.Zed.Min,cut.dMuon.Zed.Max)); dy+=0.065;}
-    if (cut.dMuon.AbsRap.Min>0.1) {t->DrawLatex(0.2175, 0.86-dy, Form("%.1f < |y_{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Min,cut.dMuon.AbsRap.Max)); dy+=0.065;}
-    else {t->DrawLatex(0.2175, 0.86-dy, Form("|y_{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Max)); dy+=0.065;}
-    t->DrawLatex(0.2175, 0.86-dy, Form("%g < p_{T,#mu#mu} < %.0f GeV",cut.dMuon.Pt.Min,cut.dMuon.Pt.Max)); dy+=0.065;
-    if (cut.jet.AbsRap.Min>0.1) {t->DrawLatex(0.2175, 0.86-dy, Form("%.1f < |y_{jet}| < %.1f",cut.jet.AbsRap.Min,cut.jet.AbsRap.Max)); dy+=0.065;}
-    else {t->DrawLatex(0.2175, 0.86-dy, Form("|y_{jet}| < %.1f",cut.jet.AbsRap.Max)); dy+=0.065;}
+    //if (cut.dMuon.AbsRap.Min>0.1) {t->DrawLatex(0.2175, 0.86-dy, Form("%.1f < |y_{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Min,cut.dMuon.AbsRap.Max)); dy+=0.065;}
+    //else {t->DrawLatex(0.2175, 0.86-dy, Form("|y_{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Max)); dy+=0.065;}
+    //t->DrawLatex(0.2175, 0.86-dy, Form("%g < p_{T,#mu#mu} < %.0f GeV",cut.dMuon.Pt.Min,cut.dMuon.Pt.Max)); dy+=0.065;
     if (cut.jet.Pt.Max<1000) {t->DrawLatex(0.2175, 0.86-dy, Form("%.0f < p_{T,jet} < %.0f GeV",cut.jet.Pt.Min,cut.jet.Pt.Max)); dy+=0.065;}
+    if (cut.jet.AbsRap.Min>0.1) {t->DrawLatex(0.2175, 0.86-dy, Form("%.1f < |y_{jet}| < %.1f",cut.jet.AbsRap.Min,cut.jet.AbsRap.Max)); dy+=0.065;}
+    else if (cut.jet.AbsRap.Max==2.0) {t->DrawLatex(0.2175, 0.86-dy, Form("|#eta_{jet}| < %.0f",cut.jet.AbsRap.Max)); dy+=0.065;}
+    else {t->DrawLatex(0.2175, 0.86-dy, Form("|y_{jet}| < %.1f",cut.jet.AbsRap.Max)); dy+=0.065;}
     if (isPbPb) {t->DrawLatex(0.2175, 0.86-dy, Form("Cent. %d-%d%%", (int)(cut.Centrality.Start/2), (int)(cut.Centrality.End/2))); dy+=0.065;}
   }
   // Drawing the Legend
@@ -268,7 +269,10 @@ void drawMassFrom2DPlot(RooWorkspace& myws,   // Local workspace
   }
   
   // CMS_lumi(pad1, isPbPb ? 105 : 104, 33, label);
-  CMS_lumi(pad1, isPbPb ? 110 : 109, 33, "");
+  if(pasStyle)
+    CMS_lumi(pad1, isPbPb ? 110 : 109, 33, "",false);
+  else 
+    CMS_lumi(pad1, isPbPb ? 110 : 109, 33, "",true);
   if (!paperStyle) gStyle->SetTitleFontSize(0.05);
   
   pad1->Update();

@@ -61,7 +61,7 @@ bool  bffON             = false;
 bool  ctauCut           = false;
 string nameTag_base     = "";    // can put here e.g. "_prompt", "_nonprompt", ...
 
-const bool useNcoll = true; // false -> use TAA / NMB, true -> use Ncoll / lumiPbPb
+const bool useNcoll = false; // false -> use TAA / NMB, true -> use Ncoll / lumiPbPb
 
 double histMax = 0;
 //////////////////
@@ -112,8 +112,11 @@ void plotZ(string workDirName) {
   string xaxis = "z";
   vector<anabin> theCats;
   if (plotMid){
-    if (plotFwd)
+    if (plotFwd) {
+      theCats.push_back(anabin(0.0, 1.0, 0, 2.4, 6.5, 100, 0, 40));
+      theCats.push_back(anabin(0.0, 1.0, 0, 2.4, 6.5, 100, 40, 180));
       theCats.push_back(anabin(0.0, 1.0, 0, 2.4, 6.5, 100, 0, 180));
+    }
     else
       theCats.push_back(anabin(0.0, 1.0, 0, 1.6, 6.5, 100, 0, 180));
   }
@@ -136,7 +139,7 @@ void doAllplots() {
   setOptions(false, true, true, false, true, true, false, "", 0, false, false, false, false, false);
   printOptions();
   plotAll("DataFits/DataFits_midJtPt");
-
+  /*
   setOptions(false, true, true, false, true, true, false, "", 0, true, true, false, false, false);
   printOptions();
   plotAll("DataFits/DataFits_midJtPt");
@@ -156,6 +159,10 @@ void doAllplots() {
   setOptions(false, true, true, false, true, true, false, "", -2, false, false, false, false, false);
   printOptions();
   plotAll("DataFits/DataFits_lowerJtPt");
+
+  setOptions(false, true, true, false, true, true, false, "", -3, false, false, false, false, false);
+  printOptions();
+  plotAll("DataFits/DataFits_lowestJtPt");
 
   ///////////////////////////////////////////////////////
   //        pp, nonprompt, mid and fwd                 //
@@ -179,6 +186,10 @@ void doAllplots() {
   setOptions(false, true, false, true, true, true, false, "", -2, false, false, false, false, false);
   printOptions();
   plotAll("DataFits/DataFits_lowerJtPt");
+
+  setOptions(false, true, false, true, true, true, false, "", -3, false, false, false, false, false);
+  printOptions();
+  plotAll("DataFits/DataFits_lowestJtPt");
 
   ///////////////////////////////////////////////////////
   //       PbPb, prompt, mid and fwd                   //
@@ -207,6 +218,10 @@ void doAllplots() {
   printOptions();
   plotAll("DataFits/DataFits_lowerJtPt");
 
+  setOptions(true, false, true, false, true, true, false, "", -3, false, false, false, false, false);
+  printOptions();
+  plotAll("DataFits/DataFits_lowestJtPt");
+
   ///////////////////////////////////////////////////////
   //       PbPb, nonprompt, mid and fwd                //
   ///////////////////////////////////////////////////////
@@ -229,6 +244,10 @@ void doAllplots() {
   setOptions(true, false, false, true, true, true, false, "", -2, false, false, false, false, false);
   printOptions();
   plotAll("DataFits/DataFits_lowerJtPt");
+
+  setOptions(true, false, false, true, true, true, false, "", -3, false, false, false, false, false);
+  printOptions();
+  plotAll("DataFits/DataFits_lowestJtPt");
 
 
   ///////////////////////////////////////////////////////
@@ -258,6 +277,10 @@ void doAllplots() {
   printOptions();
   plotAll("DataFits/DataFits_lowerJtPt");
 
+  setOptions(true, true, true, false, true, true, false, "", -3, false, false, false, false, false);
+  printOptions();
+  plotAll("DataFits/DataFits_lowestJtPt");
+
   ///////////////////////////////////////////////////////
   //      PbPb/pp, nonprompt, mid and fwd                 //
   ///////////////////////////////////////////////////////
@@ -281,6 +304,10 @@ void doAllplots() {
   printOptions();
   plotAll("DataFits/DataFits_lowerJtPt");
 
+  setOptions(true, true, false, true, true, true, false, "", -3, false, false, false, false, false);
+  printOptions();
+  plotAll("DataFits/DataFits_lowestJtPt");
+  */
 };
 
 /////////////////////
@@ -303,7 +330,7 @@ void plotNJJ(vector<anabin> thecats, string xaxis, string outputDir) {
   if (doprompt) poi = "NJpsi_prompt";
   if (dononprompt) poi = "NJpsi_nonprompt";
 
-  TString sTag(Form("%s_%s", (jtPtRange==-2)?"lowerJtPt":(jtPtRange==-1)?"lowJtPt":(jtPtRange==0)?"midJtPt":(jtPtRange==1)?"highJtPt":"higherJtPt", (plotMid)?(plotFwd?"_024":"_016"):"_1624"));
+  TString sTag(Form("%s_%s",(jtPtRange==-3)?"lowestJtPt":(jtPtRange==-2)?"lowerJtPt":(jtPtRange==-1)?"lowJtPt":(jtPtRange==0)?"midJtPt":(jtPtRange==1)?"highJtPt":"higherJtPt", (plotMid)?(plotFwd?"_024":"_016"):"_1624"));
   
 
   TFile *f(0x0);
@@ -333,16 +360,16 @@ void plotNJJ(vector<anabin> thecats, string xaxis, string outputDir) {
   TH1D* unfHist_aa(0x0);
 
   //if (plotUnfolded)
-  //{
-  TFile* funf_pp = TFile::Open("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/finalResults/UnfoldedDistributions_PP_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
-  TH1D* unfHist_pp = (TH1D*) funf_pp->Get("zUnfSI6");
-  //unfHist_pp->Draw();
-  funf_ppSyst = TFile::Open("Output/finalResults/UnfoldedDistributions_PP_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
-  unfSyst = (TH1D*) unfHist_pp->Clone("unfSyst");//(TH1D*) funf_ppSyst->Get("zUnfSI3");
-  funf_aa = TFile::Open("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/finalResults/UnfoldedDistributions_PbPb_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
-  unfHist_aa = (TH1D*) funf_aa->Get("zUnfSI99");
-  //unfHist_aa->Draw();
-  //}
+    //{
+      TFile* funf_pp = TFile::Open("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/finalResults/UnfoldedDistributions_PP_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
+      TH1D* unfHist_pp = (TH1D*) funf_pp->Get("zUnfSI6");
+      //unfHist_pp->Draw();
+      funf_ppSyst = TFile::Open("Output/finalResults/UnfoldedDistributions_PP_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
+      unfSyst = (TH1D*) unfHist_pp->Clone("unfSyst");//(TH1D*) funf_ppSyst->Get("zUnfSI3");
+      funf_aa = TFile::Open("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Output/finalResults/UnfoldedDistributions_PbPb_prompt_8iter_48z25ptBins6z5ptMeasBin_nominal_statError.root");
+      unfHist_aa = (TH1D*) funf_aa->Get("zUnfSI99");
+      //unfHist_aa->Draw();
+      //}
 
   if (!unfHist_pp || unfHist_aa ) cout<<"unfolded dist not found"<<endl;
   map<anabin, njj_input> theVars_inputs;
@@ -457,8 +484,9 @@ void plotNJJ(vector<anabin> thecats, string xaxis, string outputDir) {
 
     double normfactorpp = 1., normfactoraa = 1.;
     double lumiAA = 1512.154; //temp
-    double lumiPP = 293613467; //temp
-    normfactorpp = 1./lumiPP; //spp.lumipp; cout <<"normfactorpp = 1/lumi = 1/" << spp.lumipp << " = "<<normfactorpp<<endl;
+    double lumiPP = 301783968;//311237013.550; //293613467; //temp
+    normfactorpp = 1./lumiPP; //spp.lumipp; 
+    cout <<"normfactorpp = 1./lumiPP = 1/" << lumiPP << " = "<<normfactorpp<<endl;
     if (useNcoll) {
       normfactoraa = 1./lumiAA;//1./s.lumiaa;
       normfactoraa *= 1./(208.*208.*(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)));
@@ -466,9 +494,9 @@ void plotNJJ(vector<anabin> thecats, string xaxis, string outputDir) {
       double myNmb = NMB * s.lumiaa / lumipbpb_ABCD;
       normfactoraa = 1./(myNmb*s.taa*1e-3); // the 1e-3 factor is because taa is in mb-1 while lumis are in mub-1
     }
-    normfactoraa *= 200./(it->first.centbin().high()-it->first.centbin().low());
-
-    cout <<"normfactoraa = "<<normfactoraa<<" ; lumiaa = "<<s.lumiaa<<", (HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)) ="<<(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200))<< endl;
+    normfactoraa *= 180./(it->first.centbin().high()-it->first.centbin().low());
+    cout <<"s.lumiaa / lumipbpb_ABCD = "<<s.lumiaa / lumipbpb_ABCD<<endl;
+    cout <<"normfactoraa = 1/("<<NMB*s.lumiaa/lumipbpb_ABCD<<"*"<<s.taa<<"*1e-3) = "<<normfactoraa<<" ; lumiaa = "<<s.lumiaa<<", (HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200)) ="<<(HI::findNcollAverage(it->first.centbin().low(),it->first.centbin().high())/HI::findNcollAverage(0,200))<< endl;
     double naa = s.naa;
     double npp = spp.npp;
     double dnaa = s.dnaa_stat;
@@ -997,7 +1025,7 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
 	  tex1->SetLineWidth(2);
 	  tex1->Draw();
 	  
-	  TLatex *tex2 = new TLatex(0.2,0.66,Form("%d < p_{T,jet} < %d GeV",(jtPtRange==-2)?10:(jtPtRange==-1)?20:(jtPtRange==0)?30:(jtPtRange==1)?40:50,(jtPtRange==-2)?20:(jtPtRange==-1)?30:(jtPtRange==0)?40:(jtPtRange==1)?50:60));
+	  TLatex *tex2 = new TLatex(0.2,0.66,Form("%g < p_{T,jet} < %d GeV",(jtPtRange==-3)?6.5:(jtPtRange==-2)?10:(jtPtRange==-1)?20:(jtPtRange==0)?30:(jtPtRange==1)?40:50,(jtPtRange==-3)?10:(jtPtRange==-2)?20:(jtPtRange==-1)?30:(jtPtRange==0)?40:(jtPtRange==1)?50:60));
 	  tex2->SetNDC();
 	  tex2->SetTextSize(0.044);
 	  tex2->SetTextFont(42);
@@ -1027,7 +1055,7 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
 	  tex1->SetLineWidth(2);
 	  tex1->Draw();
 	  
-	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",(jtPtRange==-2)?10:(jtPtRange==-1)?20:(jtPtRange==0)?30:(jtPtRange==1)?40:50,(jtPtRange==-2)?20:(jtPtRange==-1)?30:(jtPtRange==0)?40:(jtPtRange==1)?50:60));
+	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%g < p_{T,jet} < %d GeV",(jtPtRange==-3)?6.5:(jtPtRange==-2)?10:(jtPtRange==-1)?20:(jtPtRange==0)?30:(jtPtRange==1)?40:50,(jtPtRange==-3)?10:(jtPtRange==-2)?20:(jtPtRange==-1)?30:(jtPtRange==0)?40:(jtPtRange==1)?50:60));
 	  tex2->SetNDC();
 	  tex2->SetTextSize(0.044);
 	  tex2->SetTextFont(42);
@@ -1057,7 +1085,7 @@ void plotGraphNJJ(map<anabin, TGraphAsymmErrors*> theGraphs, map<anabin, TGraphA
 	  tex1->SetLineWidth(2);
 	  tex1->Draw();
 	  
-	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%d < p_{T,jet} < %d GeV",(jtPtRange==-2)?10:(jtPtRange==-1)?20:(jtPtRange==0)?30:(jtPtRange==1)?40:50,(jtPtRange==-2)?20:(jtPtRange==-1)?30:(jtPtRange==0)?40:(jtPtRange==1)?50:60));
+	  TLatex *tex2 = new TLatex(0.2,0.60,Form("%g < p_{T,jet} < %d GeV",(jtPtRange==-3)?6.5:(jtPtRange==-2)?10:(jtPtRange==-1)?20:(jtPtRange==0)?30:(jtPtRange==1)?40:50,(jtPtRange==-3)?10:(jtPtRange==-2)?20:(jtPtRange==-1)?30:(jtPtRange==0)?40:(jtPtRange==1)?50:60));
 	  tex2->SetNDC();
 	  tex2->SetTextSize(0.044);
 	  tex2->SetTextFont(42);
@@ -1189,6 +1217,7 @@ void setOptions(bool adoPbPb, bool adopp, bool adoprompt, bool adononprompt, boo
   else if (jtPtRange == 2) nameTag += "_higherJtPt";
   else if (jtPtRange == -1) nameTag += "_lowJtPt";
   else if (jtPtRange == -2) nameTag += "_lowerJtPt";
+  else if(jtPtRange == -3) nameTag += "_lowestJtPt";
   nameTag+= (plotUnfolded)?"_unfolded":"";
   nameTag+= (underflowOff)?"_underflowOff":"";
   nameTag+= (mcON)?"_mcON":"";

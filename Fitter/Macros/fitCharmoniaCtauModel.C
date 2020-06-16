@@ -251,10 +251,10 @@ bool fitCharmoniaCtauModel( RooWorkspace& myws,             // Local Workspace
       string DSTAG = Form("DATA_%s", (isPbPb?"PbPb":"PP"));//Form("MCJPSIPR_%s", (isPbPb?"PbPb":"PP"));
       //if (inputFitDir["CTAURES"].find("nonPrompt")!=std::string::npos) DSTAG = Form("MCJPSINOPR_%s", (isPbPb?"PbPb":"PP"));
       //if (inputFitDir["CTAURES"].find("MCRes")!=std::string::npos /*&& inputFitDir["CTAURES"].find("MCFits")==std::string::npos*/) DSTAG = Form("MCJPSIPR_%s", (isPbPb?"PbPb":"PP"));
-      if (outputDir.find("MCRes")!=std::string::npos) DSTAG = Form("MCJPSIPR_%s", (isPbPb?"PbPb":"PP"));
+      if (outputDir.find("PrMC")!=std::string::npos) DSTAG = Form("MCJPSIPR_%s", (isPbPb?"PbPb":"PP"));
       if (outputDir.find("ResNonPromptMC")!=std::string::npos) DSTAG = Form("MCJPSINOPR_%s", (isPbPb?"PbPb":"PP"));
       setCtauResFileName(FileName, (inputFitDir["CTAURES"]=="" ? outputDir : inputFitDir["CTAURES"]), DSTAG, plotLabel, cut, isPbPb);
-      /*if (wantPureSMC)*/ { plotLabel = plotLabel + "_NoBkg"; }
+      if (wantPureSMC) { plotLabel = plotLabel + "_NoBkg"; }
       plotLabel += Form("_jetR%d",(int)(jetR*10)); 
       if (strcmp(applyCorr, "")) {plotLabel = plotLabel + "_" + applyCorr;}
       if (applyJEC) {plotLabel = plotLabel + "_JEC";}
@@ -265,12 +265,17 @@ bool fitCharmoniaCtauModel( RooWorkspace& myws,             // Local Workspace
         setCtauResFileName(FileName, (inputFitDir["CTAURES"]=="" ? outputDir : inputFitDir["CTAURES"]), DSTAG, plotLabel, cut, isPbPb);
       } else if (inputFitDir["CTAURES"]!="") { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str()) && inputFitDir["CTAURES"]!="") {
-        plotLabel = Form("_CtauRes_%s_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""),(applyJEC?"_JEC":""));
-	//cout<<"looking for file with label "<<plotLabel<<endl;
+	plotLabel = Form("_CtauRes_%s_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""),(applyJEC?"_JEC":""));
+	if (outputDir.find("PrMC")!=std::string::npos)
+	  plotLabel = Form("_CtauRes_%s_NoBkg_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(), (int)(jetR*10), (strcmp(applyCorr,"")?Form("_%s",applyCorr):""),(applyJEC?"_JEC":""));
+	cout<<"looking for file with label "<<plotLabel<<endl;
         setCtauResFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
       } else if (inputFitDir["CTAURES"]!="") { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str())) {
-        plotLabel = string(Form("_CtauRes_%s_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(),(int)(jetR*10),(strcmp(applyCorr,"")?Form("_%s",applyCorr):""),(applyJEC?"_JEC":"")));
+	plotLabel = string(Form("_CtauRes_%s_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(),(int)(jetR*10),(strcmp(applyCorr,"")?Form("_%s",applyCorr):""),(applyJEC?"_JEC":"")));
+	if (outputDir.find("PrMC")!=std::string::npos)
+	  plotLabel = string(Form("_CtauRes_%s_NoBkg_jetR%d%s%s", parIni[Form("Model_CtauRes_%s", COLL.c_str())].c_str(),(int)(jetR*10),(strcmp(applyCorr,"")?Form("_%s",applyCorr):""),(applyJEC?"_JEC":"")));
+        
         setCtauResFileName(FileName, outputDir, DSTAG, plotLabel, cut, isPbPb);
       } else { found = true; }
       if (!found && gSystem->AccessPathName(FileName.c_str())) {

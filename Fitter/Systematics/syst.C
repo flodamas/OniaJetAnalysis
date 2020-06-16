@@ -135,21 +135,24 @@ filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_fullAccEff.csv",sprep
   else if (readEffSyst)
   {
     if (collTag=="PbPb") {
+    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_tnptagSyst.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_tnpmuidSyst.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_tnpmuidStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_tnptrgSyst.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_tnptrgStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_tnptrkSyst.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_tnptrkStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
-    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_AccEffStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
-    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_AccEffMisMod.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
+    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_EffStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
+    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_AccStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
+    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PbPb_EffMisMod.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     }
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_tnpglbSyst.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_tnpglbStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_tnpmuidtrgSyst.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
     filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_tnpmuidtrgStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
-    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_AccEffStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
-    //filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_AccEffMisMod.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
+    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_EffStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
+    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_AccStat.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
+    filelist.push_back(Form("%sSystematics/csv/syst_%s_%s_PP_EffMisMod.csv",sprependPath.Data(),snameTag.Data(),spoiname.Data()));
    }
 
   vector< map<anabin, syst> > systmap_all;

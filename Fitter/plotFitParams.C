@@ -30,9 +30,11 @@
 #include "Macros/Utilities/bin.h"
 
 using namespace std;
-void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, const char* applyCorr, bool applyJEC);
-void getUnfoldingInput(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, double jetR, const char* applyCorr, bool applyJEC, bool statErr);
-double readSyst(const char* systfile, double zedmin, double zedmax, double rapmin, double rapmax);
+void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DSTag, const char* fitType, bool wantPureSMC, double jetR, const char* applyCorr, bool applyJEC);
+void getUnfoldingInput(const char* workDirName="DataFits", const char* rapRegion="", const char* DSTag="DATA", const char* fitType="ctauMass", bool wantPureSMC=0, double jetR=0.3, const char* applyCorr="AccEff", bool applyJEC=1, bool statErr=1);
+void getUnfoldingInput_all(bool statErr=1);
+void plot18012Comp(bool isPr);
+double readSyst(const char* systfile, double zedmin, double zedmax, double rapmin, double rapmax, int cntmin, int cntmax);
 void plotMCMassPars(const char* workDirName,
 		    const char* rapRegion,
 		    const char* DSTag, //="DATA", // Data Set tag can be: "DATA","MCPSI2SP", "MCJPSIP" ...
@@ -247,36 +249,53 @@ void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DS
 
   double zbins016 [] = {0.3, 0.44, 0.58, 0.72, 0.86, 1.0};
   double zbins1624 [] = {0.2, 0.4, 0.6, 0.8, 1.0};
+  double zbins024 [] = {0.064, 0.220, 0.376, 0.532, 0.688, 0.844, 1.000};
+
+  string binTag = workDirName;
+  double jtptmin;
+  double jtptmax;
+  if (binTag.find("midJtPt")!=std::string::npos) {binTag = "midJtPt"; jtptmin =30; jtptmax=40;}
+  else if (binTag.find("lowJtPt")!=std::string::npos) {binTag = "lowJtPt"; jtptmin =20; jtptmax=30;}
+  else if (binTag.find("lowerJtPt")!=std::string::npos) {binTag = "lowerJtPt"; jtptmin =10; jtptmax=20;}
+  else if (binTag.find("highJtPt")!=std::string::npos) {binTag = "highJtPt"; jtptmin =40; jtptmax=50;}
+  else if (binTag.find("higherJtPt")!=std::string::npos) {binTag = "higherJtPt"; jtptmin =50; jtptmax=60;}
 
   int nzbins = 0;
   double zedmin, zedmax;
-  if (strcmp(rapRegion,"1624")) {
+  if (!strcmp(rapRegion,"016")) {
     nzbins = sizeof(zbins016)/sizeof(double)-1;
     zedmin = zbins016[0];
     zedmax = zbins016[nzbins];
   }
-  else {
+  else if (!strcmp(rapRegion,"1624")){
     nzbins = sizeof(zbins1624)/sizeof(double)-1;
     zedmin = zbins1624[0];
     zedmax = zbins1624[nzbins];
   }
+  else {
+    nzbins = sizeof(zbins024)/sizeof(double)-1;
+    zedmin = zbins024[0];
+    zedmax = zbins024[nzbins];
+  }
 
-  TCanvas* c = new TCanvas ("c","",1000,800);
-  TH1F* bkgOrd = NULL;
-  if (strcmp(rapRegion,"1624"))
-    bkgOrd = new TH1F ("bkgOrd",";z(J/#psi);background order", 7, 0.02, 1);
-  else 
-    bkgOrd = new TH1F ("bkgOrd",";z(J/#psi);background order", 5, 0, 1);
+  TCanvas* c = new TCanvas ("c","",900,900);
+  TH1F* bkgOrd_pp = NULL;
+  TH1F* bkgOrd_pbpb = NULL;
+  //if (strcmp(rapRegion,"1624"))
+  bkgOrd_pp = new TH1F ("bkgOrd_pp",";z(J/#psi);background order", nzbins, zedmin, zedmax);
+  bkgOrd_pbpb = new TH1F ("bkgOrd_pbpb",";z(J/#psi);background order", nzbins, zedmin, zedmax);
+  //else 
+  //bkgOrd = new TH1F ("bkgOrd",";z(J/#psi);background order", 5, 0, 1);
 
   string bkgPol [] = {"Uniform", "Chebychev1", "Chebychev2", "Chebychev3", "Chebychev4", "Chebychev5", "Chebychev6"};
   string bkgExp [] = {"Uniform", "ExpChebychev1", "ExpChebychev2", "ExpChebychev3", "ExpChebychev4", "ExpChebychev5", "ExpChebychev6"};
-  gSystem->mkdir(Form("Output/%s/DataFits_%s/%s/%s/fitsPars",workDirName, rapRegion, fitType, DSTag));
-  TString treeFileName = Form ("Output/%s/DataFits_%s/%s/%s/result/tree_allvars.root",workDirName, rapRegion, fitType, DSTag);
+  gSystem->mkdir(Form("Output/%s/%s/%s/fitsPars",workDirName, fitType, DSTag));
+  TString treeFileName = Form ("Output/%s/%s/%s/result/tree_allvars.root",workDirName, fitType, DSTag);
   cout << "[INFO] extracting MC parameters from "<<treeFileName<<endl; 
   TFile *f = new TFile(treeFileName);
   if (!f || !f->IsOpen()) {
     cout << "[INFO] tree file not found! creating the result trees."<<endl;
-    results2tree(Form("%s/DataFits_%s", workDirName, rapRegion), DSTag,"", fitType, wantPureSMC, jetR, applyCorr, applyJEC);
+    results2tree(workDirName, DSTag,"", fitType, wantPureSMC, jetR, applyCorr, applyJEC);
     f = new TFile(treeFileName);
     if (!f) return;
   }
@@ -332,61 +351,91 @@ void plotBkgOrder(const char* workDirName, const char* rapRegion, const char* DS
     }
     cout<<"[INFO] z: "<<zmin<<"-"<<zmax<< "bkg: " << bkgName <<endl;
     //if (!(zmin < zedmin+0.02 && zmax == 1)){
-      bkgOrd->SetBinContent(bkgOrd->FindBin(zmin+0.001),ord);
-      bkgOrd->SetBinError(bkgOrd->FindBin(zmin+0.001), 0.0001);
+    if (TString(collSystem)=="PP") {
+      bkgOrd_pp->SetBinContent(bkgOrd_pp->FindBin(zmin+0.001),ord);
+      bkgOrd_pp->SetBinError(bkgOrd_pp->FindBin(zmin+0.001), 0.0001);
+    }
+    else {
+      bkgOrd_pbpb->SetBinContent(bkgOrd_pbpb->FindBin(zmin+0.001),ord);
+      bkgOrd_pbpb->SetBinError(bkgOrd_pbpb->FindBin(zmin+0.001), 0.0001);
+    }
       //}
   }
 
-    TLatex *  text2 = new TLatex(0.175 ,0.8,strcmp(ShapeTag,"PolChebychev")?"Exp. Chebychev bkg.":"Pol. Chebychev bkg.");
+    TLatex *  text2 = new TLatex(0.15 ,0.8,strcmp(ShapeTag,"PolChebychev")?"Exp. Chebychev bkg.":"Pol. Chebychev bkg.");
     text2->SetNDC();
     text2->SetTextFont(42);
     text2->SetTextSize(0.05);
     text2->SetLineWidth(2);
 
-    TLatex *  text3 = new TLatex(0.21 ,0.75, Form("%.1f < |y| < %.1f", ymin, ymax));
+    TLatex *  text3 = new TLatex(0.15 ,0.75, Form("%.0f < p_{T,jet} < %.0f GeV", jtptmin, jtptmax));
     text3->SetNDC();
     text3->SetTextFont(42);
     text3->SetTextSize(0.05);
     text3->SetLineWidth(2);
 
-    TLatex *  text = new TLatex(0.75 ,0.8,"CMS");
+    TLatex *  text = new TLatex(0.73 ,0.83,"CMS");
     text->SetNDC();
     text->SetTextFont(42);
     text->SetTextSize(0.06708595);
     text->SetLineWidth(5);
 
-    TLatex *  text1 = new TLatex(0.7 ,0.72,"Preliminary");
+    TLatex *  text1 = new TLatex(0.66 ,0.77,"Preliminary");
     text1->SetNDC();
     text1->SetTextFont(42);
     text1->SetTextSize(0.05);
     text1->SetLineWidth(2);
 
-    TLatex *  text4 = new TLatex(0.5 ,0.91,"pp 27.39 pb^{-1} (5.02 TeV)");
+    TLatex *  text4 = new TLatex(0.51 ,0.91,"pp 311 pb^{-1} (5.02 TeV)");
     text4->SetNDC();
     text4->SetTextFont(42);
-    text4->SetTextSize(0.05);
+    text4->SetTextSize(0.04);
     text4->SetLineWidth(2);
 
+    TLatex *  text5 = new TLatex(0.51,0.91,"pbpb 1.7 nb^{-1} (5.02 TeV)");
+    text5->SetNDC();
+    text5->SetTextFont(42);
+    text5->SetTextSize(0.04);
+    text5->SetLineWidth(2);
 
-    bkgOrd->GetYaxis()->SetRangeUser(0, 3);
-    bkgOrd->SetMarkerColor(kMagenta+3);
-    bkgOrd->SetMarkerStyle(33);
-    bkgOrd->SetMarkerSize(3);
-    bkgOrd->SetLineColor(kMagenta+2);
-    //bkgOrd->SetOption("E1");
+
+    bkgOrd_pp->GetYaxis()->SetRangeUser(0, 6);
+    bkgOrd_pp->SetMarkerColor(kMagenta+3);
+    bkgOrd_pp->SetMarkerStyle(33);
+    bkgOrd_pp->SetMarkerSize(3);
+    bkgOrd_pp->SetLineColor(kMagenta+2);
+    //bkgOrd_pp->SetOption("E1");
+
+    bkgOrd_pbpb->GetYaxis()->SetRangeUser(0, 6);
+    bkgOrd_pbpb->SetMarkerColor(kGreen+3);
+    bkgOrd_pbpb->SetMarkerStyle(33);
+    bkgOrd_pbpb->SetMarkerSize(3);
+    bkgOrd_pbpb->SetLineColor(kGreen+2);
+    //bkgOrd_pp->SetOption("E1");
 
     c->cd();
-    bkgOrd->Draw("EP");
+    bkgOrd_pp->Draw("EP");
     text->Draw("same");
     text1->Draw("same");
     text2->Draw("same");
     text3->Draw("same");
     text4->Draw("same");
-    c->SaveAs(Form("Output/%s/DataFits_%s/%s/%s/fitsPars/bkgOrder_%s_%s.png",workDirName, rapRegion, fitType, DSTag, ShapeTag.Data(), rapRegion));
-    c->SaveAs(Form("Output/%s/DataFits_%s/%s/%s/fitsPars/bkgOrder_%s_%s.pdf",workDirName, rapRegion, fitType, DSTag, ShapeTag.Data(), rapRegion));
-    c->SaveAs(Form("Output/%s/DataFits_%s/%s/%s/fitsPars/bkgOrder_%s_%s.root",workDirName, rapRegion, fitType, DSTag, ShapeTag.Data(), rapRegion));
+    //c->SaveAs(Form("Output/%s/DataFits_%s/%s/%s/fitsPars/bkgOrder_%s_%s.png",workDirName, rapRegion, fitType, DSTag, ShapeTag.Data(), rapRegion));
+    c->SaveAs(Form("Output/%s/%s/%s/fitsPars/bkgOrder_%s_%s_pp.pdf",workDirName, fitType, DSTag, ShapeTag.Data(), binTag.c_str()));
+    //c->SaveAs(Form("Output/%s/DataFits_%s/%s/%s/fitsPars/bkgOrder_%s_%s.root",workDirName, rapRegion, fitType, DSTag, ShapeTag.Data(), rapRegion));
+
+    c->cd();
+    bkgOrd_pbpb->Draw("EP");
+    text->Draw("same");
+    text1->Draw("same");
+    text2->Draw("same");
+    text3->Draw("same");
+    text5->Draw("same");
+    //c->SaveAs(Form("Output/%s/DataFits_%s/%s/%s/fitsPars/bkgOrder_%s_%s.png",workDirName, rapRegion, fitType, DSTag, ShapeTag.Data(), rapRegion));
+    c->SaveAs(Form("Output/%s/%s/%s/fitsPars/bkgOrder_%s_%s_pbpb.pdf",workDirName, fitType, DSTag, ShapeTag.Data(), binTag.c_str()));
+    //c->SaveAs(Form("Output/%s/DataFits_%s/%s/%s/fitsPars/bkgOrder_%s_%s.root",workDirName, rapRegion, fitType, DSTag, ShapeTag.Data(), rapRegion));
     f->Close();
-    delete f; delete bkgOrd;
+    delete f; delete bkgOrd_pp; delete bkgOrd_pbpb;
 }
 
 
@@ -401,12 +450,13 @@ void getUnfoldingInput(const char* workDirName, const char* rapRegion, const cha
   if (binTag.find("midJtPt")!=std::string::npos) binTag = "midJtPt";
   else if (binTag.find("lowJtPt")!=std::string::npos) binTag = "lowJtPt";
   else if (binTag.find("lowerJtPt")!=std::string::npos) binTag = "lowerJtPt";
+  else if (binTag.find("lowestJtPt")!=std::string::npos) binTag = "lowestJtPt";
   else if (binTag.find("highJtPt")!=std::string::npos) binTag = "highJtPt";
   else if (binTag.find("higherJtPt")!=std::string::npos) binTag = "higherJtPt";
 
   double prSyst;
   double nprSyst;
-  string systName [] = {"ctauBkg", "ctauErr", "ctauRes", "ctauTrue", "massBkg", "massSig", "AccEffMisMod", "tnpmuidSyst", "AccEffStat", "tnpstaStat", "tnpstaSyst", "tnptrgStat", "tnptrgSyst", "tnpbinned", "tnptrkSyst", "tnpmuidStat"};
+  string systName [] = {"ctauBkg", "ctauErr", "ctauRes", "ctauTrue", "massBkg", "massSig","fullAccEff"};//, "AccEffMisMod", "tnpmuidSyst", "AccEffStat", "tnpstaStat", "tnpstaSyst", "tnptrgStat", "tnptrgSyst", "tnpbinned", "tnptrkSyst", "tnpmuidStat"};
 
   int nSyst = sizeof(systName)/sizeof(systName[0]);
 
@@ -433,6 +483,12 @@ void getUnfoldingInput(const char* workDirName, const char* rapRegion, const cha
 
   TH1F* prNhist_PbPb = new TH1F ("prNhist_PbPb",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
   TH1F* nprNhist_PbPb = new TH1F ("nprNhist_PbPb",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
+
+  TH1F* prNhist_PbPb_cent = new TH1F ("prNhist_PbPb_cent",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
+  TH1F* nprNhist_PbPb_cent = new TH1F ("nprNhist_PbPb_cent",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
+
+  TH1F* prNhist_PbPb_peri = new TH1F ("prNhist_PbPb_peri",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
+  TH1F* nprNhist_PbPb_peri = new TH1F ("nprNhist_PbPb_peri",";z(J/#psi);N(J/#psi)", nzbins, zedmin, zedmax);
   
 
   gSystem->mkdir(Form("Output/%s/%s/%s/fitsPars",workDirName, fitType, DSTag));
@@ -489,40 +545,75 @@ void getUnfoldingInput(const char* workDirName, const char* rapRegion, const cha
     tr->GetEntry(i);
     prSyst = 0;
     nprSyst = 0;
-
-    for (int j=0; j<nSyst ; j++) {
-      double v1 = readSyst(Form("../Fitter/Systematics/csv/syst_%s_%s_NJpsi_prompt_PP_%s.csv", binTag.c_str(), rapRegion, systName[i].c_str()), zmin, zmax, ymin, ymax);
-      double v2 = readSyst(Form("../Fitter/Systematics/csv/syst_%s_%s_NJpsi_nonprompt_PP_%s.csv", binTag.c_str(), rapRegion, systName[i].c_str()), zmin, zmax, ymin, ymax);
-      prSyst=sqrt(pow(prSyst,2)+pow(v1,2));
-      nprSyst=sqrt(pow(nprSyst,2)+pow(v2,2));
+    if (!statErr) {
+      for (int j=0; j<nSyst ; j++) {
+	double v1 = readSyst(Form("../Fitter/Systematics/csv/syst_%s_NJpsi_prompt_%s_%s.csv", binTag.c_str(), collSystem, systName[j].c_str()), zmin, zmax, ymin, ymax, centmin, centmax);
+	double v2 = readSyst(Form("../Fitter/Systematics/csv/syst_%s_NJpsi_nonprompt_%s_%s.csv", binTag.c_str(), collSystem, systName[j].c_str()), zmin, zmax, ymin, ymax, centmin, centmax);
+	//cout <<"reading from file "<<Form("../Fitter/Systematics/csv/syst_%s_NJpsi_prompt_%s_%s.csv", binTag.c_str(), collSystem, systName[j].c_str())<<endl;
+	prSyst=sqrt(pow(prSyst,2)+pow(v1,2));
+	nprSyst=sqrt(pow(nprSyst,2)+pow(v2,2));
+      }
     }
+    cout <<"collSystem: "<<collSystem<<",cent:["<<centmin<<"-"<<centmax<<"], z:["<<zmin<<"-"<<zmax<<"], N_Jpsi_parLoad_mass = "<<val<<", N_Jpsi_parLoad_mass_err = "<<errL<<", b_Jpsi_val = "<<bfrac<<", b_Jpsi_errL = "<<bfrac_errL<<endl;
+    double err = 0;
     if (TString(collSystem)=="PP") {
       prNhist_pp->SetBinContent(prNhist_pp->FindBin(zmin+0.001),val*(1-bfrac));
       if (statErr)
-	prNhist_pp->SetBinError(prNhist_pp->FindBin(zmin+0.001), val*(1-bfrac)*sqrt(pow(errL/val,2)-2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
-      else
-	prNhist_pp->SetBinError(prNhist_pp->FindBin(zmin+0.001), val*(1-bfrac)*prSyst);
-
+	err = val*(1-bfrac)*sqrt(pow(errL/val,2)-2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2));
+      else 
+	err = val*(1-bfrac)*prSyst;
+      if (err > val*(1-bfrac)) {
+	cout <<"[WARNING] very big error"<<endl;
+	err = val*(1-bfrac);
+      }
+      prNhist_pp->SetBinError(prNhist_pp->FindBin(zmin+0.001), err);
+      
       nprNhist_pp->SetBinContent(nprNhist_pp->FindBin(zmin+0.001),val*bfrac);
       if (statErr)
-	nprNhist_pp->SetBinError(nprNhist_pp->FindBin(zmin+0.001), val*bfrac*sqrt(pow(errL/val,2)+2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
+	err = val*bfrac*sqrt(pow(errL/val,2)+2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2));
       else 
-	nprNhist_pp->SetBinError(nprNhist_pp->FindBin(zmin+0.001),val*bfrac*nprSyst);
+	err = val*bfrac*nprSyst;
+      if (err > val*bfrac) {
+        cout <<"[WARNING] very big error"<<endl;
+        err = val*bfrac;
       }
+      nprNhist_pp->SetBinError(nprNhist_pp->FindBin(zmin+0.001), err);
+    }
     else {
-      prNhist_PbPb->SetBinContent(prNhist_PbPb->FindBin(zmin+0.001),val*(1-bfrac));
+      if (centmin==0 && centmax==180) prNhist_PbPb->SetBinContent(prNhist_PbPb->FindBin(zmin+0.001),val*(1-bfrac));
+      else if (centmin==0 && centmax==40) prNhist_PbPb_cent->SetBinContent(prNhist_PbPb_cent->FindBin(zmin+0.001),val*(1-bfrac));
+      else if (centmin==40 && centmax==180) prNhist_PbPb_peri->SetBinContent(prNhist_PbPb_peri->FindBin(zmin+0.001),val*(1-bfrac));
+      else cout<<"[WARNING] check centrality selection"<<endl;
       if (statErr)
-	prNhist_PbPb->SetBinError(prNhist_PbPb->FindBin(zmin+0.001), val*(1-bfrac)*sqrt(pow(errL/val,2)-2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
-      else
-	prNhist_PbPb->SetBinError(prNhist_PbPb->FindBin(zmin+0.001), val*(1-bfrac)*prSyst);
-
-      nprNhist_PbPb->SetBinContent(nprNhist_PbPb->FindBin(zmin+0.001),val*bfrac);
-      if (statErr)
-	nprNhist_PbPb->SetBinError(nprNhist_PbPb->FindBin(zmin+0.001), val*bfrac*sqrt(pow(errL/val,2)+2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2)));
+	err = val*(1-bfrac)*sqrt(pow(errL/val,2)-2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2));
       else 
-	nprNhist_PbPb->SetBinError(nprNhist_PbPb->FindBin(zmin+0.001),val*bfrac*nprSyst);
+	err = val*(1-bfrac)*prSyst;
+      
+      if (err > val*(1-bfrac)) {
+        cout <<"[WARNING] very big error: "<<err/(val*(1-bfrac))<<endl;
+        err = val*(1-bfrac);
       }
 
+      if (centmin==0 && centmax==180) prNhist_PbPb->SetBinError(prNhist_PbPb->FindBin(zmin+0.001), err);
+      else if (centmin==0 && centmax==40) prNhist_PbPb_cent->SetBinError(prNhist_PbPb_cent->FindBin(zmin+0.001), err);
+      else if (centmin==40 && centmax==180) prNhist_PbPb_peri->SetBinError(prNhist_PbPb_peri->FindBin(zmin+0.001), err);
+
+
+      if (centmin==0 && centmax==180) nprNhist_PbPb->SetBinContent(nprNhist_PbPb->FindBin(zmin+0.001),val*bfrac);
+      else if (centmin==0 && centmax==40) nprNhist_PbPb_cent->SetBinContent(nprNhist_PbPb_cent->FindBin(zmin+0.001),val*bfrac);
+      else if (centmin==40 && centmax==180) nprNhist_PbPb_peri->SetBinContent(nprNhist_PbPb_peri->FindBin(zmin+0.001),val*bfrac);
+      if (statErr)
+	err = val*bfrac*sqrt(pow(errL/val,2)+2*correl*errL*bfrac_errL/(val*bfrac)+pow(bfrac_errL/bfrac,2));
+      else err = val*bfrac*nprSyst;
+      if (err > val*bfrac) {
+        cout <<"[WARNING] very big error: "<<err/(val*bfrac)<<endl;
+        err = val*bfrac;
+      }
+      if (centmin==0 && centmax==180) nprNhist_PbPb->SetBinError(nprNhist_PbPb->FindBin(zmin+0.001), err);
+      else if (centmin==0 && centmax==40) nprNhist_PbPb_cent->SetBinError(nprNhist_PbPb_cent->FindBin(zmin+0.001), err);
+      else if (centmin==40 && centmax==180) nprNhist_PbPb_peri->SetBinError(nprNhist_PbPb_peri->FindBin(zmin+0.001), err);
+    }
+    
   }
   TFile* fsave = new TFile (Form("Output/%s/%s/%s/fitsPars/unfoldingInput_%s_rap%s_jetR%d_%s.root", workDirName, fitType, DSTag, binTag.c_str(), rapRegion, (int)(jetR*10), statErr?"statErr":"systErr"),"RECREATE");
   fsave->ls();
@@ -530,12 +621,161 @@ void getUnfoldingInput(const char* workDirName, const char* rapRegion, const cha
   nprNhist_pp->Write(Form("nprHist_PP_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
   prNhist_PbPb->Write(Form("prHist_PbPb_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
   nprNhist_PbPb->Write(Form("nprHist_PbPb_%s_rap%s_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+  prNhist_PbPb_cent->Write(Form("prHist_PbPb_%s_rap%s_centBin_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+  nprNhist_PbPb_cent->Write(Form("nprHist_PbPb_%s_rap%s_centBin_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+  prNhist_PbPb_peri->Write(Form("prHist_PbPb_%s_rap%s_periBin_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
+  nprNhist_PbPb_peri->Write(Form("nprHist_PbPb_%s_rap%s_periBin_%s", binTag.c_str(), rapRegion, statErr?"statErr":"systErr"));
 
   fsave->Close();
   delete prNhist_pp; delete nprNhist_pp; delete prNhist_PbPb; delete nprNhist_PbPb; delete fsave; delete f;
 }
+void getUnfoldingInput_all(bool statErr) {  
+  getUnfoldingInput("DataFits/DataFits_midJtPt", "", "DATA", "ctauMass", 0, 0.3, "AccEff", 1, statErr);
+  getUnfoldingInput("DataFits/DataFits_lowJtPt", "", "DATA", "ctauMass", 0, 0.3, "AccEff", 1, statErr);
+  getUnfoldingInput("DataFits/DataFits_lowerJtPt", "", "DATA", "ctauMass", 0, 0.3, "AccEff", 1, statErr);
+  getUnfoldingInput("DataFits/DataFits_lowestJtPt", "", "DATA", "ctauMass", 0, 0.3, "AccEff", 1, statErr);
+  getUnfoldingInput("DataFits/DataFits_highJtPt", "", "DATA", "ctauMass", 0, 0.3, "AccEff", 1, statErr);
+  getUnfoldingInput("DataFits/DataFits_higherJtPt", "", "DATA", "ctauMass", 0, 0.3, "AccEff", 1, statErr);
+}
 
-double readSyst(const char* systfile, double zedmin, double zedmax, double rapmin, double rapmax) {
+void plot18012Comp(bool isPr) {
+  TFile* file19 = TFile::Open("Output/DataFits_HIN18012Comp/ctauMass/DATA/fitsPars/unfoldingInput_DataFits_HIN18012Comp_rap016_jetR4_statErr.root");
+  TFile* file18 = TFile::Open("~/DimuonCADIs/HIN-16-004/Fitter/Output/DataFits/DataFits_midJtPt/DataFits_016/ctauMass/DATA/fitsPars/unfoldingInput_midJtPt_rap016_statErr.root");
+  TFile* file18Syst = TFile::Open("~/DimuonCADIs/HIN-16-004/Fitter/Output/DataFits/DataFits_midJtPt/DataFits_016/ctauMass/DATA/fitsPars/unfoldingInput_midJtPt_rap016_systErr.root");
+  TH1F* hist19 = (TH1F*) file19->Get(Form("%sprHist_PP_DataFits_HIN18012Comp_rap016_statErr",isPr?"":"n"));
+  TH1F* hist18 = (TH1F*) file18->Get(Form("%sprHist_midJtPt_rap016_statErr",isPr?"":"n"));
+  TH1F* hist18Syst = (TH1F*) file18Syst->Get(Form("%sprHist_midJtPt_rap016_systErr",isPr?"":"n"));
+
+  int nBin = hist19->GetNbinsX()+1;
+  for (int i=0; i<=nBin; i++) {
+    if (hist19->GetBinCenter(i)<0.44 || hist19->GetBinCenter(i)>1) {
+      hist19->SetBinContent(i,0);
+      hist19->SetBinError(i,0);
+    }
+  }
+  nBin = hist18->GetNbinsX()+1;
+  for (int i=0; i<=nBin; i++) {
+    if (hist18->GetBinCenter(i)<0.44 || hist18->GetBinCenter(i)>1) {
+      hist18->SetBinContent(i,0);
+      hist18->SetBinError(i,0);
+      hist18Syst->SetBinContent(i,0);
+      hist18Syst->SetBinError(i,0);
+    }
+  }
+
+  hist19->Scale(1./hist19->Integral("width"));
+  hist18->Scale(1./hist18->Integral("width"));
+  hist18Syst->Scale(1./hist18Syst->Integral("width"));
+
+  hist19->SetLineColor(8);
+  hist19->SetMarkerColor(8);
+  hist19->SetMarkerStyle(kFullCircle);
+
+  hist18->SetLineColor(9);
+  hist18->SetMarkerColor(9);
+  hist18->SetMarkerStyle(kFullSquare);
+
+  hist18Syst->SetLineColor(9);
+  hist18Syst->SetMarkerColor(9);
+  hist18Syst->SetMarkerStyle(kFullSquare);
+  hist18Syst->SetFillColorAlpha(38,0.5);
+
+  hist19->GetYaxis()->SetTitle("1/N dN/dz");
+  hist19->GetXaxis()->SetTitle("z");
+  hist19->GetXaxis()->SetRangeUser(0,1);
+  if (hist18->GetMaximum()>hist19->GetMaximum()) hist19->GetYaxis()->SetRangeUser(0,1.5*hist18->GetMaximum());
+  else hist19->GetYaxis()->SetRangeUser(0,1.5*hist19->GetMaximum());
+
+  TLegend* leg = new TLegend(0.2,0.3,0.5,0.4);
+  leg->SetBorderSize(0);
+  leg->SetFillStyle(0);
+  leg->AddEntry(hist19,"2017 pp, R=0.4","lp");
+  leg->AddEntry(hist18,"2015 pp, R=0.4","lp");
+  TCanvas* c = new TCanvas("c","",900,900);
+  hist19->Draw("e1");
+  hist18Syst->Draw("e2 same");
+  hist18->Draw("e1 same");
+  leg->Draw("same");
+  c->SaveAs(Form("Output/MeasureDistComp_18012vs19007_ppData%s_midRap_noUnderflow.pdf",isPr?"":"npr"));
+  c->SaveAs(Form("Output/MeasureDistComp_18012vs19007_ppData%s_midRap_noUnderflow.png",isPr?"":"npr"));
+}
+
+void compareRaa() {
+  gStyle->SetOptStat(0);
+  double glb19007  = sqrt(0.011*0.011+0.015*0.015);
+  double glb16025 = 0.023;
+  double Raa16025 [] = {0.356, 0.351,0.345,0.335,0.324,0.318};
+  double stat16025 [] = {0.008,0.008,0.008,0.008,0.008,0.013};
+  double syst16025 [] = {0.024,0.024,0.024,0.027,0.026,0.024};
+
+  int nBin = sizeof(Raa16025)/sizeof(double);
+  double totPP = 0.0460229;
+  double statPP = 0.000276909;
+  double systPP = 0.000844524;
+
+  double totPbPb = 0.0118678;
+  double statPbPb = 0.000586712;
+  double systPbPb = 0.00133272;
+
+  double Raa19007 = (totPbPb/totPP);
+  double stat19007 = Raa19007*sqrt((statPbPb/totPbPb)*(statPbPb/totPbPb)+(statPP/totPP)*(statPP/totPP));
+  double syst19007 = Raa19007*sqrt((systPbPb/totPbPb)*(systPbPb/totPbPb)+(systPP/totPP)*(systPP/totPP));
+
+  TH1D* hist16025 = new TH1D("hist16025",";|y|;R_{AA}",nBin,0,2.4);
+  TH1D* hSyst16025 = new TH1D("hSyst16025",";|y|;R_{AA}",nBin,0,2.4);
+  TH1D* hist19007 = new TH1D("hist19007",";|y|;R_{AA}",1,0,2.4);
+  TH1D* hSyst19007 = new TH1D("hSyst19007",";|y|;R_{AA}",1,0,2.4);
+  for (int i=0;i<nBin;i++) {
+    hist16025->SetBinContent(i+1,Raa16025[i]);
+    hist16025->SetBinError(i+1,stat16025[i]);
+    hSyst16025->SetBinContent(i+1,Raa16025[i]);
+    hSyst16025->SetBinError(i+1,syst16025[i]+(Raa16025[i]*glb16025));
+    }
+  hist19007->SetBinContent(1,Raa19007);
+  hist19007->SetBinError(1,stat19007);
+  hSyst19007->SetBinContent(1,Raa19007);
+  hSyst19007->SetBinError(1,syst19007+(Raa19007*glb19007));
+
+  hist16025->SetLineColor(kRed+2);
+  hist16025->SetLineWidth(2);
+  hist16025->SetMarkerColor(kRed+2);
+  hist16025->SetMarkerStyle(kFullCircle);
+  hist16025->SetFillColorAlpha(kRed-5,0.35);
+  hSyst16025->SetLineColor(kRed+2);
+  hSyst16025->SetLineWidth(2);
+  hSyst16025->SetMarkerColor(kRed+2);
+  hSyst16025->SetMarkerStyle(kFullCircle);
+  hSyst16025->SetFillColorAlpha(kRed-5,0.35);
+
+  hist19007->SetLineColor(kBlue+2);
+  hist19007->SetLineWidth(2);
+  hist19007->SetMarkerColor(kBlue+2);
+  hist19007->SetMarkerStyle(kFullSquare);
+  hist19007->SetFillColorAlpha(kBlue-5,0.35);
+  hSyst19007->SetLineColor(kBlue+2);
+  hSyst19007->SetLineWidth(2);
+  hSyst19007->SetMarkerColor(kBlue+2);
+  hSyst19007->SetMarkerStyle(kFullSquare);
+  hSyst19007->SetFillColorAlpha(kBlue-5,0.35);
+
+  TLegend* leg = new TLegend(0.6,0.6,0.8,0.7);
+  leg->SetBorderSize(0);
+  leg->AddEntry(hSyst16025,"HIN-16-025","lp");
+  leg->AddEntry(hSyst19007,"HIN-19-007","lp");
+
+  TCanvas* c = new TCanvas ("c","",800,800);
+  hSyst16025->GetYaxis()->SetRangeUser(0,1);
+  hSyst16025->Draw("E2");
+  hSyst19007->Draw("same E2");
+  hist19007->Draw("same E1");
+  hSyst16025->Draw("same E2");
+  hist16025->Draw("same E1");
+  leg->Draw("same");
+  c->SaveAs("Output/RaaComp.pdf");
+  c->SaveAs("Output/RaaComp.png");
+}
+
+double readSyst(const char* systfile, double zedmin, double zedmax, double rapmin, double rapmax, int cntmin,int cntmax) {
   double ans;
   ans = 0;
   ifstream file(systfile);
@@ -569,13 +809,13 @@ double readSyst(const char* systfile, double zedmin, double zedmax, double rapmi
       cnt++;
     }
     //if (!(zmin == 0.4 && zmax == 1.0) && !(zmin == 0.2 && zmax == 1.0)) ///// to not take the integrated results
-    if (zmin<zedmin+0.001 && zmin>zedmin-0.001 && zmax<zedmax+0.001 && zmax>zedmax-0.001 && ymin<rapmin+0.001 && ymin>rapmin-0.001 && ymax<rapmax+0.001 && ymax>rapmax-0.001)
+    if (zmin<zedmin+0.001 && zmin>zedmin-0.001 && zmax<zedmax+0.001 && zmax>zedmax-0.001 && ymin<rapmin+0.001 && ymin>rapmin-0.001 && ymax<rapmax+0.001 && ymax>rapmax-0.001 && centmin<cntmin+0.001 && centmin>cntmin-0.001 && centmax<cntmax+0.001 && centmax>cntmax-0.001)
       //ans.push_back(value);
       ans = value;
   }
   file.close();
   if (ans == 0) cout <<"[WARNING] systematic = 0;"<<endl;
-  if (ans >10) cout <<"[WARNING] huge systematic in "<<systfile<<endl;
+  if (ans >1) cout <<"[WARNING] huge systematic in "<<systfile<<", syst = "<<ans<<endl;
   return ans;
 }
 

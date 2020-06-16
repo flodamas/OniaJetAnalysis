@@ -226,7 +226,7 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 
     ////////////////////////////////////
     Long64_t nentries = theTree->GetEntries();
-    //nentries = 2000000;
+    //nentries = 20;
 
     float normF = 0.;
     
@@ -249,9 +249,9 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	}
 	normF = nentries/normF;
       }
-   
+    
     //normF = 0.00271722; //0.00276384;
-    //if (isPrompt) normF = 0.00276328;
+    //if (isPrompt) normF = 0.0027758; //0.00276328;
     //
     cout <<"[INFO] normF = "<<normF<<endl;
     // creating the tree to use in the unfolding
@@ -262,21 +262,22 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 
     if (isPbPb) {
       jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Autumn18_HI_V6_%s/Autumn18_HI_V6_%s_L2Relative_AK%dPF.txt",isMC?"MC":"DATA",isMC?"MC":"DATA",(int)(jetR*10)));
-      jeuFileName = Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Autumn18_HI_V6_%s/Autumn18_HI_V6_%s_Uncertainty_AK%dPF.txt",isMC?"MC":"DATA",isMC?"MC":"DATA",(int)(jetR*10));
+      jeuFileName = Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Autumn18_HI_V6_%s/Autumn18_HI_V6_%s_Uncertainty_AK%dPF.txt",/*isMC?"MC":*/"DATA",/*isMC?"MC":*/"DATA",(int)(jetR*10));
       if (!isMC)
 	jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Autumn18_HI_V6_%s/Autumn18_HI_V6_%s_L2L3Residual_AK%dPF.txt",isMC?"MC":"DATA",isMC?"MC":"DATA",(int)(jetR*10)));
     }
     
     else {
       jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2Relative_AK%dPF.txt",isMC?"MC":"DATA",isMC?"MC":"DATA",(int)(jetR*10)));
-      jeuFileName = Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_Uncertainty_AK%dPF.txt",isMC?"MC":"DATA",isMC?"MC":"DATA",(int)(jetR*10));
+      jeuFileName = Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_Uncertainty_AK%dPF.txt",/*isMC?"MC":*/"DATA",/*isMC?"MC":*/"DATA",(int)(jetR*10));
       if (!isMC)
 	jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2L3Residual_AK%dPF.txt",isMC?"MC":"DATA",isMC?"MC":"DATA",(int)(jetR*10)));
     }
 
     JetCorrector JEC(jecFileName);
     JetUncertainty JEU(jeuFileName);
-
+    cout <<"[INFO] reading jet energy corrections from JEC file: "<<jecFileName[0]<<endl;
+    cout <<"[INFO] reading uncertainties from JEU file: "<<jeuFileName<<endl;
     gSystem->mkdir("TreesForUnfolding");
     string trUnfFileName = Form("TreesForUnfolding/tree_%s%s_jetR%d%s%s%s.root", DSName.c_str(), (isPureSDataset?"_NoBkg":""), (int)(jetR*10), (applyWeight_Corr?Form("_%s",corrName.Data()):""), (applyJEC?"_JEC":""), (applyWeight? fl.c_str():""));
     TFile* trUnfFile = new TFile (trUnfFileName.c_str(),"RECREATE");
@@ -284,10 +285,10 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
     TTree* trUnf = new TTree ("treeForUnfolding","tree used for the unfolding");
     Int_t evtNb; Int_t centr; Float_t jp_pt; Float_t jp_rap; Float_t jp_eta; Float_t jp_mass; Float_t jp_phi; Float_t jp_l; 
     Float_t jp_gen_pt; Float_t jp_gen_rap; Float_t jp_gen_eta; Float_t jp_gen_phi; 
-    Float_t jt_pt; Float_t jt_pt_noZJEC; Float_t jt_pt_JEU_Up; Float_t jt_pt_JEU_Down; Float_t jt_rap; Float_t jt_eta; Float_t jt_phi; Float_t jt_CHF; Float_t jt_NHF; Float_t jt_CEF; Float_t jt_NEF; Float_t jt_MUF; Float_t jt_CHM; Float_t jt_NHM; Float_t jt_CEM; Float_t jt_NEM; Float_t jt_MUM; 
+    Float_t jt_pt; Float_t jt_pt_noZJEC; Float_t jt_pt_jettyCorr; Float_t jt_pt_JEU_Up; Float_t jt_pt_JEU_Down; Float_t jt_rap; Float_t jt_eta; Float_t jt_phi; Float_t jt_CHF; Float_t jt_NHF; Float_t jt_CEF; Float_t jt_NEF; Float_t jt_MUF; Float_t jt_CHM; Float_t jt_NHM; Float_t jt_CEM; Float_t jt_NEM; Float_t jt_MUM; 
     Float_t jt_ref_pt; Float_t jt_ref_rap; Float_t jt_ref_eta; Float_t jt_ref_phi; Float_t jt_pt_genZJEC;
     Float_t jt_gen_chargedSum; Float_t jt_gen_hardSum; Float_t jt_signal_chargedSum; Float_t jt_signal_hardSum;
-    Float_t z; Float_t gen_z; 
+    Float_t z; Float_t gen_z; Float_t z_jettyCorr;
     Float_t corr_AccEff; Float_t pt_hat; Float_t corr_ptw;
 
     cout<< "[INFO] Creating the tree to use in the unfolding" << endl;
@@ -301,12 +302,14 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
     trUnf->Branch("jp_l", &jp_l, "jp_l/F");
     trUnf->Branch("jt_pt", &jt_pt, "jt_pt/F");
     trUnf->Branch("jt_pt_noZJEC", &jt_pt_noZJEC,"jt_pt_noZJEC/F");
+    trUnf->Branch("jt_pt_jettyCorr", &jt_pt_jettyCorr,"jt_pt_jettyCorr/F");
     trUnf->Branch("jt_pt_JEU_Up", &jt_pt_JEU_Up,"jt_pt_JEU_Up/F");
     trUnf->Branch("jt_pt_JEU_Down", &jt_pt_JEU_Down,"jt_pt_JEU_Down/F");
     trUnf->Branch("jt_rap", &jt_rap, "jt_rap/F");
     trUnf->Branch("jt_eta", &jt_eta, "jt_eta/F");
     trUnf->Branch("jt_phi", &jt_phi, "jt_phi/F");
     trUnf->Branch("z", &z, "z/F");
+    trUnf->Branch("z_jettyCorr", &z_jettyCorr, "z_jettyCorr/F");
     trUnf->Branch("corr_AccEff", &corr_AccEff, "corr_AccEff/F");
     if (isMC) {
       trUnf->Branch("corr_ptw", &corr_ptw, "corr_ptw/F");
@@ -383,61 +386,68 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	corr_ptw = 1;
 	double rawPt = 0;
 
-	for (Long64_t ijet=0; ijet<nref; ijet++)
-	{
+	for (Long64_t ijet=0; ijet<nref; ijet++) {
 	  if (jetFound) continue;
-	  if (jetsInHCALHole(jteta[ijet],jtphi[ijet])) continue;
-	    TLorentzVector v_jet;
-	    JEC.SetJetPT(rawpt[ijet]);
-	    JEC.SetJetEta(jteta[ijet]);
-	    JEC.SetJetPhi(jtphi[ijet]);
-	    JEC.SetRho(1);
-	    JEC.SetJetArea(jtarea[ijet]);
-	    jt_pt_noZJEC = JEC.GetCorrectedPT();
+	  if (isPbPb && jetsInHCALHole(jteta[ijet],jtphi[ijet])) continue;
+	  TLorentzVector v_jet;
+	  JEC.SetJetPT(rawpt[ijet]);
+	  JEC.SetJetEta(jteta[ijet]);
+	  JEC.SetJetPhi(jtphi[ijet]);
+	  JEC.SetRho(1);
+	  JEC.SetJetArea(jtarea[ijet]);
+	  jt_pt_noZJEC = JEC.GetCorrectedPT();
 
-	    JEU.SetJetPT(jt_pt_noZJEC);
-	    JEU.SetJetEta(jteta[ijet]);
-	    JEU.SetJetPhi(jtphi[ijet]);
-
-	    v_jet.SetPtEtaPhiM(jt_pt_noZJEC, jteta[ijet], jtphi[ijet], jtm[ijet]);
-	    if (RecoQQ4mom->DeltaR (v_jet)<=drmin) {
-	      jetFound = true;
-	      drmin = RecoQQ4mom->DeltaR (v_jet);
-	      if (applyJEC) {
-		jt_pt = jecCorr(jt_pt_noZJEC, rawpt[ijet], RecoQQ4mom->Pt());
-		zed->setVal(RecoQQ4mom->Pt()/jt_pt);
-		if (zed->getVal() > 1 && zed->getVal() <= 1.000001) zed->setVal (0.9999999);
-		ptJet->setVal(jt_pt);
-		z = jp_pt/jt_pt;
-		if (z > 1 && z <= 1.000001) z = 0.9999999;
-		jt_pt_JEU_Down = jeuCorr(jt_pt, z, -1*(JEU.GetUncertainty().first));//jt_pt * (1 - JEU.GetUncertainty().first);
-		//cout <<"[INFO] jt_pt_noZJEC = "<<jt_pt_noZJEC<<", jt_pt = "<<jt_pt<<", JEU.GetUncertainty().first = "<<JEU.GetUncertainty().first<<", jt_pt_JEU_Down = "<<jt_pt_JEU_Down<<endl;
-		jt_pt_JEU_Up = jeuCorr(jt_pt, z, JEU.GetUncertainty().second);//jt_pt * (1 + JEU.GetUncertainty().second);
-		//cout <<"[INFO] jt_pt_noZJEC = "<<jt_pt_noZJEC<<", jt_pt = "<<jt_pt<<", JEU.GetUncertainty().second = "<<JEU.GetUncertainty().second<<", jt_pt_JEU_Up = "<<jt_pt_JEU_Up<<endl;
-	      }
-	      else {
-		zed->setVal(RecoQQ4mom->Pt()/jt_pt_noZJEC);
-		if (zed->getVal() > 1 && zed->getVal() <= 1.000001) zed->setVal(0.9999999);
-		jt_pt = jt_pt_noZJEC;
-		jt_pt_JEU_Down = jt_pt * (1 - JEU.GetUncertainty().first);
-		jt_pt_JEU_Up = jt_pt * (1 + JEU.GetUncertainty().second);
-		ptJet->setVal(jt_pt);
-		z = RecoQQ4mom->Pt()/jt_pt;
-		if (z > 1 && z <= 1.000001) z = 0.9999999;
-	      }
-	      rapJet->setVal(jty[ijet]);
-	      jt_rap = jty[ijet];
-	      jt_eta = jteta[ijet];
-	      jt_phi = jtphi[ijet];
-	      rawPt = rawpt[ijet];
-	      if (isMC) {
-		jt_ref_pt = refpt[ijet];
-		jt_ref_rap = refy[ijet];
-		jt_ref_eta = refeta[ijet];
-		jt_ref_phi = refphi[ijet];
-	      }
+	  JEU.SetJetPT(jt_pt_noZJEC);
+	  JEU.SetJetEta(jteta[ijet]);
+	  JEU.SetJetPhi(jtphi[ijet]);
+	  
+	  v_jet.SetPtEtaPhiM(jt_pt_noZJEC, jteta[ijet], jtphi[ijet], jtm[ijet]);
+	  if (RecoQQ4mom->DeltaR (v_jet)<=drmin) {
+	    jetFound = true;
+	    drmin = RecoQQ4mom->DeltaR (v_jet);
+	    if (applyJEC) {
+	      jt_pt = jecCorr(jt_pt_noZJEC, rawpt[ijet], RecoQQ4mom->Pt());
+	      zed->setVal(RecoQQ4mom->Pt()/jt_pt);
+	      if (zed->getVal() > 1 && zed->getVal() <= 1.000001) zed->setVal (0.9999999);
+	      ptJet->setVal(jt_pt);
+	      z = jp_pt/jt_pt;
+	      if (z > 1 && z <= 1.000001) z = 0.9999999;
+	      jt_pt_JEU_Down = jeuCorr(jt_pt, z, -1*(JEU.GetUncertainty().first));//jt_pt * (1 - JEU.GetUncertainty().first);
+	      jt_pt_JEU_Up = jeuCorr(jt_pt, z, JEU.GetUncertainty().second);//jt_pt * (1 + JEU.GetUncertainty().second);
 	    }
-	    continue;
+	    else {
+	      zed->setVal(RecoQQ4mom->Pt()/jt_pt_noZJEC);
+	      if (zed->getVal() > 1 && zed->getVal() <= 1.000001) zed->setVal(0.9999999);
+	      jt_pt = jt_pt_noZJEC;
+	      jt_pt_JEU_Down = jt_pt * (1 - JEU.GetUncertainty().first);
+	      jt_pt_JEU_Up = jt_pt * (1 + JEU.GetUncertainty().second);
+	      ptJet->setVal(jt_pt);
+	      z = RecoQQ4mom->Pt()/jt_pt;
+	      if (z > 1 && z <= 1.000001) z = 0.9999999;
+	    }
+	    rapJet->setVal(jty[ijet]);
+	    jt_rap = jty[ijet];
+	    jt_eta = jteta[ijet];
+	    jt_phi = jtphi[ijet];
+	    rawPt = rawpt[ijet];
+
+	    if (rawpt[ijet]>jp_pt) {
+	      JEC.SetJetPT(rawpt[ijet]-jp_pt); 
+	      jt_pt_jettyCorr = jp_pt+JEC.GetCorrectedPT();
+	    }
+	    else jt_pt_jettyCorr = jp_pt;
+	    z_jettyCorr = jp_pt/jt_pt_jettyCorr;
+
+	    //jt_pt_jettyCorr = jecCorr(jt_pt_jettyCorr, rawpt[ijet], RecoQQ4mom->Pt());
+
+	    if (isMC) {
+	      jt_ref_pt = refpt[ijet];
+	      jt_ref_rap = refy[ijet];
+	      jt_ref_eta = refeta[ijet];
+	      jt_ref_phi = refphi[ijet];
+	    }
+	  }
+	  //continue;
 	}
 	
         if (isMC) {
@@ -449,10 +459,10 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	    ctauRes->setVal( (ctau->getValV() - ctauTrue->getValV()) );
 	  }
 	}
-	
         if (applyWeight && !applyWeight_Corr){
 	  double w = Gen_weight;
 	  if (isMC && isPbPb) w = w*getNColl(hiBin,!isPbPb)*normF;
+	  if (isPbPb && jt_eta > -3.0 && jt_eta < -1.392) w = w*(1.125448); //(jtPhi > -1.57) &&  (jtPhi < -0.87)
 	  weight->setVal(w);
         }
         else if (applyWeight_Corr) {
@@ -471,6 +481,7 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	      else if (pthat >= 45) corr_ptw = 0.000212618;
 	    }
 	  }
+	  if (isPbPb && jt_eta > -3.0 && jt_eta < -1.392) wCorr = wCorr*(1.125448); //(jtPhi > -1.57) &&  (jtPhi < -0.87)
 	  corr_AccEff = wCorr;
 	  weightCorr->setVal(wCorr*corr_ptw);
 	}
@@ -500,8 +511,10 @@ bool    tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, str
 	      else if (isMC && isPureSDataset && !isMatchedDiMuon(iQQ))
 		gen_z = -1;
 
-	      if (z<100 && z>1 && jt_pt>15) cout <<"[WARNING] z = "<<z<<" in entry "<<jentry<<endl;  
+	      //if (isPbPb && !isMC && z<0.376 && jp_pt>6.5 && jt_pt>10 && jt_pt<20 && fabs(jt_eta)<2 && corr_AccEff>1000) {cout <<"found a problematic event with w = "<<corr_AccEff<<endl; continue;}
+	      //if (jp_pt>6.5) cout <<"less than 6.5"<<endl;
 
+	      if (z<100 && z>1 && jt_pt>15) cout <<"[WARNING] z = "<<z<<" in entry "<<jentry<<endl;  
 	      else if (applyWeight_Corr) dataOS->add(*cols,weightCorr->getVal()); //Signal and background dimuons
 	      else dataOS->add(*cols, ( applyWeight ? weight->getVal() : 1.0)); //Signal and background dimuons
 	      evtNb = jentry;

@@ -269,7 +269,8 @@ namespace HI {
   float findTaaAverage(int hiBinLow, int hiBinHigh) {
     // if the bin corresponds to a bin we already know, give the official number from https://twiki.cern.ch/twiki/bin/view/CMS/GlauberTables
     if (hiBinLow==0&&hiBinHigh==180) return 6.274;
-
+    if (hiBinLow==0&&hiBinHigh==40) return 18.72;
+    if (hiBinLow==40&&hiBinHigh==180) return 2.717;
     //16-025 bins
     //For centrality dependence in rapidity intervals:
     if (hiBinLow==0&&hiBinHigh==20) return 23.22;
@@ -299,7 +300,7 @@ namespace HI {
     if (hiBinLow==140&&hiBinHigh==200) return 0.1095;
     
     //16-004 bins (fwd-y, cause mid-y is the same as 16-025)
-    if (hiBinLow==0&&hiBinHigh==40) return 18.79;
+    //if (hiBinLow==0&&hiBinHigh==40) return 18.79;
     if (hiBinLow==40&&hiBinHigh==80) return 6.819;
     if (hiBinLow==80&&hiBinHigh==200) return 0.8096;
     
@@ -314,6 +315,8 @@ namespace HI {
   float findTaaAverage_err_low(int hiBinLow, int hiBinHigh) {
     // if the bin corresponds to a bin we already know, give the official number from https://twiki.cern.ch/twiki/bin/view/CMS/GlauberTables
     if (hiBinLow==0&&hiBinHigh==180) return 0.137; 
+    if (hiBinLow==0&&hiBinHigh==40) return 0.36;
+    if (hiBinLow==40&&hiBinHigh==180) return 0.098;
     //16-025 bins
     //For centrality dependence in rapidity intervals:
     if (hiBinLow==0&&hiBinHigh==20) return 0.689;
@@ -343,7 +346,7 @@ namespace HI {
     if (hiBinLow==140&&hiBinHigh==200) return 0.011;
     
     //16-004 bins (fwd-y, cause mid-y is the same as 16-025)
-    if (hiBinLow==0&&hiBinHigh==40) return 0.563;
+    //if (hiBinLow==0&&hiBinHigh==40) return 0.563;
     if (hiBinLow==40&&hiBinHigh==80) return 0.283;
     if (hiBinLow==80&&hiBinHigh==200) return 0.046;
     
@@ -358,6 +361,8 @@ namespace HI {
   float findTaaAverage_err_high(int hiBinLow, int hiBinHigh) {
     // if the bin corresponds to a bin we already know, give the official number from https://twiki.cern.ch/twiki/bin/view/CMS/GlauberTables
     if (hiBinLow==0&&hiBinHigh==180) return 0.137;
+    if (hiBinLow==0&&hiBinHigh==40) return 0.563;
+    if (hiBinLow==40&&hiBinHigh==180) return 0.098;
 
     //16-025 bins
     //For centrality dependence in rapidity intervals:
@@ -388,7 +393,7 @@ namespace HI {
     if (hiBinLow==140&&hiBinHigh==200) return 0.018;
     
     //16-004 bins (fwd-y, cause mid-y is the same as 16-025)
-    if (hiBinLow==0&&hiBinHigh==40) return 0.366;
+    //if (hiBinLow==0&&hiBinHigh==40) return 0.366;
     if (hiBinLow==40&&hiBinHigh==80) return 0.260;
     if (hiBinLow==80&&hiBinHigh==200) return 0.071;
     

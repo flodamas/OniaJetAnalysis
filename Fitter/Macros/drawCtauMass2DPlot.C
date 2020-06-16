@@ -15,9 +15,8 @@ void drawCtauMass2DPlot(RooWorkspace& myws,   // Local workspace
                         map<string, double> binWidth={} // User-defined Location of the fit results
                         ) 
 {
-  //cout << "start of the drawing function" << endl;
+  //cout << "start of the 2D drawing function" << endl;
   gStyle->SetOptStat(0);
-
   if (DSTAG.find("_")!=std::string::npos) DSTAG.erase(DSTAG.find("_"));
 
   double jetR = 0.4;
@@ -110,9 +109,39 @@ void drawCtauMass2DPlot(RooWorkspace& myws,   // Local workspace
 
   cFigDATA->Clear();
   cFigDATA->Close();
-  
+
+  //cout <<"done with data and PDF now start with pull"<<endl;
+  TH1* hPULL = (TH1*) hDATA->Clone(Form("histPULL_%s", (isPbPb?"PbPb":"PP")));
+  TCanvas *cFigPULL   = new TCanvas(Form("cCtauMassPULL_%s", (isPbPb?"PbPb":"PP")), "cCtauMassPULL",1000,900);
+  cFigPULL->cd();
+  gPad->SetLeftMargin(0.1);
+  gPad->SetRightMargin(0.1);
+
+  hDATA->Scale(hPDF->Integral()*1./hDATA->Integral());
+  int nx = hPULL->GetNbinsX();
+  int ny = hPULL->GetNbinsY();
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      int nbin = hPULL->GetBin(ix,iy);
+      if (hDATA->GetBinError(nbin)==0)  
+	hPULL->SetBinContent(nbin,0);
+      else {
+	hPULL->SetBinContent(nbin, (hPDF->GetBinContent(nbin)-hDATA->GetBinContent(nbin))*1./hDATA->GetBinError(nbin));
+	//cout <<"[INFO] for ctau = "<<hPULL->GetXaxis()->GetBinCenter(ix)<<", m = "<<hPULL->GetYaxis()->GetBinCenter(iy)<<", pdfVal = "<<hPDF->GetBinContent(nbin)<<", dataVal = "<<hDATA->GetBinContent(nbin)<<", pull = "<<hPULL->GetBinContent(nbin)<<endl;
+      }
+    }
+  }
+
+  hPULL->GetYaxis()->SetTitleOffset(1.1);
+  hPULL->GetXaxis()->SetTitleOffset(1.1);
+  hPULL->GetZaxis()->SetRangeUser(-5.2, 5.2);
+  hPULL->Draw("colz");
+  gSystem->mkdir(Form("%sctauMass/%s/plot/pull2D/", outputDir.c_str(), DSTAG.c_str()), kTRUE);
+  cFigPULL->SaveAs(Form("%sctauMass/%s/plot/pull2D/PLOT_%s_%s_%s%s_z%.0f%.0f_pt%.0f%.0f_rap%.0f%.0f_cent%d%d.pdf", outputDir.c_str(), DSTAG.c_str(), "CTAUMASSPULL", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), plotLabel.c_str(), (cut.dMuon.Zed.Min*100.0), (cut.dMuon.Zed.Max*100.0), (cut.dMuon.Pt.Min*10.0), (cut.dMuon.Pt.Max*10.0), (cut.dMuon.AbsRap.Min*10.0), (cut.dMuon.AbsRap.Max*10.0), cut.Centrality.Start, cut.Centrality.End));
+
   delete hPDF;
   delete hDATA;
+  delete hPULL;
 
 };
 

@@ -21,7 +21,7 @@ float extraTextFont = 52;  // default is helvetica-italics
 
 // text sizes and text offsets with respect to the top frame
 // in unit of the top margin size
-float lumiTextSize     = 0.5;
+float lumiTextSize     = 0.6;
 float lumiTextOffset   = 0.28;
 float cmsTextSize      = 0.75;
 float cmsTextOffset    = 0.01;  // in case of ticks
@@ -46,8 +46,8 @@ TString lumi_PbPb2015_alt  = "351 #mub^{-1}";
 TString lumi_pp2013  = "pp 5.4 pb^{-1}";
 TString lumi_pp2015  = "pp 27.39 pb^{-1}";
 TString lumi_pp2015_alt  = "28.0 pb^{-1}";
-TString lumi_pp2017  = "pp 293.61 pb^{-1}";
-TString lumi_PbPb2018  = "PbPb 1512.15 #mub^{-1}";
+TString lumi_pp2017  = "pp 302 pb^{-1}";
+TString lumi_PbPb2018  = "PbPb 1.6 nb^{-1}";
 bool drawLogo      = false;
 
 void CMS_lumi( TPad* pad, int iPeriod=3, int iPosX=10, TString label = lumi_PbPb2018 , bool writeExtraText = true);

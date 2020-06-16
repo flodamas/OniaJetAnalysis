@@ -27,7 +27,7 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
                         ) 
 {
 
-  bool pasStyle = false;
+  bool pasStyle = true;
 
   RooMsgService::instance().getStream(0).removeTopic(Caching);  
   RooMsgService::instance().getStream(1).removeTopic(Caching);
@@ -214,12 +214,13 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
   else {
     dy+=0.045;
     if (cut.dMuon.Zed.Max<100) {t->DrawLatex(0.2175, 0.86-dy, Form("%g < z_{#mu#mu} < %g",cut.dMuon.Zed.Min,cut.dMuon.Zed.Max)); dy+=0.065;}
-    if (cut.dMuon.AbsRap.Min>0.1) {t->DrawLatex(0.2175, 0.86-dy, Form("%.1f < |y_{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Min,cut.dMuon.AbsRap.Max)); dy+=0.065;}
-    else {t->DrawLatex(0.2175, 0.86-dy, Form("|y_{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Max)); dy+=0.065;}
-    t->DrawLatex(0.2175, 0.86-dy, Form("%g < p_{T,#mu#mu} < %.0f GeV",cut.dMuon.Pt.Min,cut.dMuon.Pt.Max)); dy+=0.065;
-    if (cut.jet.AbsRap.Min>0.1) {t->DrawLatex(0.2175, 0.86-dy, Form("%.1f < |y_{jet}| < %.1f",cut.jet.AbsRap.Min,cut.jet.AbsRap.Max)); dy+=0.065;}
-    else {t->DrawLatex(0.2175, 0.86-dy, Form("|y_{jet}| < %.1f",cut.jet.AbsRap.Max)); dy+=0.065;}
+    //if (cut.dMuon.AbsRap.Min>0.1) {t->DrawLatex(0.2175, 0.86-dy, Form("%.1f < |y_{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Min,cut.dMuon.AbsRap.Max)); dy+=0.065;}
+    //else {t->DrawLatex(0.2175, 0.86-dy, Form("|y_{#mu#mu}| < %.1f",cut.dMuon.AbsRap.Max)); dy+=0.065;}
+    //t->DrawLatex(0.2175, 0.86-dy, Form("%g < p_{T,#mu#mu} < %.0f GeV",cut.dMuon.Pt.Min,cut.dMuon.Pt.Max)); dy+=0.065;
     if (cut.jet.Pt.Max<1000) {t->DrawLatex(0.2175, 0.86-dy, Form("%.0f < p_{T,jet} < %.0f GeV",cut.jet.Pt.Min,cut.jet.Pt.Max)); dy+=0.065;}
+    if (cut.jet.AbsRap.Min>0.1) {t->DrawLatex(0.2175, 0.86-dy, Form("%.1f < |y_{jet}| < %.1f",cut.jet.AbsRap.Min,cut.jet.AbsRap.Max)); dy+=0.065;}
+    else if (cut.jet.AbsRap.Max == 2.0) {t->DrawLatex(0.2175, 0.86-dy, Form("|#eta_{jet}| < %.0f",cut.jet.AbsRap.Max)); dy+=0.065;}
+    else {t->DrawLatex(0.2175, 0.86-dy, Form("|y_{jet}| < %.1f",cut.jet.AbsRap.Max)); dy+=0.065;}
     if (isPbPb) {t->DrawLatex(0.2175, 0.86-dy, Form("Cent. %d-%d%%", (int)(cut.Centrality.Start/2), (int)(cut.Centrality.End/2))); dy+=0.065;}
     if (outErr>0.0) {t->DrawLatex(0.21, 0.86-dy, Form("Excl: (%.4f%%) %.0f evts", (outErr*100.0/outTot), outErr)); dy+=1.5*0.065;}
   }
@@ -229,7 +230,7 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
   if (incPsi2S && incJpsi && incSS)  { ymin = 0.7202; } 
   if (incPsi2S && incJpsi && !incSS) { ymin = 0.7452; }
   TLegend* leg = new TLegend(0.5175, ymin, 0.7180, 0.8809); leg->SetTextSize(0.03);
-  if (pasStyle) {leg = new TLegend(0.2, ymin, 0.4, 0.4); leg->SetTextSize(0.044); leg->SetTextFont(42);}
+  if (pasStyle) {leg = new TLegend(0.2, ymin, 0.4, 0.45); leg->SetTextSize(0.044); leg->SetTextFont(42);}
   leg->AddEntry(frame->findObject("dOS"), (incSS?"Opposite Charge":"Data"),"pe");
   if (incSS) { leg->AddEntry(frame->findObject("dSS"),"Same Charge","pe"); }
   if(frame->findObject("PDF")) { leg->AddEntry(frame->findObject("PDF"),"Total fit","fl"); }
@@ -260,7 +261,10 @@ void drawCtauFrom2DPlot(RooWorkspace& myws,   // Local workspace
   }
   
   //CMS_lumi(pad1, isPbPb ? 105 : 104, 33, label);
-  CMS_lumi(pad1, isPbPb ? 110 : 109, 33, "");
+  if(pasStyle)
+    CMS_lumi(pad1, isPbPb ? 110 : 109, 33, "",false);
+  else
+    CMS_lumi(pad1, isPbPb ? 110 : 109, 33, "",true);
   gStyle->SetTitleFontSize(0.05);
   
   pad1->Update();
