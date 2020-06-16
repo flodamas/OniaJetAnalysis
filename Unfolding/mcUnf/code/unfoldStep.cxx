@@ -24,7 +24,7 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
     if (smearMeas) {
       if (stepNumber==1) {
 	cout <<"[INFO] Smearing the MC measured distribution to match data stats"<<endl;
-	TFile* dataFile = TFile::Open(Form("%s/dataUnf/data_results/meas_%s_data_%s_statErrs.root",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"prompt")); //use prompt data for prompt and nonprompt
+	TFile* dataFile = TFile::Open(Form("%s/dataUnf/data_results/meas_%s_data_%s%s_statErrs.root",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"prompt",doCent?"_centBin":doPeri?"_periBin":"")); //use prompt data for prompt and nonprompt
 	TRandom* rnd = new TRandom3();
 	TH2D *hMeasuredData = (TH2D*) dataFile->Get("h_Meas;1");
 	TFile* saveFile = new TFile(Form("%s/mcUnf/unfOutput/step%i/statSmearing_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str()),"RECREATE");
@@ -193,8 +193,8 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
   Double_t *ptmax = new Double_t[nBinJet_gen];
 
   for (int i=0;i<nBinJet_gen;i++) {
-      ptmin[i] = min_jetpt+i*jetPt_gen_binWidth;
-      ptmax[i] = min_jetpt+(i+1)*jetPt_gen_binWidth;
+      ptmin[i] = min_jetpt_real+i*jetPt_gen_binWidth;
+      ptmax[i] = min_jetpt_real+(i+1)*jetPt_gen_binWidth;
     }
 
   //Double_t ptmin[nBinJet_gen] = {20.,22.,24.,26.,28.,30.,32.,34.,36.,38.,40.,42.,44.,46.,48.};
@@ -263,12 +263,14 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
 
 void unfoldStep(Int_t step = 1){
   //prompt
-  unfold(true,true,nIter,step);
-  if (step<=nSIter_pp && centShift == 0)
+  if (step<=nSIter) 
+    unfold(true,true,nIter,step);
+  if (step<=nSIter_pp && centShift == 0 && !doCent && !doPeri)
     unfold(true,false,nIter,step);
 
   //nonprompt
-  unfold(false,true,nIter,step);
-  if (step<=nSIter_pp && centShift == 0)
+  if (step<=nSIter) 
+    unfold(false,true,nIter,step);
+  if (step<=nSIter_pp && centShift == 0 && !doCent && !doPeri)
     unfold(false,false,nIter,step);
 }

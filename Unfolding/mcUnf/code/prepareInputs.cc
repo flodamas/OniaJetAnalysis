@@ -142,9 +142,13 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   Double_t *xmin_sparce = new Double_t[fDim];
   Double_t *xmax_sparce = new Double_t[fDim];
 
+  Int_t* bins_sparce_compact = new Int_t[fDim];
+  Double_t *xmin_sparce_compact = new Double_t[fDim];
+  Double_t *xmax_sparce_compact = new Double_t[fDim];
+
   bins_sparce[0] = nBinJet_gen;
-  xmin_sparce[0] = min_jetpt;
-  xmax_sparce[0] = max_jetpt;
+  xmin_sparce[0] = min_jetpt_real;//min_jetpt;
+  xmax_sparce[0] = max_jetpt_real;//max_jetpt;
 
   bins_sparce[1] = nBinZ_gen;
   xmin_sparce[1] = min_z;
@@ -157,11 +161,31 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   bins_sparce[3] = nBinZ_reco;
   xmin_sparce[3] = min_z;
   xmax_sparce[3] = max_z;
+
+  bins_sparce_compact[0] = 15;//nBinJet_gen;
+  xmin_sparce_compact[0] = 20;//min_jetpt;
+  xmax_sparce_compact[0] = 50;//max_jetpt;
+
+  bins_sparce_compact[1] = nBinZ_gen;
+  xmin_sparce_compact[1] = min_z;
+  xmax_sparce_compact[1] = max_z;
+  
+  bins_sparce_compact[2] = 3;//nBinJet_reco;
+  xmin_sparce_compact[2] = 20;//min_jetpt;
+  xmax_sparce_compact[2] = 50;//max_jetpt;
+
+  bins_sparce_compact[3] = nBinZ_reco;
+  xmin_sparce_compact[3] = min_z;
+  xmax_sparce_compact[3] = max_z;
   
   //initial not normalized 4D  
   THnSparseF * fSparse = new THnSparseF("hs", "hs", fDim, bins_sparce, xmin_sparce, xmax_sparce);
   fSparse->Sumw2();
   fSparse->CalculateErrors();
+
+  THnSparseF * fSparse_compact = new THnSparseF("hs_compact", "hs_compact", fDim, bins_sparce_compact, xmin_sparce_compact, xmax_sparce_compact);
+  fSparse_compact->Sumw2();
+  fSparse_compact->CalculateErrors();
 
   THnSparseF * fSparseOrig = new THnSparseF("hs_orig", "hs_orig", fDim, bins_sparce, xmin_sparce, xmax_sparce);
   fSparseOrig->Sumw2();
@@ -194,19 +218,19 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
 
     //if (doPbPb && (centr<10 || centr>=190)) continue;
     if (!doTrain) {
-      if (doPbPb && centShift==-1 && (centr<5 || centr>=185)) continue;
-      if (doPbPb && centShift==0 && (centr<10 || centr>=190)) continue;
-      if (doPbPb && centShift==1 && (centr<15 || centr>=195)) continue;
+      if (doPbPb && centShift==-1 && (centr<min_cent || centr>=max_cent)) continue;
+      if (doPbPb && centShift==0 && (centr<min_cent+10 || centr>=max_cent+10)) continue;
+      if (doPbPb && centShift==1 && (centr<min_cent+20 || centr>=max_cent+20)) continue;
     }
     else {
-      if (doPbPb && (centr<10 || centr>=190)) continue;
+      if (doPbPb && (centr<min_cent+10 || centr>=max_cent+10)) continue;
     }
     // check event content
     if(jp_pt < min_jp_pt || jp_pt > max_jp_pt) continue;    
     if(TMath::Abs(jp_eta) > max_jp_eta ) continue;
     if(jp_mass < 2.6 || jp_mass > 3.5) continue;
-    if(jt_pt < min_jetpt || jt_pt > max_jetpt) continue;
-    if(jt_ref_pt < min_jetpt || jt_ref_pt > max_jetpt) continue;
+    if(jt_pt < min_jetpt_real || jt_pt > max_jetpt_real) continue;
+    if(jt_ref_pt < min_jetpt_real || jt_ref_pt > max_jetpt_real) continue;
     if(TMath::Abs(jt_eta) > max_jt_eta) continue;    
 
     double gen_z2 = gen_z;
@@ -243,11 +267,34 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
     fValue[1] = gen_z2;
     fValue[2] = jt_pt;
     fValue[3] = z2;
+    //if (jt_ref_pt > max_jetpt-jetPt_reco_binWidth)
+    //fValue[0] = (max_jetpt-jetPt_reco_binWidth)+(jt_ref_pt-(max_jetpt-jetPt_reco_binWidth))*squeezeHigh;//jt_ref_pt;
+    //else if (jt_ref_pt < min_jetpt+jetPt_reco_binWidth)
+    //fValue[0] = (min_jetpt+jetPt_reco_binWidth)-((min_jetpt+jetPt_reco_binWidth)-jt_ref_pt)*squeezeLow;//jt_ref_pt;
+    if (jt_pt > max_jetpt-jetPt_reco_binWidth)
+	fValue[2] = (max_jetpt-jetPt_reco_binWidth)+(jt_pt-(max_jetpt-jetPt_reco_binWidth))*squeezeHigh;//jt_pt;
+      else if (jt_pt < min_jetpt+jetPt_reco_binWidth)
+	fValue[2] = (min_jetpt+jetPt_reco_binWidth)-((min_jetpt+jetPt_reco_binWidth)-jt_pt)*squeezeLow;//jt_pt;
+
+
+      //if (jt_ref_pt<midLowerPt)
+      //cout <<"jt_ref_pt = "<<jt_ref_pt<<", fValue[0] = "<< fValue[0]<<", jt_pt = "<<jt_pt<<", fValue[2] = "<<fValue[2]<<endl; 
 
     finalCorr = corr_AccEff*corr_ptw;
     fSparseOrig->Fill(fValue,finalCorr);
     if (dataDist) finalCorr = finalCorr*mcDataWeight->GetBinContent(mcDataWeight->FindBin(z2,jt_pt));
     fSparse->Fill(fValue,finalCorr);
+    if (jt_ref_pt > midUpperPt)
+      fValue[0] = midUpperPt+0.5*(jt_ref_pt-midUpperPt);//jt_ref_pt;
+    else if (jt_ref_pt < midLowerPt)
+      fValue[0] = midLowerPt-0.5*(midLowerPt-jt_ref_pt);//jt_ref_pt;
+      if (jt_pt > midUpperPt)
+	fValue[2] = midUpperPt+0.5*(jt_pt-midUpperPt);//jt_pt;
+      else if (jt_pt < midLowerPt)
+	fValue[2] = midLowerPt-0.5*(midLowerPt-jt_pt);//jt_pt;
+
+    fSparse_compact->Fill(fValue,finalCorr);
+
   }
 
   
@@ -259,7 +306,7 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
     for(int ijet = 0; ijet < nBinJet_gen; ijet++){
 
       float izMid = min_z+iz*z_gen_binWidth+z_gen_binWidth/2;
-      float ijetMid = min_jetpt+ijet*jetPt_gen_binWidth+jetPt_gen_binWidth/2;
+      float ijetMid = min_jetpt_real+ijet*jetPt_gen_binWidth+jetPt_gen_binWidth/2;
 
       double valIntegral = 0;
       //cout << "iz = " << iz << " izMid = " << izMid << endl;
@@ -327,7 +374,7 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   /// jet pt normalization -> put it to match jet pt truth
 
   for(int ijet = 0; ijet < nBinJet_gen; ijet++){      
-    float ijetMid = min_jetpt+ijet*jetPt_gen_binWidth+jetPt_gen_binWidth/2;
+    float ijetMid = min_jetpt_real+ijet*jetPt_gen_binWidth+jetPt_gen_binWidth/2;
     double valIntegralOrig = 0;
     double valIntegralZNorm = 0;
 
@@ -404,6 +451,7 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
   h_jetpPtGen_jetPtReco->Write();
   
   fSparse->Write();
+  fSparse_compact->Write();
   fSparseOrig->Write();
   fSparse_newZNorm->Write();
   fSparse_newJetPtNorm->Write();
@@ -425,20 +473,22 @@ void prepare(bool doPrompt = false, bool doPbPb = true, bool doTrain=true, Int_t
 
 void prepareInputs(Int_t step = 1){
   //prepare(bool doPrompt, bool doPbPb, bool doTrain, Int_t stepNumber)
-  prepare(true,true,true,step);
-  prepare(true,true,false,step);
-
-  if (step<=nSIter_pp && centShift == 0){
+  if (step<=nSIter) {
+    prepare(true,true,true,step);
+    prepare(true,true,false,step);
+  }
+  if (step<=nSIter_pp && centShift == 0 && !doCent && !doPeri){
     prepare(true,false,true,step);
     prepare(true,false,false,step);
   }
   //nonprompt
-  prepare(false,true,true,step);
-  prepare(false,true,false,step);
-  
-  if (step<=nSIter_pp && centShift == 0){
+  if (step<=nSIter) {
+    prepare(false,true,true,step);
+    prepare(false,true,false,step);
+  }
+  if (step<=nSIter_pp && centShift == 0 && !doCent && !doPeri){
     prepare(false,false,true,step);
     prepare(false,false,false,step);
   }
-
+  
 }

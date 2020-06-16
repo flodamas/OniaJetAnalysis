@@ -22,11 +22,19 @@ void create(bool doPrompt = true, bool doPbPb = true, bool doTrain = false, Int_
   //Get response
 
   string thnSparseName = "";
-  //take normalized tr matrix 
-  if(doTrain && flatPrior) thnSparseName = "hs_newJetPtNorm;1";
-  else if(doTrain && !flatPrior) thnSparseName = "hs;1";
   //take not normalized matrix, since we need real measured 2D distribution from it
-  else thnSparseName = "hs;1";
+  if (!doTrain) thnSparseName = "hs;1";
+  //take normalized tr matrix 
+  else if (flatPrior) thnSparseName = "hs_newJetPtNorm;1";
+  else if (stepNumber==1) thnSparseName = "hs;1";
+  else thnSparseName = "hs_newJetPtNorm;1";
+
+  //if(doTrain && flatPrior) thnSparseName = "hs_newJetPtNorm;1";
+  //else if(doTrain && !flatPrior) {
+  //if (stepNumber==1)
+  //thnSparseName = "hs;1";
+  //}
+  //else thnSparseName = "hs;1";
   
   THnSparseF *hn = static_cast<THnSparseF*>(f->Get(thnSparseName.c_str()));
   //hn->Sumw2();
@@ -164,19 +172,22 @@ void create(bool doPrompt = true, bool doPbPb = true, bool doTrain = false, Int_
 
 void createRooUnfoldResponse(Int_t step = 1){
   //prompt PbPb
-  create(true,true,true,step);
-  create(true,true,false,step);
+  if (step<=nSIter) {
+    create(true,true,true,step);
+    create(true,true,false,step);
+  }
   //prompt pp
-  if (step<=nSIter_pp && centShift ==0){
+  if (step<=nSIter_pp && centShift ==0 && !doCent && !doPeri){
     create(true,false,true,step);
     create(true,false,false,step);
   }
-
-  //nonprompt PbPb
-  create(false,true,true,step);
-  create(false,true,false,step);
+  if (step<=nSIter) {
+    //nonprompt PbPb
+    create(false,true,true,step);
+    create(false,true,false,step);
+  }
   //nonprompt pp
-  if (step<=nSIter_pp && centShift ==0){
+  if (step<=nSIter_pp && centShift ==0 && !doCent && !doPeri){
     create(false,false,true,step);
     create(false,false,false,step);
   }

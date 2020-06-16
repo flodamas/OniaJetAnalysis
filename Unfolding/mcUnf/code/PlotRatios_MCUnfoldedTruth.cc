@@ -12,6 +12,7 @@ void plot(bool doPrompt = false, bool doPbPb = true){
 
   int iterFinal = nSIter;
   if (!doPbPb) iterFinal = nSIter_pp;
+  if (iterFinal<4) iterFinal = 4;
 
   filename1 = Form("%s/mcUnf/unfOutput/step1/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
   filename2 = Form("%s/mcUnf/unfOutput/step2/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
@@ -32,7 +33,9 @@ void plot(bool doPrompt = false, bool doPbPb = true){
   TH1D *hZUnf_SI3 = (TH1D*)file3->Get(Form("hMUnf_%d_Iter%d;1",midLowerId,nIter)); TH1D *hZUnf_SI3_temp = NULL;
   TH1D *hZUnf_SI4 = (TH1D*)file4->Get(Form("hMUnf_%d_Iter%d;1",midLowerId,nIter)); TH1D *hZUnf_SI4_temp = NULL;  
 
-  for (int i = 1; i < (nBinJet_gen/nBinJet_reco); i++) {
+  cout <<"midUpperId = "<<midUpperId<<", midLowerId = "<<midLowerId<<endl;
+
+  for (int i = 1; i <= (midUpperId-midLowerId); i++) {
     hZTrueTemp = (TH1D*)file3->Get(Form("hMTru_%d;1",midLowerId+i));
     hZTrue->Add(hZTrueTemp);
 
@@ -121,7 +124,7 @@ void plot(bool doPrompt = false, bool doPbPb = true){
   hZMeas->GetYaxis()->SetTitleOffset(1.6);
   hZMeas->GetYaxis()->SetTitle(Form("dN/dz (per %f)",z_reco_binWidth));
 
-  hZMeas->SetMaximum(hZMeas->GetMaximum()*1.5);
+  hZMeas->GetYaxis()->SetRangeUser(0,hZMeas->GetMaximum()*1.5);
   
   hZMeas->SetLineColor(col[0]);
   hZMeas->SetMarkerColor(col[0]);
@@ -243,6 +246,7 @@ void plot(bool doPrompt = false, bool doPbPb = true){
   mycan1->Update();
   
   mycan1->SaveAs(Form("%s/mcUnf/plots/unf_mc_%s_%s_jetR%d_ratioMeasured_%dz%dptBins%dz%dptMeasBins%s_%dIter%dSIter.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter,iterFinal));
+  mycan1->SaveAs(Form("%s/mcUnf/plots/unf_mc_%s_%s_jetR%d_ratioMeasured_%dz%dptBins%dz%dptMeasBins%s_%dIter%dSIter.png",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter,iterFinal));
 
   hZUnf_SI1_ratioTruth->SetStats(0);
   hZUnf_SI1_ratioTruth->GetYaxis()->SetTitle("ratio to truth");
@@ -296,15 +300,16 @@ void plot(bool doPrompt = false, bool doPbPb = true){
   mycan1->Update();
   
   mycan1->SaveAs(Form("%s/mcUnf/plots/unf_mc_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter%dSIter.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter,iterFinal));
+  mycan1->SaveAs(Form("%s/mcUnf/plots/unf_mc_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter%dSIter.png",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter,iterFinal));
 }
 
 void PlotRatios_MCUnfoldedTruth(){
   //plot(bool doPrompt, bool doPbPb)
   plot(true,true);
-  if (centShift == 0)
+  if (centShift == 0 && nSIter_pp>0 && !doCent && !doPeri)
     plot(true,false);
 
   plot(false,true);
-  if (centShift == 0)
+  if (centShift == 0 && nSIter_pp>0 && !doCent && !doPeri)
     plot(false,false);
 }

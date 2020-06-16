@@ -1,4 +1,4 @@
-#include "inputParams.h"
+ #include "inputParams.h"
 
 void plot(bool doPrompt = false, bool doPbPb = true){
   if (!setCaseTag()) return;
@@ -32,7 +32,7 @@ void plot(bool doPrompt = false, bool doPbPb = true){
   TH1D* chi2Hist = new TH1D("chi2Hist","",150,0.5,150.5);//99,0.5,99.5);
   
   //for (int iIter = iterMin; iIter<=iterMax; iIter++)
-  for (int iIter = 1; iIter<40; iIter++)
+  for (int iIter = 1; iIter<=25; iIter++)
     {
       if (!doPbPb && iIter>nSIter_pp) continue;
       filename = Form("%s/mcUnf/unfOutput/step%d/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), iIter, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str());
@@ -43,7 +43,7 @@ void plot(bool doPrompt = false, bool doPbPb = true){
       if (iIter==1) hZTrue = (TH1D*)file->Get(Form("hMTru_%d;1",midLowerId)); TH1D *hZTrueTemp = NULL;
       TH1D *hZUnf = (TH1D*) file->Get(Form("hMUnf_%d_Iter%d;1",midLowerId,nIter)); TH1D *hZUnf_temp = NULL;
       
-      for (int i = 1; i < (nBinJet_gen/nBinJet_reco); i++) {
+      for (int i = 1; i <= (midUpperId-midLowerId); i++) {
 	if (iIter==1) {
 	  hZTrueTemp = (TH1D*)file->Get(Form("hMTru_%d;1",midLowerId+i));
 	  hZTrue->Add(hZTrueTemp);
@@ -85,8 +85,17 @@ void plot(bool doPrompt = false, bool doPbPb = true){
       hZUnf->SetLineColor(col[iIter-iterMin+1]);
       hZUnf->SetLineWidth(lineWidth[iIter-iterMin+1]);
       }
-      
-      Double_t chi2 = hZUnf->Chi2Test(hZTrue,"WW CHI2/NDF");
+      TH1D* hZUnf_chi2 = (TH1D*) hZUnf->Clone("hZUnf_chi2");
+      TH1D* hZTrue_chi2 = (TH1D*) hZTrue->Clone("hZTrue_chi2");
+      hZUnf_chi2->SetBinContent(1,0);
+      hZUnf_chi2->SetBinError(1,0);
+      hZTrue_chi2->SetBinContent(1,0);
+      hZTrue_chi2->SetBinError(1,0);
+      for (int iBin=1;iBin<=nBinZ_reco; iBin++) {
+	hZUnf_chi2->SetBinError(iBin,0);
+      }
+
+      Double_t chi2 = hZUnf_chi2->Chi2Test(hZTrue_chi2,"WW CHI2/NDF");
       cout <<"[INFO] For SI "<<iIter<<" CHI2/NDF = "<<chi2<<endl;
       chi2Hist->SetBinContent(chi2Hist->FindBin(iIter),chi2);
       if (iIter>=iterMin && iIter<=iterMax) {
@@ -131,40 +140,29 @@ void plot(bool doPrompt = false, bool doPbPb = true){
 	line1->Draw("same");
 	line2 = new TLine(min_z,0,gPad->GetUxmax(),0);
 	line2->SetLineColor(kblue);
-	line2->SetLineStyle(1);
-	line2->SetLineWidth(1);
-	line2->Draw("same");
-      }
-      mycan1->Update();
-    }  
-  mycan1->SaveAs(Form("%s/mcUnf/plots/chi2Test/unf_mc_IterComparison_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter_SIterFrom%dTo%d.pdf",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter, iterMin,iterMax));
-  mycan1->SaveAs(Form("%s/mcUnf/plots/chi2Test/unf_mc_IterComparison_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter_SIterFrom%dTo%d.png",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter, iterMin,iterMax));
-  TFile* fileChi2Save = new TFile(Form("%s/mcUnf/plots/chi2Test/unf_mc_chi2Hist_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter_SIterFrom%dTo%d.root",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter, iterMin,iterMax),"RECREATE");
-  chi2Hist->Write();
-  fileChi2Save->Close();
-}
+ 	line2->SetLineStyle(1);
+ 	line2->SetLineWidth(1);
+ 	line2->Draw("same");
+       }
+       mycan1->Update();
+     }  
+   mycan1->SaveAs(Form("%s/mcUnf/plots/chi2Test/unf_mc_IterComparison_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter_SIterFrom%dTo%d.pdf",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter, iterMin,iterMax));
+   mycan1->SaveAs(Form("%s/mcUnf/plots/chi2Test/unf_mc_IterComparison_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter_SIterFrom%dTo%d.png",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter, iterMin,iterMax));
+   TFile* fileChi2Save = new TFile(Form("%s/mcUnf/plots/chi2Test/unf_mc_chi2Hist_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s_%dIter_SIterFrom%dTo%d.root",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str(),nIter, iterMin,iterMax),"RECREATE");
+   chi2Hist->Write();
+   fileChi2Save->Close();
+ }
 
-void PlotRatios_MCUnfolded_NSIterDecision(){
-  //plot(bool doPrompt, bool doPbPb)
-  plot(true,true);
-  if (centShift==0)
-    plot(true,false);
+ void plotChi2(bool doPrompt, bool doPbPb) {
+   if (!setCaseTag()) return;
+   gStyle->SetOptStat(0);
 
-  plot(false,true);
-  if (centShift==0)
-  plot(false,false);
-}
-
-void plotChi2(bool doPrompt, bool doPbPb) {
-  if (!setCaseTag()) return;
-  gStyle->SetOptStat(0);
-
-  int iter[] = {3,10};
-  int SIMin[] = {27,27};
-  int SIMax[] = {33,33};
-  int SIMin_pp[] = {1,-1};
-  int SIMax_pp[] = {6,4};
-  int nCase = sizeof(iter)/sizeof(int);
+   int iter[] = {2,3,5,10};
+   int SIMin[] = {22,22,22,22,22};
+   int SIMax[] = {28,28,28,28,28};
+   int SIMin_pp[] = {1,1,1,1,1};
+   int SIMax_pp[] = {4,4,4,4,4};
+   int nCase = sizeof(iter)/sizeof(int);
 
   TH1D* histAxis = new TH1D("histAxis","",150,0.5,150.5);
   if (doPbPb) 
@@ -206,4 +204,20 @@ void plotChi2(bool doPrompt, bool doPbPb) {
   leg->Draw("same");
   c->SaveAs(Form("%s/mcUnf/plots/chi2Test/unf_mc_chi2Plot_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s.pdf",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str()));
   c->SaveAs(Form("%s/mcUnf/plots/chi2Test/unf_mc_chi2Plot_%s_%s_jetR%d_ratioTruth_%dz%dptBins%dz%dptMeasBins%s.png",unfPath.c_str(), doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", (int) (jetR*10), nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, caseTag.c_str()));
+}
+
+void PlotRatios_MCUnfolded_NSIterDecision(){
+  //plot(bool doPrompt, bool doPbPb)
+  plot(true,true);
+  if (centShift==0 && nSIter_pp>0 && !doCent && !doPeri)
+    plot(true,false);
+
+  plot(false,true);
+  if (centShift==0 && nSIter_pp>0 && !doCent && !doPeri)
+    plot(false,false);
+  
+  //plotChi2(1,1);
+  //plotChi2(1,0);
+  //plotChi2(0,1);
+  //plotChi2(0,0);
 }
