@@ -1,33 +1,41 @@
-#include "../inputParams.h"
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#include "inputParams.h"
+#endif
 
 void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
 
-  if (!setSystTag()) return;
+  if (!setSystTag(doPbPb)) return;
   string filename = "";
   string outputfile = "";
+  int stepNumber = nSIter;
+  if (!doPbPb) stepNumber = nSIter_pp;
 
-  gSystem->mkdir("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i/matrixOper");
+  gSystem->mkdir(Form("%s/dataUnf/unfOutput/step%i/matrixOper", unfPath.c_str(), stepNumber));
   
-  fileName = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  filename = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
 
-  outputfile = Form("/Users/diab/Phd_LLR/JpsiJetAnalysisPbPb2019/JpsiInJetsPbPb/Unfolding/dataUnf/unfOutput/step%i/matrixOper/matrixOperation_%s_%s_8iter_%dz%dptBins%dz%dptMeasBin%s.root",stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
-       
+  outputfile = Form("%s/dataUnf/unfOutput/step%i/matrixOper/matrixOperation_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(), stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  
+  cout <<"output = "<<outputfile<<endl;     
   TFile *file = new TFile(filename.c_str());
 
   // get forward transfer matrix
-  TH2D *h_fwdMatrix  = (TH2D *)file->Get("trmatrix");
+  TH2D *h_matrix  = (TH2D *)file->Get("trmatrix");
   
   // 2D histo for its errors
-  TH2D *h_fwdMatrixErr  = (TH2D *)h_fwdMatrix->Clone("h_fwdMatrixErr");
+  TH2D *h_matrixErr  = (TH2D *)h_matrix->Clone("h_matrixErr");
   
   // get inverse transfer matrix
-  TMatrixT<double> *invMatrix  = (TMatrixT<double> *)file->Get(Form("invtrmat%s",nIter));
+  TMatrixT<double> *invMatrix  = (TMatrixT<double> *)file->Get(Form("invtrmat%d",nIter));
 
   TH2D *h2_UnfData  = (TH2D*)file->Get(Form("hReco_Iter%d;1",nIter));
   TH2D *h2_MeasData  = (TH2D*)file->Get("fh2MeasData;1");
-  
 
-  TH1D *h1_zUnf = (TH1D*)h2_UnfData->ProjectionX("h1_zUnf",6,10);
+  int midStart = h2_UnfData->GetYaxis()->FindBin(midLowerPt);
+  int midEnd = h2_UnfData->GetYaxis()->FindBin(midUpperPt)-1;
+
+  //cout <<"midStart = "<<midStart<<", midEnd"<<midEnd<<endl;
+  TH1D *h1_zUnf = (TH1D*)h2_UnfData->ProjectionX("h1_zUnf",midStart,midEnd);//6,10);
   
   //  TH1D *h1_zUnf = (TH1D*)file->Get("hMUnf_1_Iter3;1");
   
@@ -40,7 +48,7 @@ void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
   TH2D *h_invMatrixOut = (TH2D*)h_invMatrix->Clone("h_invMatrixOut");
   h_invMatrixOut->Reset();
   
-  cout << "here" << endl;
+  //cout << "here" << endl;
   
   //normalize 2d histogram, such that each measured bin integrates to unity
   for(int jjet = 0; jjet < nBinJet_reco; jjet++){
@@ -95,12 +103,11 @@ void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
 	  if(h_invMatrixErr->GetBinContent(binY,binX)>0) sumErr+=h_invMatrixErr->GetBinContent(binY,binX)*h_invMatrixErr->GetBinContent(binY,binX);
 	}
       }
-      if(sumErr>0)sumErr = sqrt(sumErr);
+      if(sumErr>0) sumErr = sqrt(sumErr);
 
       for(int ijet = 0; ijet < nBinJet_gen; ijet++){
 	for(int iz = 0; iz < nBinZ_gen; iz++){
 	  int binX = nBinZ_gen*ijet+iz+1;
-	  if(doMid) binX = 49*ijet+iz+1;
 	  
 	  float valWeight = h_invMatrix->GetBinContent(binY,binX);	  
 	  float errWeight = h_invMatrixErr->GetBinContent(binY,binX);
@@ -131,19 +138,20 @@ void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
 	for(int iz = 0; iz < nBinZ_gen; iz++){
 	  int binX = nBinZ_gen*ijet+iz+1;
 	  
-	  float fwdMatixVal = h_fwdMatrix->GetBinContent(binY,binX);
-	  float fwdMatrixErr = h_fwdMatrix->GetBinError(binY,binX);
-
-	  if(fwdMatixVal>0)cout << "fwd matrix relative error = " << fwdMatrixErr/fwdMatixVal << endl;
-	  if(fwdMatrixErr/fwdMatixVal>0.99)cout <<"fwd rel error is 100% in the bin with jjet = " << jjet << " , jz = " << jz << " , ijet = " << ijet << " , iz = " << iz << endl; 
+	  float matrixVal = h_matrix->GetBinContent(binY,binX);
+	  float matrixErr = h_matrix->GetBinError(binY,binX);
+	  //cout <<"matrixVal = "<<matrixVal<<", matrixErr = "<<endl;
+	  
+	  //if(matrixVal>0)cout << "matrix relative error = " << matrixErr/matrixVal << endl;
+	  if(matrixErr/matrixVal>0.99) cout <<"rel error is 100% in the bin with jjet = " << jjet << " , jz = " << jz << " , ijet = " << ijet << " , iz = " << iz << endl; 
 	  
 	  float invMatrixVal = h_invMatrixOut->GetBinContent(binY,binX);
-	  cout << "invMatrixVal  = " << invMatrixVal << endl;
+	  //cout << "invMatrixVal  = " << invMatrixVal << endl;
 	  float invMatrixErr = 0;
-	  if(fwdMatixVal>0) invMatrixErr = fwdMatrixErr*invMatrixVal/fwdMatixVal;
+	  if(matrixVal>0) invMatrixErr = matrixErr*invMatrixVal/matrixVal;
 
-	  if(fwdMatixVal>0)cout << "inv matrix relative error = " << invMatrixErr/invMatrixVal << endl;
-	  if(invMatrixErr/invMatrixVal>0.99)cout<<"fwd rel error is 100% in the bin with jjet = " << jjet << " , jz = " << jz << " , ijet = " << ijet << " , iz = " <<iz << endl;
+	  //if(matrixVal>0)cout << "inv matrix relative error = " << invMatrixErr/invMatrixVal << endl;
+	  if(invMatrixErr/invMatrixVal>0.99) cout<<"rel error is 100% in the bin with jjet = " << jjet << " , jz = " << jz << " , ijet = " << ijet << " , iz = " <<iz << endl;
 
 	  h_invMatrixOut->SetBinError(binY,binX,invMatrixErr);  
 
@@ -169,16 +177,16 @@ void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
 	for(int jz = 0; jz < nBinZ_reco; jz++){
 	  int binY = nBinZ_reco*jjet+jz+1;
 	  
-	  if(ijet>4 && ijet<10) {
+	  if(ijet>=midLowerId && ijet<midLowerId+nBinJet_gen/nBinJet_reco) {
 	    zBinsVals[iz] += h_invMatrixOut->GetBinContent(binY,binX);
-	    cout << "bin content to add = " << h_invMatrixOut->GetBinContent(binY,binX) << endl;
+	    //cout << "bin content to add = " << h_invMatrixOut->GetBinContent(binY,binX) << endl;
 	  }
 	  
 	}
       }
     }
     
-    cout << "iz+1 = " << iz+1 << " bin content = " << zBinsVals[iz] << endl;
+    //cout << "iz+1 = " << iz+1 << " bin content = " << zBinsVals[iz] << endl;
     h_zUnfNomBin->SetBinContent(iz+1,zBinsVals[iz]);
     
   }
@@ -225,7 +233,7 @@ void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
 	  oldVal = h_invMatrixOut->GetBinContent(binY,binX);
 	  errVal = h_invMatrixOut->GetBinError(binY,binX);
 	  smearVal = myRand->Gaus(oldVal,errVal);
-
+	  //cout <<"oldVal = "<<oldVal<<", errVal = "<<errVal<<", smearVal = "<<smearVal<<endl;
 	  if(smearVal<0) {
 	    smearVal = 0;
 	  }
@@ -241,7 +249,7 @@ void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
 
   //project the correct axis
   
-  TH1D *h_zUnfNomBinSmear = (TH1D *)h1_zUnf->Clone("h_zUnfNomBinSmear");
+  TH1D *h_zUnfNomBinSmear = (TH1D*)h1_zUnf->Clone("h_zUnfNomBinSmear");
   h_zUnfNomBinSmear->Reset();
   float zBinsValsSmear[nBinZ_gen];
 
@@ -258,9 +266,9 @@ void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
 	for(int jz = 0; jz < nBinZ_reco; jz++){
 	  int binY = nBinZ_reco*jjet+jz+1;
 	  // do it only for the unf jt pt 25-35 GeV
-	  //if(ijet>4 && ijet<10) zBinsValsSmear[iz] += h_invMatrixOutSmear->GetBinContent(binY,binX);
-	  cout <<"h_invMatrixOutSmear->GetYaxis()->GetBinCenter(binX)" << h_invMatrixOutSmear->GetYaxis()->GetBinCenter(binX)<<endl;
-	  if (h_invMatrixOutSmear->GetYaxis()->GetBinCenter(binX) > midLowerPt && h_invMatrixOutSmear->GetYaxis()->GetBinCenter(binX) < midUpperPt) zBinsValsSmear[iz] += h_invMatrixOutSmear->GetBinContent(binY,binX);
+	  int nStart = midLowerId;
+	  int nEnd = midLowerId+(nBinJet_gen/nBinJet_reco);
+	  if (ijet>=nStart && ijet<nEnd) zBinsValsSmear[iz] += h_invMatrixOutSmear->GetBinContent(binY,binX);
 	}
       }
       
@@ -274,21 +282,22 @@ void operate(bool doPrompt = true, bool doPbPb = true, int toyNumber = 1){
   h_zUnfNomBinSmear->Draw("EP");
     
   
-  TFile *outfile = new TFile(outputfile.c_str(),"UPDATE");
-  if(toyNumber == 1) h1_zUnf->Write("nominalZUnf");
+  TFile *outfile = new TFile(outputfile.c_str(),toyNumber==1?"RECREATE":"UPDATE");
+  if(toyNumber == 1) {h1_zUnf->Write("nominalZUnf");
+    h_invMatrixOutSmear->Write("invMatrixOutSmear");
+  }
   h_zUnfNomBinSmear->Write(Form("zUnfSmear_toy%i",toyNumber));
   outfile->Close();
   
 }
 
-void smearMatrix2_newBins(){
-
+void smearTransferMatrix(){
   for(int i = 1; i < 101; i++){
     operate(true,true,i);
-    operate(true,false,i);
+    if (!doCent && !doPeri)
+      operate(true,false,i);
     //nonprompt
     //operate(false,true,i);
     //operate(false,false,i);
   }
 }
-B

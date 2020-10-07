@@ -1,8 +1,10 @@
-#include "../inputParams.h"
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#include "inputParams.h"
+#endif
 
 void compute(bool doPrompt = true, bool doPbPb = true){
 
-  if (!setSystTag()) return;
+  if (!setSystTag(doPbPb)) return;
   string filename = "";
   string outputfile = "";
   
@@ -12,7 +14,8 @@ void compute(bool doPrompt = true, bool doPbPb = true){
   
   filename = Form("%s/dataUnf/unfOutput/step%i/matrixOper/matrixOperation_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   outputfile = Form("%s/dataUnf/unfOutput/matrixOper/systUnc_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
-  
+
+  cout <<"reading file = "<<filename<<endl;  
   TFile *file = new TFile(filename.c_str());
 
   TH1D *h1_zUnf = (TH1D*)file->Get("nominalZUnf");
@@ -74,7 +77,7 @@ void compute(bool doPrompt = true, bool doPbPb = true){
   
   TCanvas * can0 = new TCanvas("can0","can0",600,600);
   h1_zUnf_newSyst->Draw("EP");
-  can0->SaveAs("../../plots/trMatrixSystCheck.png");
+  can0->SaveAs("../plots/trMatrixSystCheck.png");
   
 
   TFile *outfile = new TFile(outputfile.c_str(),"RECREATE");
@@ -89,7 +92,8 @@ void compute(bool doPrompt = true, bool doPbPb = true){
 void trStatSystUnc(){
   //compute(bool doPrompt = true, bool doPbPb = true)
   compute(true,true);
-  compute(true,false);
+  if (!doCent && !doPeri)
+    compute(true,false);
 
   //compute(false,true);
   //compute(false,false);

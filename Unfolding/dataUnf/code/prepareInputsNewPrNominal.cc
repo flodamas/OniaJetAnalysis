@@ -21,13 +21,13 @@ float getZWeight(float z_gen = 0){
   zFunc->SetParameters(11.2639,-252.785,1698.17,-4651.78,6166.36,-3973.96,1002.8);
   //else zFunc->SetParameters(53.2622,-763.157,4007.63,-9781.24,12194.8,-7581.59,1870.36);
   float wZ = zFunc->Eval(z_gen);
-
   return wZ;
 }
 
+void preparePrior(bool doPbPb = true, string outputName="");
 void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) { 
   printInput();
-  if (!setSystTag()) return;
+  if (!setSystTag(doPbPb)) return;
   setSFVal();
   
   string filename = "";
@@ -39,9 +39,13 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
   gSystem->mkdir(Form("%s/dataUnf/unfOutput",unfPath.c_str()));
   gSystem->mkdir(Form("%s/dataUnf/unfOutput/step%i",unfPath.c_str(),stepNumber));
 
-  filename = Form("~/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_%s_%s_NoBkg%s_AccEff_JEC.root",doPrompt?"MCJPSIPR":"MCJPSINOPR",doPbPb?"PbPb":"PP",Form("_jetR%d",(int)(jetR*10)));
+  filename = Form("~/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_%s_%s_NoBkg%s_AccEff_JEC.root",useSystTrM?(doPrompt?"MCJPSINOPR":"MCJPSIPR"):(doPrompt?"MCJPSIPR":"MCJPSINOPR"),doPbPb?"PbPb":"PP",Form("_jetR%d",(int)(jetR*10)));
   outputfile = Form("%s/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
-  if(stepNumber > 1) filenamePrevStep = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),stepNumber-1,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());  
+  if(stepNumber > 1) filenamePrevStep = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),stepNumber-1,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+  if (nprPrior && stepNumber == 1) {
+    filenamePrevStep = Form("%s/dataUnf/unfInput/step%i/priorDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),stepNumber,doPbPb?"PbPb":"PP","nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
+    preparePrior(doPbPb,filenamePrevStep);
+  }
 
   cout <<"filename = "<<filename<<endl;
   cout <<"outputfile = "<<outputfile<<endl;
@@ -60,11 +64,8 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
   
   if(stepNumber > 1) {
     TFile *filePrevStep = new TFile(filenamePrevStep.c_str());
-
     //    cout << "file OK" << endl;
-    
     TH1D *h_z_unf_jetPtBin[nBinJet_gen];
-
     for(int ibin = 0; ibin < nBinJet_gen; ibin++){
       h_z_unf_jetPtBin[ibin] = (TH1D*)filePrevStep->Get(Form("hMUnf_%i_Iter%d;1",ibin,nIter));
     }
@@ -81,19 +82,43 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
     }
             
     for(int iz = 1; iz <= nBinZ_gen; iz++){
-      
       z_frac_allJetPtBins[iz-1] = h_z_allBins->GetBinContent(iz);
-
-      //cout << "iz = " << iz << " allJtPtBins content = " << z_frac_allJetPtBins[iz-1] << endl;
-      
+      //cout << "iz = " << iz << " allJtPtBins content = " << z_frac_allJetPtBins[iz-1] << endl;  
       for(int ijtpt = 0; ijtpt < nBinJet_gen; ijtpt++){
+	z_frac_JetPtBin[ijtpt][iz-1] = h_z_unf_jetPtBin[ijtpt]->GetBinContent(iz);
+      }
+    }    
+  }
 
+  else if(nprPrior) {
+    TFile *filePrevStep = new TFile(filenamePrevStep.c_str());
+    //    cout << "file OK" << endl;
+    TH1D *h_z_unf_jetPtBin[nBinJet_gen];
+    for(int ibin = 0; ibin < nBinJet_gen; ibin++){
+      h_z_unf_jetPtBin[ibin] = (TH1D*)filePrevStep->Get(Form("zDist_%i",ibin));
+    }
+    
+    TH1D *h_z_allBins = (TH1D*)h_z_unf_jetPtBin[0]->Clone();
+    for(int ibin = 1; ibin < nBinJet_gen; ibin++){
+      h_z_allBins->Add(h_z_unf_jetPtBin[ibin]);
+    }
+    
+    h_z_allBins->Scale(1/h_z_allBins->Integral());
+
+    for(int ibin = 1; ibin < nBinJet_gen; ibin++){
+      h_z_unf_jetPtBin[ibin]->Scale(1/h_z_unf_jetPtBin[ibin]->Integral());
+    }
+            
+    for(int iz = 1; iz <= nBinZ_gen; iz++){
+      z_frac_allJetPtBins[iz-1] = h_z_allBins->GetBinContent(iz);
+      //cout << "iz = " << iz << " allJtPtBins content = " << z_frac_allJetPtBins[iz-1] << endl;  
+      for(int ijtpt = 0; ijtpt < nBinJet_gen; ijtpt++){
 	z_frac_JetPtBin[ijtpt][iz-1] = h_z_unf_jetPtBin[ijtpt]->GetBinContent(iz);
       }
     }
-    
   }
-  else{
+
+  else {
     for(int i = 1; i <= nBinZ_gen; i++){
       for(int ijtpt = 0; ijtpt < nBinJet_gen; ijtpt++){
 	z_frac_JetPtBin[ijtpt][i-1] = 1.0;
@@ -221,8 +246,8 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
 
   TRandom *rand = new TRandom();
 
-  double c2 = 0.06*0.06;
-  double s2 = 0.8*0.8;
+  double c2 = (5.92454e-02)*(5.92454e-02);//(2.54002e-02)*(2.54002e-02);//0.06*0.06;
+  double s2 = (9.84442e-01)*(9.84442e-01);//(9.42256e-01)*(9.42256e-01);//0.8*0.8;
 
   int sfBin = -1;
   if(SF<1.05) sfBin=0;
@@ -234,9 +259,9 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
     t_unf->GetEntry(nEv);
 
     // check event content
-    if (doPbPb && centShift==-1 && (centr<5 || centr>=185)) continue;
-    if (doPbPb && centShift==0 && (centr<10 || centr>=190)) continue;
-    if (doPbPb && centShift==1 && (centr<15 || centr>=195)) continue;
+    if (doPbPb && centShift==-1 && (centr<min_cent+6 || centr>=max_cent+6)) continue;
+    if (doPbPb && centShift==0 && (centr<(min_cent+9) || centr>=(max_cent+9))) continue;
+    if (doPbPb && centShift==1 && (centr<(min_cent+12) || centr>=(max_cent+12))) continue;
 
     if (JESsyst==+1) jt_pt = jt_pt_JEU_Up;
     else if (JESsyst==-1) jt_pt = jt_pt_JEU_Down;
@@ -245,12 +270,8 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
     if(TMath::Abs(jp_eta) > max_jp_eta ) continue;
     if(jp_mass < 2.6 || jp_mass > 3.5) continue;
     
-    //!!!!!!!!!!!!!!!!!!!!!!!!!! to check !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if(jt_pt < min_jetpt || jt_pt > max_jetpt) continue;
-    if(jt_ref_pt < min_jetpt || jt_ref_pt > max_jetpt) continue;
     float absJtEta = TMath::Abs(jt_eta);
-    if(absJtEta > max_jt_pt) continue;
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if(absJtEta > max_jt_eta) continue;
 
     // get eta bin for resolution
     int etaBin = -1;
@@ -271,38 +292,27 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
     double sigmaSmear = pTres*TMath::Sqrt(sfVal*sfVal - 1.);
     double smearPt  = (1.-gen_z)*jt_ref_pt*rand->Gaus(0.,sigmaSmear);
     //cout <<"[INFO] sfVal = "<<sfVal<<", orig jtpt= "<<jt_pt<<", orig z = "<<", smearPt = "<<smearPt;
-    jt_pt = jt_pt+smearPt;
+    if (!noSmearing)
+      jt_pt = jt_pt+smearPt;
+    if (jt_pt<jp_pt) jt_pt= jp_pt;
     z = jp_pt/jt_pt;
     //cout <<", new jtpt = "<<jt_pt<<"new z = "<<z<<endl;
+    if (z<0) cout<<"[WARNING] jtpt = "<<jt_pt<<", z = "<<z<<endl;
     if(z<0) z=0;
     if (z>1) z=1;
-    //double scaleFactor_JES = nonpromptJES->Eval(gen_z)/promptJES->Eval(gen_z);//nonpromptJESVal(gen_z)/promptJESVal(gen_z);
-    //double corr_scaleFactor_JES = (1. - scaleFactor_JES)/2.;
-    //double new_scaleFactor_JES = scaleFactor_JES+corr_scaleFactor_JES;
-    //jt_pt = jt_pt*new_scaleFactor_JES;
-    //z = jp_pt/jt_pt;
-    
-    //if(jt_pt_new_wJES < min_jetpt || jt_pt_new_wJES > max_jetpt) continue;
-    //if(jt_ref_pt < min_jetpt || jt_ref_pt > max_jetpt) continue;
-    //if(TMath::Abs(jt_eta) > 2.4) continue;
 
     if(gen_z >= 1. && gen_z<1.001) gen_z = 0.99;
     if(z >= 1. && z < 1.001) z = 0.99;
     if(gen_z >=1. ) continue;
     if(z >= 1. ) continue;
+    if(jt_pt < min_jetpt || jt_pt > max_jetpt) continue;
+    if(jt_ref_pt < min_jetpt || jt_ref_pt > max_jetpt) continue;
 
     //response matrix fill
     fValue[0] = jt_ref_pt;
     fValue[1] = gen_z;
     fValue[2] = jt_pt;
     fValue[3] = z;
-
-    // no z weights for data unfolding
-    /*
-    zWeight = 1.;
-    if(doPrompt && doTrain) zWeight = getZWeight(doMid,gen_z);
-    if(!doPrompt && doTrain) zWeight = 1/getZWeight(doMid,gen_z);
-    */
     
     finalCorr = corr_AccEff*corr_ptw;
     fSparse->Fill(fValue,finalCorr);
@@ -380,7 +390,6 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
 	  }
       }
     }
-
   }
 
 
@@ -518,7 +527,25 @@ void prepare(bool doPrompt = false, bool doPbPb = true, Int_t stepNumber = 1) {
 void prepareInputsNewPrNominal(Int_t step = 1) { 
   if (!matrixInv)
     prepare(true,true,step);
-  if (step<=nSIter_pp && centShift==0)
+  if (step<=(nSIter_pp+3) && centShift==0 && !doCent && !doPeri)
     prepare(true,false,step);
 }
 
+
+void preparePrior(bool doPbPb, string outputName){
+  string treeFilename = Form("~/JpsiInJetsPbPb/Fitter/TreesForUnfolding/tree_%s_%s_NoBkg%s_AccEff_JEC%s.root","MCJPSINOPR",doPbPb?"PbPb":"PP",Form("_jetR%d",(int)(jetR*10)),doPbPb?"":"_updatedCorr");
+  TFile *file = new TFile(treeFilename.c_str());
+  TTree *t_unf = (TTree*)file->Get("treeForUnfolding");
+  TH1D *h_z_jetPtBin[nBinJet_gen];
+
+  TFile *outputFile = new TFile(outputName.c_str(),"RECREATE");
+    for(int ibin = 0; ibin < nBinJet_gen; ibin++){
+      float min_jetpt_bin = min_jetpt+ibin*(jetPt_gen_binWidth);
+      float max_jetpt_bin = min_jetpt+(ibin+1)*(jetPt_gen_binWidth);
+      h_z_jetPtBin[ibin] = new TH1D(Form("zDist_%i",ibin),Form("jt_ref_pt>%f && jt_ref_pt<%f",min_jetpt_bin,max_jetpt_bin),nBinZ_gen,min_z,max_z);
+      t_unf->Draw(Form("gen_z>>zDist_%i",ibin),Form("corr_AccEff%s*corr_ptw*(jp_gen_pt>%f && jp_gen_pt<%f && fabs(jp_gen_rap)<%f && jt_ref_pt>%f && jt_ref_pt<%f && gen_z>%f && gen_z<%f && fabs(jt_ref_eta)<%f %s)",doPbPb?"":"_comp",min_jp_pt,max_jp_pt,max_jp_eta,min_jetpt_bin,max_jetpt_bin,min_z,max_z,max_jt_eta,doPbPb?Form("&& centr >%d && centr <%d",min_cent+9,max_cent+9):""));
+      h_z_jetPtBin[ibin]->Write(Form("zDist_%i",ibin));
+    }
+    outputFile->Close();
+    file->Close();
+}

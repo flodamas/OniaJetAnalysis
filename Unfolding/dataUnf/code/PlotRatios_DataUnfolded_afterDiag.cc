@@ -3,7 +3,7 @@
 #endif
 
 void plot(bool doPrompt = true, bool doPbPb = false){
-  if (!setSystTag()) return;
+  if (!setSystTag(doPbPb)) return;
   
   string filename1 = "";
   string filename2 = "";
@@ -14,13 +14,13 @@ void plot(bool doPrompt = true, bool doPbPb = false){
 
   int iterFinal = nSIter;
   if (!doPbPb) iterFinal = nSIter_pp;
-
+  if (iterFinal<4) iterFinal=4;
   filename1 = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_Diag%s.root",unfPath.c_str(),1,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   filename2 = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_Diag%s.root",unfPath.c_str(),2,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   filename3 = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_Diag%s.root",unfPath.c_str(),iterFinal-1,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   filename4 = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_Diag%s.root",unfPath.c_str(),iterFinal,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   filenameMeas = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(),iterFinal,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
-  outputfile = Form("%s/dataUnf/plots/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%s_statError.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, iterFinal, systTag.c_str());
+  outputfile = Form("%s/dataUnf/plots/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_SIter%i%s%s.pdf",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, iterFinal, systTag.c_str(), systErr?"":"_statError");
 
   TFile *file1 = new TFile(filename1.c_str());
   TFile *file2 = new TFile(filename2.c_str());
@@ -31,7 +31,7 @@ void plot(bool doPrompt = true, bool doPbPb = false){
 
   TH2D *h2ZMeas = (TH2D*)fileMeas->Get("fh2MeasData;1");
   
-  TH2D *h2UnfResp1 = (TH2D*)file1->Get("hReco_Iter1;1"); //this is the way it's save in unfoldStepNewPrNominalDiag 
+  TH2D *h2UnfResp1 = (TH2D*)file1->Get("hReco_Iter1;1"); //this is the way it's saved in unfoldStepNewPrNominalDiag 
   TH2D *h2UnfResp2 = (TH2D*)file2->Get("hReco_Iter1;1"); //it's not wrong
   TH2D *h2UnfResp3 = (TH2D*)file3->Get("hReco_Iter1;1"); //don't panic everytime you see it
   TH2D *h2UnfResp4 = (TH2D*)file4->Get("hReco_Iter1;1");
@@ -39,6 +39,7 @@ void plot(bool doPrompt = true, bool doPbPb = false){
   Int_t min_PriorFolded = h2UnfResp1->GetYaxis()->FindBin(midLowerPt+0.00001);
   Int_t max_PriorFolded = h2UnfResp1->GetYaxis()->FindBin(midUpperPt-0.00001);
   
+  cout <<"midLowerPt = "<<midLowerPt<<"; midUpperPt = "<<midUpperPt<<endl;
   cout <<"min_PriorFolded = "<<min_PriorFolded<<"; max_PriorFolded = "<<max_PriorFolded<<endl;
 
   TH1D *hZMeas = h2ZMeas->ProjectionX("hZMeas",min_PriorFolded,min_PriorFolded);
@@ -150,7 +151,7 @@ void plot(bool doPrompt = true, bool doPbPb = false){
 
   hZUnf_SI1_ratioMeas->SetStats(0);
   hZUnf_SI1_ratioMeas->GetYaxis()->SetTitle("ratio to measured");
-  hZUnf_SI1_ratioMeas->GetYaxis()->SetRangeUser(0.,1.7);
+  hZUnf_SI1_ratioMeas->GetYaxis()->SetRangeUser(0.,2.);
   hZUnf_SI1_ratioMeas->GetXaxis()->SetTitle("z");
 
   hZUnf_SI1_ratioMeas->SetLineColor(col[2]);
@@ -194,7 +195,7 @@ void plot(bool doPrompt = true, bool doPbPb = false){
 }
 
 void plotInv(bool doPrompt = true, bool doPbPb = false) {
- if (!setSystTag()) return;
+ if (!setSystTag(doPbPb)) return;
   
   string filenameUnf = "";
   string outputfile = "";
@@ -312,7 +313,7 @@ void plotInv(bool doPrompt = true, bool doPbPb = false) {
 void PlotRatios_DataUnfolded_afterDiag(){
   if (!matrixInv)
     plot(true,true);
-  if (centShift==0) {
+  if (centShift==0 && !doCent && !doPeri) {
     if (!matrixInv)
       plot(true,false);
     else 

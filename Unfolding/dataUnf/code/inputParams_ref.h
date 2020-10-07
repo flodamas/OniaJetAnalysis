@@ -46,66 +46,27 @@ using namespace std;
 ///////////////////////////////////////////////
 //           general parameters              //
 ///////////////////////////////////////////////
-string unfPath = "/data_CMS/cms/diab/JpsiJet/Unfolding";
 bool sameSample = false;
 bool mc2015 = false;
 bool flatPrior = true;
-bool matrixInv = false;
-
 int nIter = 3;
-int nIter_pp = 3;
-int nSIter = 25;
-int nSIter_pp = 1;
+int nSIter = 9;
+int nSIter_pp = 6;
 
-double normPP = 3.31363e-09;//3.21299e-09;//3.4058383e-09;
-double normPbPb = 1.4482e-08; //2.28119e-08 for 0-20% //4.17577e-08 for 20-90%
+double normPP = 3.4058383e-09;
+double normPbPb = 1.5292e-08;
 
-double taaUnc = 0.025;
-double lumiPPUnc = 0.035;
-
-bool noProbFit = false;
-bool noSmearing = false;
 ///////////////////////////////////////////////
 //              systematics                  //
 ///////////////////////////////////////////////
-bool doCent = false;
-bool doPeri = false;
-int nIter_cent = 2;
-int nSIter_cent = 28;
-
-int nIter_peri = 2;
-int nSIter_peri = 21;
-
 int centShift = 0; // 0 is nominal, -1 for systDown and +1 for systUp
-
-bool useSystTrM = false; //if true use nonprompt Tr on prompt data 
-
-bool systErr = false;
 
 int JESsyst = 0; // 0 is nominal, -1 for systDown and +1 for systUp
 int JERsyst = 0; // 0 is nominal, -1 for systDown and +1 for systUp
 double SF = 1.1; // 1.1 is nominal, 1.0 for systDown, 1.2 for systUp
 
-bool nprPrior = false;
-
-double SFvalPP[3][7];
-double SFvalPbPb[3][14];
-
-int nIter_syst = 10;
-int nSIter_syst = 30;
-
-int nIter_syst_pp = 10;
-int nSIter_syst_pp = 1;
-
-int nIter_syst_cent = 10;
-int nSIter_syst_cent = 30;
-
-int nIter_syst_peri = 10;
-int nSIter_syst_peri = 13;
-
 string systTag = "";
 
-bool systDiff = true;
 ///////////////////////////////////////////////
 //             jet parameters                //
 ///////////////////////////////////////////////
@@ -114,26 +75,24 @@ float jetR = 0.3;
 float min_z = 0.064; 
 float max_z = 1.0;
 
-float min_jetpt = 0.;//10.;
+float min_jetpt = 10.;
 float max_jetpt = 60.;
-
-float max_jt_eta = 2.0;
 
 int nBinZ_gen = 48;
 int nBinZ_reco = 6;
   
-int nBinJet_gen = 30;
-int nBinJet_reco = 6;
+int nBinJet_gen = 25;
+int nBinJet_reco = 5;
 
 float jetPt_gen_binWidth = (max_jetpt-min_jetpt)*1.0/nBinJet_gen;
 float z_gen_binWidth = (max_z-min_z)*1.0/nBinZ_gen;
 float jetPt_reco_binWidth = (max_jetpt-min_jetpt)*1.0/nBinJet_reco;
 float z_reco_binWidth = (max_z-min_z)*1.0/nBinZ_reco;
 
-float midLowerPt = 30;//(max_jetpt+min_jetpt-jetPt_reco_binWidth)*0.5;
-float midUpperPt = 40;//(max_jetpt+min_jetpt+jetPt_reco_binWidth)*0.5;
+float midLowerPt = (max_jetpt+min_jetpt-jetPt_reco_binWidth)*0.5;
+float midUpperPt = (max_jetpt+min_jetpt+jetPt_reco_binWidth)*0.5;
 
-int midLowerId = (midLowerPt-min_jetpt)/jetPt_gen_binWidth;//( (int) (nBinJet_reco/2) )*(nBinJet_gen/nBinJet_reco);
+int midLowerId = ( (int) (nBinJet_reco/2) )*(nBinJet_gen/nBinJet_reco);
 
 float unfStart = 0.22; // where we separate underflow from measured
 
@@ -143,8 +102,6 @@ float unfStart = 0.22; // where we separate underflow from measured
 float min_jp_pt = 6.5;
 float max_jp_pt = 100.;//100. or 35.
 float max_jp_eta = 2.4;//2.4 or 1.6
-int min_cent = 0;
-int max_cent = 180;
 
 ///////////////////////////////////////////////
 //            style parameters               //
@@ -177,11 +134,11 @@ Int_t korangeLight  = pal->GetColor(255,168,104);
 Int_t kredLight     = pal->GetColor(253,169,179);
 Int_t kpinkLight    = pal->GetColor(255,192,224);
 
-Int_t col[] = {kBlack, kblue, kGreen+2, kViolet+1, kred, kGray+1, kYellow+1, kPink+1};
-int markerStyle[] = {kFullSquare,kFullCircle,kOpenTriangleUp,kOpenTriangleDown,kOpenCross,kOpenCrossX,kOpenStar,kOpenDiamond};
-int markerSize[] = {1,1,1,1,1,1,1};
-int lineStyle[] = {1, 1, 7, 7, 8, 7,7};
-int lineWidth[] = {1,1,1,1,1,1,1};
+Int_t col[] = {kBlack, kblue, kGreen+2, kCyan+2, kred, kGray+1};
+int markerStyle[] = {kFullSquare,kFullCircle,kOpenTriangleUp,kOpenTriangleDown,kOpenCross,kOpenCrossX};
+int markerSize[] = {1,1,1,1,1,1};
+int lineStyle[] = {1, 1, 7, 7, 8, 7};
+int lineWidth[] = {1,1,1,1,1,1};
 
 ///////////////////////////////////////////////
 //               functions                   //
@@ -203,20 +160,14 @@ void printInput() {
   cout << "###############################################"<<endl;
 }
 
-bool setSystTag (bool doPbPb) {
+bool setSystTag () {
   systTag = "";
-
-  //if ((doCent&&doPeri) ||!doPbPb) {doCent = false; doPeri = false;}
-  //normPbPb = 1.5292e-08 for0-90% //2.28119e-08 for 0-20% //4.63974e-08 for 20-90%
-  if (doCent) {systTag = systTag+"_centBin"; min_cent=0; max_cent=40; normPbPb = 2.23119e-08;}// nSIter =18;}
-  else if (doPeri) {systTag = systTag+"_periBin"; min_cent=40; max_cent=180; normPbPb = 4.39222e-08;};// nSIter =15;}
 
   if (JESsyst!=0 && (JERsyst!=0 || SF!=1.1 || centShift!=0) ) { cout <<"[ERROR] please check your systematic options"<<endl; return false;}
   if (JERsyst!=0 && (JESsyst!=0 || SF!=1.1 || centShift!=0) ) { cout <<"[ERROR] please check your systematic options"<<endl; return false;}
   if (SF!=1.1 && (JERsyst!=0 || JESsyst!=0 || centShift!=0) ) { cout <<"[ERROR] please check your systematic options"<<endl; return false;}
   if (centShift!=0 && (JERsyst!=0 || JESsyst!=0 || SF!=1.1) ) { cout <<"[ERROR] please check your systematic options"<<endl; return false;}
-  if (matrixInv && (nSIter_pp > 1 || nIter>1)) {cout <<"[ERROR] please check your systematic options"<<endl; return false;}  
-
+  
   if (JESsyst == 1) systTag = systTag + "_JESSystUp";
   else if (JESsyst == -1) systTag = systTag + "_JESSystDown";
   
@@ -225,68 +176,11 @@ bool setSystTag (bool doPbPb) {
   
   if (SF == 1.2) systTag = systTag + "_SFSystUp";
   else if (SF == 1.0) systTag = systTag + "_SFSystDown";
-
-  if (useSystTrM) systTag = systTag + "_TrMSyst";
-
-  if (!flatPrior) systTag = systTag + "_priorSyst";
-  if(nprPrior) systTag = systTag + "_nprPriorSyst";
-
+  
   if (systTag == "") systTag = "_nominal";
-
-  if (matrixInv) systTag = systTag + "_matrixInv";  
-  if (noProbFit) systTag = systTag +"_noProbFit";
-  if (noSmearing) systTag = systTag +"_noSmearing";
-
+  
   if (centShift == 1) systTag = systTag + "_centShiftSystUp";
   else if (centShift == -1) systTag = systTag + "_centShiftSystDown";
-
-  if (systErr) systTag = systTag+"_systError";
-  cout<< "systTag = "<<systTag<<endl; 
-  return true;
-}
-
-void setSFVal() {
-  SFvalPP[0][0] = 1.1432 - 0.0222;
-  SFvalPP[1][0] = 1.1432;
-  SFvalPP[2][0] = 1.1432 + 0.0222;
-  SFvalPP[0][1] = 1.1815 - 0.0484;
-  SFvalPP[1][1] = 1.1815;
-  SFvalPP[2][1] = 1.1815 + 0.0484;
-  SFvalPP[0][2] = 1.0989 - 0.0456;
-  SFvalPP[1][2] = 1.0989;
-  SFvalPP[2][2] = 1.0989 + 0.0456;
-  SFvalPP[0][3] = 1.1137 - 0.1397;
-  SFvalPP[1][3] = 1.1137;
-  SFvalPP[2][3] = 1.1137 + 0.1397;
-  SFvalPP[0][4] = 1.1307 - 0.1470;
-  SFvalPP[1][4] = 1.1307;
-  SFvalPP[2][4] = 1.1307 + 0.1470;
-  SFvalPP[0][5] = 1.1600 - 0.0976;
-  SFvalPP[1][5] = 1.1600;
-  SFvalPP[2][5] = 1.1600 + 0.0976;
-  SFvalPP[0][6] = 1.2393 - 0.1909;
-  SFvalPP[1][6] = 1.2393;
-  SFvalPP[2][6] = 1.2393 + 0.1909;
   
-  SFvalPbPb[0][0] = 1.1415;
-  SFvalPbPb[1][0] = 1.1742;
-  SFvalPbPb[2][0] = 1.2069;
-  SFvalPbPb[0][1] = 1.1559;
-  SFvalPbPb[1][1] = 1.1930;
-  SFvalPbPb[2][1] = 1.2302;
-  SFvalPbPb[0][2] = 1.0812;
-  SFvalPbPb[1][2] = 1.1451;
-  SFvalPbPb[2][2] = 1.2089;
-  SFvalPbPb[0][3] = 1.1086;
-  SFvalPbPb[1][3] = 1.1618;
-  SFvalPbPb[2][3] = 1.2150;
-  SFvalPbPb[0][4] = 1.0838;
-  SFvalPbPb[1][4] = 1.1455;
-  SFvalPbPb[2][4] = 1.2072;
-  SFvalPbPb[0][5] = 1.0748;
-  SFvalPbPb[1][5] = 1.1117;
-  SFvalPbPb[2][5] = 1.1486;
-  SFvalPbPb[0][6] = 1.0888;
-  SFvalPbPb[1][6] = 1.1581;
-  SFvalPbPb[2][6] = 1.2274;
+  return true;
 }

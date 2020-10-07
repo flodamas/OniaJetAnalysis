@@ -2,27 +2,15 @@
 #include "inputParams.h"
 #endif
 
-void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
-  if (!setSystTag(doPbPb)) return;
-  
+
+void createRooUnfoldResponseDiag(){ 
   string inputName = "";
   string outputName = "";
   string partOfOutput = "response";
 
-  //string SF_name = "";
-  //if(SF == 1.1) SF_name = "_nominal";
-  //if(SF == 1.2) SF_name = "_up";
-  //if(SF == 1.0) SF_name= "_down";
-
-  cout << "step # =" << stepNumber << endl;
-    
-  inputName = Form("%s/dataUnf/unfInput/step%i/unfolding_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
-
-  outputName = inputName;
-  int idxReplace = inputName.find("unfolding_4D");
-  cout <<"idxReplace "<<idxReplace<<endl;
-  outputName.replace(idxReplace,9,partOfOutput);
-  cout << "outputName = " << outputName << endl;
+  inputName = Form("%s/dataUnf/unfInput/diag4DMatrixInv.root",unfPath.c_str());
+  
+  outputName = Form("%s/dataUnf/unfInput/diag4DMatrixResponseInv.root",unfPath.c_str());
   
   TFile *f = new TFile(inputName.c_str());
   f->ls();
@@ -30,19 +18,9 @@ void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
   //Get response
 
   string thnSparseName = "";
-  //take normalized tr matrix 
-  thnSparseName = "hs_newJetPtNorm;1";
-  if (!flatPrior && stepNumber==1) thnSparseName = "hs;1";
+  thnSparseName = "diag4DMatrixInv;1";
   
   THnSparseF *hn = static_cast<THnSparseF*>(f->Get(thnSparseName.c_str()));
-  //hn->Sumw2();
-  
-  TH1F * h_z_gen = (TH1F*)f->Get("h_z_gen;1");
-  TH1F * hGenZJetPtCentBin = (TH1F*)f->Get("hGenZJetPtCentBin;1");
-  TH1F * hGenZJetPtLowBin = (TH1F*)f->Get("hGenZJetPtLowBin;1");
-  TH1F * hGenZJetPtHighBin = (TH1F*)f->Get("hGenZJetPtHighBin;1");
-
-  TH2D * h_trMatrix = (TH2D*)f->Get("h_trMatrix;1");
   
   const Int_t ndim = 4;
   Int_t dim[ndim];
@@ -57,17 +35,17 @@ void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
   Int_t iPtDet = 2;
   Int_t iZDet = 3;
 
-  TH2D *fh2Smear = dynamic_cast<TH2D*>(hn->Projection(iPtDet,iZDet,"E"));
-  TH2D *fh2Prior = dynamic_cast<TH2D*>(hn->Projection(iPtTrue,iZTrue,"E"));
+  TH2D *fh2Smear = dynamic_cast<TH2D*>(hn->Projection(2,3,"E"));
+  TH2D *fh2Prior = dynamic_cast<TH2D*>(hn->Projection(0,1,"E"));
 
-  Int_t nBinPt[2] = {nBinJet_reco,nBinJet_gen};
+  Int_t nBinPt[2] = {nBinJet_gen,nBinJet_reco};
   Double_t ptmin[2] = {min_jetpt,min_jetpt};
   Double_t ptmax[2] = {max_jetpt,max_jetpt};
 
-  Int_t nBinZ[2] = {nBinZ_reco,nBinZ_gen};
+  Int_t nBinZ[2] = {nBinZ_gen,nBinZ_reco};
   Double_t mmin[2] = {min_z,min_z};
   Double_t mmax[2] = {max_z,max_z};
-    
+  
   //dimensions of measured axis
   TH2D *fh2RespDimM = new TH2D("fh2RespDimM","fh2RespDimM",nBinZ[0],mmin[0],mmax[0],nBinPt[0],ptmin[0],ptmax[0]);
   //dimensions of true axis
@@ -125,15 +103,18 @@ void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
   fResponse->Setup(fh2RespDimM,fh2RespDimT);
 
   //Fill RooUnfoldResponse object
+  
   Int_t* coord = new Int_t[nDim];
   Int_t nbin = hn->GetNbins();
   
-  for(Int_t bin=0; bin<nbin; bin++) {    
+  for(Int_t bin=0; bin<nbin; bin++) {
+    
     Double_t w = hn->GetBinContent(bin,coord);
     Double_t pttrue = hn->GetAxis(0)->GetBinCenter(coord[0]);
     Double_t ztrue = hn->GetAxis(1)->GetBinCenter(coord[1]);
     Double_t ptdet = hn->GetAxis(2)->GetBinCenter(coord[2]);
-    Double_t zdet = hn->GetAxis(3)->GetBinCenter(coord[3]);    
+    Double_t zdet = hn->GetAxis(3)->GetBinCenter(coord[3]);
+    
     if(zdet>=mmin[0] && zdet<=mmax[0]
        && ztrue>=mmin[1] && ztrue<=mmax[1]
        && ptdet>=ptmin[0] && ptdet<=ptmax[0]
@@ -141,13 +122,14 @@ void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
        ){
          fResponse->Fill(zdet,ptdet,ztrue,pttrue,w);
     } 
-    else {      
+    else {
       fResponse->Miss(ztrue,pttrue,w);
       fh2Miss->Fill(ztrue,pttrue,w);
     }
   }
 
   delete [] coord;
+
   //Write response + 2D histos to file
   TFile *fout = new TFile(outputName.c_str(),"RECREATE");
   hn->Write("fhn");
@@ -157,22 +139,12 @@ void create(bool doPrompt = true, bool doPbPb = true, Int_t stepNumber = 1) {
   fh2RespDimM->Write();
   fh2RespDimT->Write();
   fh2Miss->Write();
-
-  h_trMatrix->Write();
-  h_z_gen->Write();
-  hGenZJetPtCentBin->Write();
-  hGenZJetPtLowBin->Write();
-  hGenZJetPtHighBin->Write();
     
   fout->Write();
   fout->Close();
 }
 
-void createRooUnfoldResponseNewPrNominal(Int_t step = 1) { //, double SF = 1.1){
-  if (!matrixInv)
-    create(true,true,step);
-  if (step<=(nSIter_pp+3) && centShift==0 && !doCent && !doPeri)
-    create(true,false,step);
+/*void createRooUnfoldResponseDiag(){
+  create();
 }
-
-  
+*/

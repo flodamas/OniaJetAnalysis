@@ -1,4 +1,6 @@
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "inputParams.h"
+#endif
 
 void makeRebinMatrix(){
 
@@ -105,7 +107,7 @@ void makeRebinMatrix(){
   fSparseInv->Projection(1,3)->Draw("zcol");
 
 
-  TFile *fout = new TFile("diag4DMatrixInv.root","RECREATE");
+  TFile *fout = new TFile(Form("%s/dataUnf/unfInput/diag4DMatrixInv.root",unfPath.c_str()),"RECREATE");
   fSparse->Write("diag4DMatrix");  
   fSparseInv->Write("diag4DMatrixInv");
 }

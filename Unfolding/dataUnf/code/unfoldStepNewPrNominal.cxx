@@ -3,7 +3,7 @@
 #endif
 
 void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t stepNumber = 1) {
-  if (!setSystTag()) return;
+  if (!setSystTag(doPbPb)) return;
   
   Int_t iterMin =1;
   Int_t iterDef = iterMax - 2;
@@ -12,7 +12,7 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
   string trainInputName = "";
   string outputName = "";
 
-  testInputName = Form("%s/dataUnf/data_results/meas_%s_data_%s_statErrs.root",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt");
+  testInputName = Form("%s/dataUnf/data_results/meas_%s_data_%s%s%s.root",unfPath.c_str(),doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt",doCent?"_centBin":doPeri?"_periBin":"",systErr?"_systErrs":"_statErrs");
   trainInputName = Form("%s/dataUnf/unfInput/step%i/response_4D_%s_%s_%diter_%dz%dptBins%dz%dptMeasBins%s.root", unfPath.c_str(), stepNumber, doPbPb?"PbPb":"PP", doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   outputName = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(), stepNumber,doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", iterMax, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   
@@ -252,6 +252,6 @@ void unfold(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 8, Int_t s
 void unfoldStepNewPrNominal(Int_t step = 1) { //, double SF = 1.1){
   if (!matrixInv)
     unfold(true,true,nIter,step);
-  if (step<=nSIter_pp && centShift==0)
+  if (step<=(nSIter_pp+3) && centShift==0 && !doCent && !doPeri)
     unfold(true,false,nIter,step);
 }

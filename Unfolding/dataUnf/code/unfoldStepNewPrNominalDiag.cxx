@@ -3,7 +3,7 @@
 #endif
 
 void unfoldDiag(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 3) {
-  if (!setSystTag()) return;
+  if (!setSystTag(doPbPb)) return;
 
   Int_t iterMin =1;
   Int_t iterDef = iterMax - 2;
@@ -14,6 +14,7 @@ void unfoldDiag(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 3) {
   
   testInputName = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin%s.root",unfPath.c_str(), iterMax, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   trainInputName = Form("%s/dataUnf/unfInput/diag4DMatrixResponseInv.root",unfPath.c_str());
+  //trainInputName = "diag4DMatrixResponseInv.root";
   outputName = Form("%s/dataUnf/unfOutput/step%i/UnfoldedDistributions_%s_%s_%diter_%dz%dptBins%dz%dptMeasBin_Diag%s.root",unfPath.c_str(), iterMax, doPbPb?"PbPb":"PP",doPrompt?"prompt":"nonprompt", nIter, nBinZ_gen, nBinJet_gen, nBinZ_reco, nBinJet_reco, systTag.c_str());
   
   
@@ -72,6 +73,6 @@ void unfoldDiag(bool doPrompt = true, bool doPbPb = true, Int_t iterMax = 3) {
 void unfoldStepNewPrNominalDiag(int step){
   if (!matrixInv)
     unfoldDiag(true,true,step);
-  if (step<=nSIter_pp && (centShift==0))
+  if (step<=(nSIter_pp+3) && (centShift==0) && !doCent && !doPeri)
     unfoldDiag(true,false,step);
 }
