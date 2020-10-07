@@ -25,7 +25,7 @@ Repository for code regarding Jpsi in jet in 5.02TeV data.
    oniaTree t(..,..,..) -- make the class onia tree, the settings correspond to prompt/nonprompt, pp/PbPb, Acc/Eff
    t.EffCalc("caseTag") -- caseTag corresponds to the output directory and is also used for different settings in the code, t should be an efficiency tree (previous step)
    t.AccCalc("caseTag") -- t should be an acceptance tree (previous step)
-   AccEffCalc("caseTag")
+   t.AccEffCalc("caseTag") -- works with any setting of t but with all histograms available
   ```
  * To get the exact same settings as the jpsi in jet analysis (HIN-19-007), one can simply run runAllAccEff.sh that has the correc settings
  * For the systematic uncertainties (after making the oniaTree t):
