@@ -17,14 +17,14 @@ bool addParameters(string InputFile,  vector< struct KinCuts >& cutVector, vecto
 
 
 void fitter(
-            const string workDirName="Test", // Working directoryi
+            const string workDirName="Test", // Working directory
             bool useExtFiles  = true, // Use external fit files as input
             bool useExtDS     = false, // Use external data/mc DataSets
             bool usePeriPD    = false, // If yes, use the PERIPHERAL PD provided by the user
             // Select the type of datasets to fit
             bool fitData      = true,        // Fits Data datasets
             bool fitMC        = false,         // Fits MC datasets
-            bool fitPbPb      = true,         // Fits PbPb datasets
+            bool fitPbPb      = false,         // Fits PbPb datasets
             bool fitPP        = true,        // Fits PP datasets
             bool fitMass      = true,       // Fits invariant mass distribution
             bool fitCtau      = true,       // Fits ctau distribution
@@ -49,7 +49,7 @@ void fitter(
             bool wantPureSMC  = false,        // Flag to indicate if we want to fit pure signal MC
             const char* applyCorr  = "",     // Apply weight to data for correction (Acceptance & Ef , l_J/psi eff...). No correction if empty variable.
 	    bool applyJEC     = false,       // Apply Jet Energy Correction
-            int  numCores     = 32,           // Number of cores used for fitting
+            int  numCores     = 8,           // Number of cores used for fitting
             // Select the drawing options
             bool  setLogScale  = true,         // Draw plot with log scale
             bool  incSS        = false,        // Include Same Sign data

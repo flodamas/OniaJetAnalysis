@@ -1,21 +1,15 @@
 DATA_PbPb      ;  /data_CMS/cms/diab/JpsiJet/Data/PbPb/v3/HiForestAOD_merged_PsiPeriPD.root
 DATA_PbPb      ;  /data_CMS/cms/diab/JpsiJet/Data/PbPb/v3/HiForestAOD_merged_DoubleMuonPD.root
 
-DATA_PP        ;  /data_CMS/cms/diab/JpsiJet/Data/pp/v5/HiForestAOD_part1_merged.root
-DATA_PP        ;  /data_CMS/cms/diab/JpsiJet/Data/pp/v5/HiForestAOD_part2_merged.root
-DATA_PP        ;  /data_CMS/cms/diab/JpsiJet/Data/pp/v5/HiForestAOD_part3_merged.root
+DATA_PP		 ;  /data_CMS/cms/mnguyen/jPsiJet18/data/PP/subJets/merged_HiForestMiniAOD.root
 
 MCJPSIPR_PbPb   ;  /data_CMS/cms/diab/JpsiJet/MC/PbPb/prompt/v5/HiForestAOD_merged.root
 
 MCJPSINOPR_PbPb ;  /data_CMS/cms/diab/JpsiJet/MC/PbPb/nonprompt/v2/HiForestAOD_merged.root
 
-MCJPSIPR_PP     ;  /data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v3/HiForestAOD_ext_merged.root
-MCJPSIPR_PP     ;  /data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v3/HiForestAOD_pthat15_merged.root
-MCJPSIPR_PP     ;  /data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v3/HiForestAOD_pthat25_merged.root
-MCJPSIPR_PP     ;  /data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v3/HiForestAOD_pthat35_merged.root
-MCJPSIPR_PP     ;  /data_CMS/cms/diab/JpsiJet/MC/pp/prompt/v3/HiForestAOD_pthat45_merged.root
+MCJPSIPR_PP	  ;  /data_CMS/cms/mnguyen/jPsiJet18/mc/pp/prompt/subJets/merged_HiForestMiniAOD.root 
 
-MCJPSINOPR_PP   ;  /data_CMS/cms/diab/JpsiJet/MC/pp/nonprompt/v2/HiForestAOD_merged.root
+MCJPSINOPR_PP	  ;  /data_CMS/cms/mnguyen/jPsiJet18/mc/pp/nonprompt/subJets/merged_HiForestMiniAOD.root
 
 MCPSI2SPR_PbPb  ;  root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/PbPb502TeV/TTrees/OniaTree_Pythia8_Psi2SMM_ptPsi2_00_03_Hydjet_MB_HINPbPbWinter16DR-75X_mcRun2_HeavyIon_v13-v1.root
 MCPSI2SPR_PbPb  ;  root://xrootd.unl.edu//store/group/phys_heavyions/dileptons/MC2015/PbPb502TeV/TTrees/OniaTree_Pythia8_Psi2SMM_ptPsi2_03_06_Hydjet_MB_HINPbPbWinter16DR-75X_mcRun2_HeavyIon_v13-v1.root

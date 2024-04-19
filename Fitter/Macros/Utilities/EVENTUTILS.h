@@ -473,8 +473,18 @@ namespace RecoQQ {
   
   Bool_t areMuonsInAcceptance2019 (Int_t iRecoQQ)
   {
-    TLorentzVector *RecoQQmupl = (TLorentzVector*) Reco_mu_4mom->At(Reco_QQ_mupl_idx[iRecoQQ]);
-    TLorentzVector *RecoQQmumi = (TLorentzVector*) Reco_mu_4mom->At(Reco_QQ_mumi_idx[iRecoQQ]);
+
+    int iMupl = Reco_QQ_mupl_idx[iRecoQQ];
+    int iMumi = Reco_QQ_mumi_idx[iRecoQQ];
+    /*
+    if (iMupl < 0 || iMumi < 0){
+       cout << "\n[Debug] areMuonsInAcceptance: found iRecoQQ = " << iRecoQQ << " with negative muon indices!!! Will return false for now...\n";
+       return false;
+    }
+    */
+
+    TLorentzVector *RecoQQmupl = (TLorentzVector*) Reco_mu_4mom->At(iMupl);
+    TLorentzVector *RecoQQmumi = (TLorentzVector*) Reco_mu_4mom->At(iMumi);
 
     return ( isGlobalMuonInAccept2019(RecoQQmupl) && isGlobalMuonInAccept2019(RecoQQmumi) );
   };

@@ -56,7 +56,7 @@ void drawCtauPlot(RooWorkspace& myws,   // Local workspace
   if (plotLabel.find("_JEC")!=std::string::npos) applyJEC = true;
   else applyJEC = false;
 
-  TString corrName = "";
+  string corrName = "";
   if (applyCorr){
     if (plotLabel.find("AccEff")!=std::string::npos) corrName = "AccEff";
     else if (plotLabel.find("_lJpsiEff")!=std::string::npos) corrName = "lJpsiEff";
@@ -80,7 +80,7 @@ void drawCtauPlot(RooWorkspace& myws,   // Local workspace
   string hOSNameBkg  = Form("dhCTAUERR_Bkg_%s", (isPbPb?"PbPb":"PP"));
   string hOSNameJpsi = Form("dhCTAUERR_Jpsi_%s", (isPbPb?"PbPb":"PP"));
   string hOSNamePsi2S = Form("dhCTAUERR_Psi2S_%s", (isPbPb?"PbPb":"PP"));
-  string dsSSName = Form("dSS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyCorr?Form("_%s",corrName.Data()):""), (applyJEC?"_JEC":""));
+  string dsSSName = Form("dSS_%s_%s_jetR%d%s%s", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), (int) (jetR*10), (applyCorr?Form("_%s",corrName.c_str()):""), (applyJEC?"_JEC":""));
 
   bool isWeighted = myws.data(dsOSName.c_str())->isWeighted();
   bool isMC = (DSTAG.find("MC")!=std::string::npos);
@@ -350,11 +350,11 @@ void drawCtauPlot(RooWorkspace& myws,   // Local workspace
   else
   {
     gSystem->mkdir(Form("%sctau%sTemp/%s/plot/root/", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str()), kTRUE);
-    cFig->SaveAs(Form("%sctau%sTemp/%s/plot/root/PLOT_%s_%s_%s_%s%s%s_z%.0f%.0f_pt%.0f%.0f_rap%.0f%.0f_cent%d%d.root", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str(), "CTAU", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), "Bkg", (applyCorr?Form("_%s",corrName.Data()):""),(applyJEC?"_JEC":""), (cut.dMuon.Zed.Min*100.0), (cut.dMuon.Zed.Max*100.0), (cut.dMuon.Pt.Min*10.0), (cut.dMuon.Pt.Max*10.0), (cut.dMuon.AbsRap.Min*10.0), (cut.dMuon.AbsRap.Max*10.0), cut.Centrality.Start, cut.Centrality.End));
+    cFig->SaveAs(Form("%sctau%sTemp/%s/plot/root/PLOT_%s_%s_%s_%s%s%s_z%.0f%.0f_pt%.0f%.0f_rap%.0f%.0f_cent%d%d.root", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str(), "CTAU", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), "Bkg", (applyCorr?Form("_%s",corrName.c_str()):""),(applyJEC?"_JEC":""), (cut.dMuon.Zed.Min*100.0), (cut.dMuon.Zed.Max*100.0), (cut.dMuon.Pt.Min*10.0), (cut.dMuon.Pt.Max*10.0), (cut.dMuon.AbsRap.Min*10.0), (cut.dMuon.AbsRap.Max*10.0), cut.Centrality.Start, cut.Centrality.End));
     gSystem->mkdir(Form("%sctau%sTemp/%s/plot/png/", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str()), kTRUE);
-    cFig->SaveAs(Form("%sctau%sTemp/%s/plot/png/PLOT_%s_%s_%s_%s%s%s_z%.0f%.0f_pt%.0f%.0f_rap%.0f%.0f_cent%d%d.png", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str(), "CTAU", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), "Bkg", (applyCorr?Form("_%s",corrName.Data()):""),(applyJEC?"_JEC":"") ,(cut.dMuon.Zed.Min*100.0), (cut.dMuon.Zed.Max*100.0), (cut.dMuon.Pt.Min*10.0), (cut.dMuon.Pt.Max*10.0), (cut.dMuon.AbsRap.Min*10.0), (cut.dMuon.AbsRap.Max*10.0), cut.Centrality.Start, cut.Centrality.End));
+    cFig->SaveAs(Form("%sctau%sTemp/%s/plot/png/PLOT_%s_%s_%s_%s%s%s_z%.0f%.0f_pt%.0f%.0f_rap%.0f%.0f_cent%d%d.png", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str(), "CTAU", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), "Bkg", (applyCorr?Form("_%s",corrName.c_str()):""),(applyJEC?"_JEC":"") ,(cut.dMuon.Zed.Min*100.0), (cut.dMuon.Zed.Max*100.0), (cut.dMuon.Pt.Min*10.0), (cut.dMuon.Pt.Max*10.0), (cut.dMuon.AbsRap.Min*10.0), (cut.dMuon.AbsRap.Max*10.0), cut.Centrality.Start, cut.Centrality.End));
     gSystem->mkdir(Form("%sctau%sTemp/%s/plot/pdf/", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str()), kTRUE);
-    cFig->SaveAs(Form("%sctau%sTemp/%s/plot/pdf/PLOT_%s_%s_%s_%s%s%s_z%.0f%.0f_pt%.0f%.0f_rap%.0f%.0f_cent%d%d.pdf", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str(), "CTAU", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), "Bkg", (applyCorr?Form("_%s",corrName.Data()):""),(applyJEC?"_JEC":""), (cut.dMuon.Zed.Min*100.0), (cut.dMuon.Zed.Max*100.0), (cut.dMuon.Pt.Min*10.0), (cut.dMuon.Pt.Max*10.0), (cut.dMuon.AbsRap.Min*10.0), (cut.dMuon.AbsRap.Max*10.0), cut.Centrality.Start, cut.Centrality.End));
+    cFig->SaveAs(Form("%sctau%sTemp/%s/plot/pdf/PLOT_%s_%s_%s_%s%s%s_z%.0f%.0f_pt%.0f%.0f_rap%.0f%.0f_cent%d%d.pdf", outputDir.c_str(), (SB?"SB":""), DSTAG.c_str(), "CTAU", DSTAG.c_str(), (isPbPb?"PbPb":"PP"), "Bkg", (applyCorr?Form("_%s",corrName.c_str()):""),(applyJEC?"_JEC":""), (cut.dMuon.Zed.Min*100.0), (cut.dMuon.Zed.Max*100.0), (cut.dMuon.Pt.Min*10.0), (cut.dMuon.Pt.Max*10.0), (cut.dMuon.AbsRap.Min*10.0), (cut.dMuon.AbsRap.Max*10.0), cut.Centrality.Start, cut.Centrality.End));
   }
   cFig->Clear();
   cFig->Close();
