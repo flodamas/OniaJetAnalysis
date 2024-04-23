@@ -482,9 +482,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 					//// add pt weights for prompt MC
 					if (applyWeight) {
 						if (!isMC) cout << "[WARNING] this is data and you are applying MC weights" << endl;
-						if (isPbPb) {
-							corr_ptw = Gen_weight * getNColl(hiBin, !isPbPb) * normF;
-						} else if (!isPrompt)
+					        if (!isPrompt)
 							corr_ptw = Gen_weight; //cout<<"corr_ptw = "<<corr_ptw<<endl;
 						else {
 							if (pthat >= 15 && pthat < 25)
@@ -672,10 +670,10 @@ string findSkimTree(string FileName) {
 	string name = "";
 	if (f->GetListOfKeys()->Contains("skimanalysis"))
 		name = "skimanalysis/HltTree";
-	else if (f->GetListOfKeys()->Contains("HltTree"))
-		name = "HltTree";
+	else if (f->GetListOfKeys()->Contains("hltanalysis"))
+		name = "hltanalysis/HltTree";
 	else {
-		cout << "[ERROR] HltTree (skim) was not found in: " << FileName << endl;
+		cout << "[ERROR] HltTree was not found in: " << FileName << endl;
 	}
 	f->Close();
 	delete f;
