@@ -42,7 +42,6 @@ bool isMatchedDiMuon(int iRecoDiMuon, double maxDeltaR = 0.03);
 double getNColl(int centr, bool isPP);
 double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP, int cent);
 bool readCorrection(const char* file);
-void setCentralityMap(const char* file);
 float jecCorr(double jtPt, double rawPt, double jpsiPt);
 float zjecCorr(double jtPt, double rawPt, double z);
 float jeuCorr(double jtPt, double z, double jeu);
@@ -62,13 +61,6 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 	int triggerIndex_PP = PP::HLT_HIL1DoubleMu0_v1;
 	int triggerIndex_PbPb = HI::HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1;
 	int CentFactor = 1;
-
-	bool usePeriPD = false;
-	if (InputFileNames[0].find("HIOniaPeripheral30100") != std::string::npos) {
-		cout << "[INFO] Working with Peripheral PbPb PD" << endl;
-		usePeriPD = true;
-		triggerIndex_PbPb = HI::HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1;
-	}
 
 	bool applyWeight = false;
 	if (isMC) applyWeight = true;
@@ -157,8 +149,6 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 		RooRealVar* weightCorr = new RooRealVar("weightCorr", "Data correction weight", 0.0, 10000000.0, "");
 		RooArgSet* cols = NULL;
 
-		if (applyWeight && isPbPb) setCentralityMap(Form("%s/Input/CentralityMap_PbPb2018.txt", gSystem->ExpandPathName(gSystem->pwd())));
-
 		if (applyWeight && !applyWeight_Corr) {
 			if (isMC) {
 				cols = new RooArgSet(*mass, *zed, *ctau, *ctauErr, *ctauTrue, *ptQQ, *rapQQ, *cent, *weight);
@@ -216,49 +206,16 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 		Long64_t nentries = theTree->GetEntries();
 		//nentries = 20;
 
-		float normF = 0.;
-
-		if (isMC && isPbPb) {
-			cout << "[INFO] Computing sum of weights for " << nentries << " nentries" << endl;
-
-			for (Long64_t jentry = 0; jentry < nentries; jentry++) {
-				if (jentry % 1000000 == 0) cout << "[INFO] " << jentry << "/" << nentries << endl;
-
-				if (theTree->LoadTree(jentry) < 0) break;
-				if (theTree->GetTreeNumber() != fCurrent) {
-					fCurrent = theTree->GetTreeNumber();
-					cout << "[INFO] Processing Root File: " << InputFileNames[fCurrent] << endl;
-				}
-
-				theTree->GetEntry(jentry);
-				normF += getNColl(hiBin, !isPbPb); //normF += Gen_weight*getNColl(hiBin,!isPbPb);
-			}
-			normF = nentries / normF;
-		}
-
-		//normF = 0.00271722; //0.00276384;
-		//if (isPrompt) normF = 0.0027758; //0.00276328;
-		//
-		cout << "[INFO] normF = " << normF << endl;
 		// creating the tree to use in the unfolding
 		string fl = "";
 
 		vector<string> jecFileName;
 		string jeuFileName;
 
-		if (isPbPb) {
-			jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Autumn18_HI_V6_%s/Autumn18_HI_V6_%s_L2Relative_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
-			jeuFileName = Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Autumn18_HI_V6_%s/Autumn18_HI_V6_%s_Uncertainty_AK%dPF.txt", /*isMC?"MC":*/ "DATA", /*isMC?"MC":*/ "DATA", (int)(jetR * 10));
-			if (!isMC)
-				jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Autumn18_HI_V6_%s/Autumn18_HI_V6_%s_L2L3Residual_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
-		}
-
-		else {
-			jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2Relative_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
-			jeuFileName = Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_Uncertainty_AK%dPF.txt", /*isMC?"MC":*/ "DATA", /*isMC?"MC":*/ "DATA", (int)(jetR * 10));
-			if (!isMC)
-				jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2L3Residual_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
-		}
+		jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2Relative_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
+		jeuFileName = Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_Uncertainty_AK%dPF.txt", /*isMC?"MC":*/ "DATA", /*isMC?"MC":*/ "DATA", (int)(jetR * 10));
+		if (!isMC)
+			jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2L3Residual_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
 
 		JetCorrector JEC(jecFileName);
 		JetUncertainty JEU(jeuFileName);
@@ -519,8 +476,6 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 				}
 				if (applyWeight && !applyWeight_Corr) {
 					double w = Gen_weight;
-					if (isMC && isPbPb) w = w * getNColl(hiBin, !isPbPb) * normF;
-					if (isPbPb && jt_eta > -3.0 && jt_eta < -1.392) w = w * (1.125448); //(jtPhi > -1.57) &&  (jtPhi < -0.87)
 					weight->setVal(w);
 				} else if (applyWeight_Corr) {
 					double wCorr = 1.0 / getCorr(RecoQQ4mom->Rapidity(), RecoQQ4mom->Pt(), RecoQQ4mom->M(), !isPbPb, centr);
@@ -542,7 +497,6 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 								corr_ptw = 0.000212618;
 						}
 					}
-					if (isPbPb && jt_eta > -3.0 && jt_eta < -1.392) wCorr = wCorr * (1.125448); //(jtPhi > -1.57) &&  (jtPhi < -0.87)
 					corr_AccEff = wCorr;
 					weightCorr->setVal(wCorr * corr_ptw);
 				}
@@ -888,33 +842,6 @@ double getNColl(int cen, bool isPP) {
 			lcent = ucent;
 	}
 	return 1.;
-};
-
-void setCentralityMap(const char* file) {
-	// Creates a mapping between centrality and Ncoll, based on a text file (taken from: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideHeavyIonCentrality)
-
-	if (strlen(file) > 0) {
-		char line[1024];
-		ifstream in(file);
-		float lcent;
-		float ucent;
-		float Ncoll;
-
-		fCentBins = 0;
-		while (in.getline(line, 1024, '\n')) {
-			sscanf(line, "%f %f %f", &lcent, &ucent, &Ncoll);
-
-			fCentMap[ucent] = Ncoll;
-			fCentBinning[fCentBins++] = ucent;
-		}
-		if (fCentBins == 0)
-			std::cout << "[INFO] No centrality map could be defined: The file provided is empty" << std::endl;
-		else
-			std::cout << "[INFO] Defining centrality map" << std::endl;
-	} else {
-		fCentBins = 0;
-		std::cout << "[INFO] No centrality map could be defined: No file provided" << std::endl;
-	}
 };
 
 bool readCorrection(const char* file) {
