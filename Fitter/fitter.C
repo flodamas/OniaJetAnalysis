@@ -16,16 +16,15 @@ bool setParameters(map<string, string> row, struct KinCuts& cut, map<string, str
 bool addParameters(string InputFile, vector<struct KinCuts>& cutVector, vector<map<string, string>>& parIniVector, bool isPbPb, bool doConstrFit);
 
 void fitter(
-  const string workDirName = "DataFits/DataFits_midJtPt", // Working directory
-  bool useExtFiles = true,                                // Use external fit files as input
-  bool useExtDS = false,                                  // Use external data/mc DataSets
+  bool updateDS = false,
+  bool debugMode = false,
+  bool useExtDS = false, // Use external data/mc DataSets
   // Select the type of datasets to fit
   bool fitData = true,       // Fits Data datasets
   bool fitMC = false,        // Fits MC datasets
-  bool fitPbPb = false,      // Fits PbPb datasets
   bool fitPP = true,         // Fits PP datasets
   bool fitMass = true,       // Fits invariant mass distribution
-  bool fitCtau = true,       // Fits ctau distribution
+  bool fitCtau = false,      // Fits ctau distribution
   bool fitCtauTrue = false,  // Fits ctau true MC distribution
   bool fitCtauReco = false,  // Fit ctau reco MC distribution
   bool doCtauErrPDF = false, // If yes, it builds the Ctau Error PDFs from data
@@ -62,6 +61,10 @@ void fitter(
 	 |-> Output  |-> <WorkDir> : Contain Output Plots and Results for a given work directory (e.g. 20160201)
 	 |-> DataSet : Contain all the datasets (MC and Data)
   */
+
+	/// Global settings
+	const string workDirName = "DataFits/DataFits_midJtPt"; // Working directory
+	bool fitPbPb = false;                                   // Fits PbPb datasets
 
 	gROOT->ProcessLine(".L ./Macros/Utilities/RooExtCBShape.cxx+");
 
@@ -187,21 +190,20 @@ void fitter(
 			if ((FILETAG.find("PbPb") != std::string::npos) && !fitPbPb) continue; // If we find PbPb, check if the user wants PbPb
 			string dir = DIR["dataset"][0];
 
-			bool isPbPb = false;
-			if (FILETAG.find("PbPb") != std::string::npos) { isPbPb = true; }
+			bool isPbPb = (FILETAG.find("PbPb") != std::string::npos);
 
 			if (useExtDS == true && inputDataSet["DOUBLEMUON"] != "" && (existDir(inputDataSet["DOUBLEMUON"]) == true)) { dir = inputDataSet["DOUBLEMUON"]; }
 			if (strcmp(applyCorr, "")) {
 				OutputFileName = dir + "DATASET_" + FILETAG + Form("_jetR%d", (int)(jetR * 10)) + "_" + string(applyCorr) + (applyJEC ? "_JEC" : "") + (isPbPb ? "_CENT" : "") + ".root";
 				if (gSystem->AccessPathName(OutputFileName.c_str())) { OutputFileName = DIR["dataset"][0] + "DATASET_" + FILETAG + Form("_jetR%d", (int)(jetR * 10)) + "_" + string(applyCorr) + (applyJEC ? "_JEC" : "") + ".root"; }
-				if (!tree2DataSet(Workspace[Form("%s_jetR%d_%s%s", DSTAG.c_str(), (int)(jetR * 10), applyCorr, (applyJEC ? "_JEC" : ""))], InputFileNames, FILETAG, OutputFileName)) { return; }
+				if (!tree2DataSet(Workspace[Form("%s_jetR%d_%s%s", DSTAG.c_str(), (int)(jetR * 10), applyCorr, (applyJEC ? "_JEC" : ""))], InputFileNames, FILETAG, OutputFileName, updateDS, debugMode)) { return; }
 			} else {
 				OutputFileName = dir + "DATASET_" + FILETAG + Form("_jetR%d", (int)(jetR * 10)) + (applyJEC ? "_JEC" : "") + (isPbPb ? "_CENT" : "") + ".root";
 				if (gSystem->AccessPathName(OutputFileName.c_str())) { OutputFileName = DIR["dataset"][0] + "DATASET_" + FILETAG + Form("_jetR%d", (int)(jetR * 10)) + (applyJEC ? "_JEC" : "") + (isPbPb ? "_CENT" : "") + ".root"; }
 				string NAMETAG = DSTAG /*+ FILETAG +*/ + Form("_jetR%d", (int)(jetR * 10)) + (applyJEC ? "_JEC" : "");
 				if (checkData) { NAMETAG = string("MC") + (incJpsi ? "JPSI" : "PSI2S") + (incNonPrompt ? "NOPR" : "PR") + "_" + (fitPP ? "PP" : "PbPb"); }
 				cout << "nameTag for workspace = " << NAMETAG << endl;
-				if (!tree2DataSet(Workspace[NAMETAG], InputFileNames, FILETAG, OutputFileName)) { return; }
+				if (!tree2DataSet(Workspace[NAMETAG], InputFileNames, FILETAG, OutputFileName, updateDS, debugMode)) { return; }
 			}
 			if (fitData && !aDSTAG->FindObject(DSTAG.c_str())) aDSTAG->Add(new TObjString(DSTAG.c_str()));
 		}
@@ -227,20 +229,20 @@ void fitter(
 			if (strcmp(applyCorr, "")) {
 				OutputFileName = dir + "DATASET_" + FILETAG + Form("_jetR%d", (int)(jetR * 10)) + "_" + string(applyCorr) + (applyJEC ? "_JEC" : "") + (isPbPb ? "_CENT" : "") + ".root";
 				if (gSystem->AccessPathName(OutputFileName.c_str())) { OutputFileName = DIR["dataset"][0] + "DATASET_" + FILETAG + Form("_jetR%d", (int)(jetR * 10)) + "_" + string(applyCorr) + (applyJEC ? "_JEC" : "") + ".root"; }
-				if (!tree2DataSet(Workspace[Form("%s_jetR%d_%s%s", DSTAG.c_str(), (int)(jetR * 10), applyCorr, (applyJEC ? "_JEC" : ""))], InputFileNames, FILETAG, OutputFileName)) { return; }
+				if (!tree2DataSet(Workspace[Form("%s_jetR%d_%s%s", DSTAG.c_str(), (int)(jetR * 10), applyCorr, (applyJEC ? "_JEC" : ""))], InputFileNames, FILETAG, OutputFileName, updateDS, debugMode)) { return; }
 			} else {
 				OutputFileName = dir + "DATASET_" + FILETAG + Form("_jetR%d", (int)(jetR * 10)) + (applyJEC ? "_JEC" : "") + ".root";
 				if (gSystem->AccessPathName(OutputFileName.c_str())) { OutputFileName = DIR["dataset"][0] + "DATASET_" + FILETAG + Form("_jetR%d", (int)(jetR * 10)) + (applyJEC ? "_JEC" : "") + ".root"; }
-				if (!tree2DataSet(Workspace[DSTAG + Form("_jetR%d", (int)(jetR * 10)) + (applyJEC ? "_JEC" : "")], InputFileNames, FILETAG, OutputFileName)) { return; }
+				if (!tree2DataSet(Workspace[DSTAG + Form("_jetR%d", (int)(jetR * 10)) + (applyJEC ? "_JEC" : "")], InputFileNames, FILETAG, OutputFileName, updateDS, debugMode)) { return; }
 			}
 			if (fitMC && !aDSTAG->FindObject(DSTAG.c_str())) aDSTAG->Add(new TObjString(DSTAG.c_str()));
 			if (wantPureSMC) {
 				if (strcmp(applyCorr, "")) {
 					OutputFileName = dir + "DATASET_" + FILETAG + "_PureS" + Form("_jetR%d", (int)(jetR * 10)) + "_" + string(applyCorr) + (applyJEC ? "_JEC" : "") + (isPbPb ? "_CENT" : "") + ".root";
-					if (!tree2DataSet(Workspace[Form("%s_PureS_jetR%d_%s%s", DSTAG.c_str(), (int)(jetR * 10), applyCorr, (applyJEC ? "_JEC" : ""))], InputFileNames, FILETAG, OutputFileName)) { return; }
+					if (!tree2DataSet(Workspace[Form("%s_PureS_jetR%d_%s%s", DSTAG.c_str(), (int)(jetR * 10), applyCorr, (applyJEC ? "_JEC" : ""))], InputFileNames, FILETAG, OutputFileName, updateDS, debugMode)) { return; }
 				} else {
 					OutputFileName = dir + "DATASET_" + FILETAG + "_PureS" + Form("_jetR%d", (int)(jetR * 10)) + (applyJEC ? "_JEC" : "") + ".root";
-					if (!tree2DataSet(Workspace[Form("%s_PureS_jetR%d%s", DSTAG.c_str(), (int)(jetR * 10), (applyJEC ? "_JEC" : ""))], InputFileNames, FILETAG, OutputFileName)) { return; }
+					if (!tree2DataSet(Workspace[Form("%s_PureS_jetR%d%s", DSTAG.c_str(), (int)(jetR * 10), (applyJEC ? "_JEC" : ""))], InputFileNames, FILETAG, OutputFileName, updateDS, debugMode)) { return; }
 				}
 			}
 		}

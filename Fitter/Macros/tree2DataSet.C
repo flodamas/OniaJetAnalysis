@@ -48,7 +48,7 @@ float jeuCorr(double jtPt, double z, double jeu);
 bool jetsInHCALHole(double jtEta, double jtPhi);
 int getCentFromName(TString sName);
 
-bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string DSName, string OutputFileName, bool UpdateDS = false) {
+bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string DSName, string OutputFileName, bool UpdateDS = false, bool DebugMode = false) {
 	RooDataSet* dataOS = NULL;
 	RooDataSet* dataSS = NULL;
 	RooDataSet* dataOSNoBkg = NULL;
@@ -204,7 +204,8 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 
 		////////////////////////////////////
 		Long64_t nentries = theTree->GetEntries();
-		//nentries = 20;
+
+		if (DebugMode) nentries /= 100;
 
 		// creating the tree to use in the unfolding
 		string fl = "";
@@ -413,13 +414,14 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 					JEU.SetJetPhi(jtphi[ijet]);
 
 					v_jet.SetPtEtaPhiM(jt_pt_noZJEC, jteta[ijet], jtphi[ijet], jtm[ijet]);
+
 					if (RecoQQ4mom->DeltaR(v_jet) <= drmin) {
 						jetFound = true;
 
 						drmin = RecoQQ4mom->DeltaR(v_jet);
 						if (applyJEC) {
-							jt_pt = jecCorr(jt_pt_noZJEC, rawpt[ijet], RecoQQ4mom->Pt());
-							zed->setVal(RecoQQ4mom->Pt() / jt_pt);
+							jt_pt = jecCorr(jt_pt_noZJEC, rawpt[ijet], jp_pt);
+							zed->setVal(jp_pt / jt_pt);
 							if (zed->getVal() > 1 && zed->getVal() <= 1.000001) zed->setVal(0.9999999);
 							ptJet->setVal(jt_pt);
 							z = jp_pt / jt_pt;
@@ -427,13 +429,13 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 							jt_pt_JEU_Down = jeuCorr(jt_pt, z, -1 * (JEU.GetUncertainty().first)); //jt_pt * (1 - JEU.GetUncertainty().first);
 							jt_pt_JEU_Up = jeuCorr(jt_pt, z, JEU.GetUncertainty().second);         //jt_pt * (1 + JEU.GetUncertainty().second);
 						} else {
-							zed->setVal(RecoQQ4mom->Pt() / jt_pt_noZJEC);
+							zed->setVal(jp_pt / jt_pt_noZJEC);
 							if (zed->getVal() > 1 && zed->getVal() <= 1.000001) zed->setVal(0.9999999);
 							jt_pt = jt_pt_noZJEC;
 							jt_pt_JEU_Down = jt_pt * (1 - JEU.GetUncertainty().first);
 							jt_pt_JEU_Up = jt_pt * (1 + JEU.GetUncertainty().second);
 							ptJet->setVal(jt_pt);
-							z = RecoQQ4mom->Pt() / jt_pt;
+							z = jp_pt / jt_pt;
 							if (z > 1 && z <= 1.000001) z = 0.9999999;
 						}
 						rapJet->setVal(jty[ijet]);
@@ -441,6 +443,8 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 						jt_eta = jteta[ijet];
 						jt_phi = jtphi[ijet];
 						rawPt = rawpt[ijet];
+
+						if (DebugMode) cout << "\n[Debug] Jpsi-in-jet candidate: Jpsi pT = " << jp_pt << ", (raw) jet pT = (" << rawPt << ") " << jt_pt << ", z = " << z << endl;
 
 						if (rawpt[ijet] > jp_pt) {
 							JEC.SetJetPT(rawpt[ijet] - jp_pt);
@@ -482,7 +486,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 					//// add pt weights for prompt MC
 					if (applyWeight) {
 						if (!isMC) cout << "[WARNING] this is data and you are applying MC weights" << endl;
-					        if (!isPrompt)
+						if (!isPrompt)
 							corr_ptw = Gen_weight; //cout<<"corr_ptw = "<<corr_ptw<<endl;
 						else {
 							if (pthat >= 15 && pthat < 25)
