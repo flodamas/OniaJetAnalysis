@@ -22,7 +22,6 @@ void fitter(
   // Select the type of datasets to fit
   bool fitData = true,       // Fits Data datasets
   bool fitMC = false,        // Fits MC datasets
-  bool fitPP = true,         // Fits PP datasets
   bool fitMass = true,       // Fits invariant mass distribution
   bool fitCtau = false,      // Fits ctau distribution
   bool fitCtauTrue = false,  // Fits ctau true MC distribution
@@ -65,6 +64,7 @@ void fitter(
 	/// Global settings
 	const string workDirName = "DataFits/DataFits_midJtPt"; // Working directory
 	bool fitPbPb = false;                                   // Fits PbPb datasets
+	bool fitPP = true;                                      // Fits PP datasets
 
 	gROOT->ProcessLine(".L ./Macros/Utilities/RooExtCBShape.cxx+");
 
