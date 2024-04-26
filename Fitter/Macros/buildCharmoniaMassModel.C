@@ -860,13 +860,13 @@ void setMassDefaultParameters(map<string, string>& parIni, bool isPbPb, double n
 
 	// DEFAULT RANGE OF NUMBER OF EVENTS
 	if (parIni.count(Form("N_Jpsi_%s", (isPbPb ? "PbPb" : "PP"))) == 0 || parIni[Form("N_Jpsi_%s", (isPbPb ? "PbPb" : "PP"))] == "") {
-		parIni[Form("N_Jpsi_%s", (isPbPb ? "PbPb" : "PP"))] = Form("%s[%.10f,%.10f,%.10f]", Form("N_Jpsi_%s", (isPbPb ? "PbPb" : "PP")), numEntries, -200, 2.0 * numEntries);
+		parIni[Form("N_Jpsi_%s", (isPbPb ? "PbPb" : "PP"))] = Form("%s[%.10f,%d,%.10f]", Form("N_Jpsi_%s", (isPbPb ? "PbPb" : "PP")), numEntries, -200, 2.0 * numEntries);
 	}
 	if (parIni.count(Form("N_Psi2S_%s", (isPbPb ? "PbPb" : "PP"))) == 0 || parIni[Form("N_Psi2S_%s", (isPbPb ? "PbPb" : "PP"))] == "") {
-		parIni[Form("N_Psi2S_%s", (isPbPb ? "PbPb" : "PP"))] = Form("%s[%.10f,%.10f,%.10f]", Form("N_Psi2S_%s", (isPbPb ? "PbPb" : "PP")), numEntries, -200, 2.0 * numEntries);
+		parIni[Form("N_Psi2S_%s", (isPbPb ? "PbPb" : "PP"))] = Form("%s[%.10f,%d,%.10f]", Form("N_Psi2S_%s", (isPbPb ? "PbPb" : "PP")), numEntries, -200, 2.0 * numEntries);
 	}
 	if (parIni.count(Form("N_Bkg_%s", (isPbPb ? "PbPb" : "PP"))) == 0 || parIni[Form("N_Bkg_%s", (isPbPb ? "PbPb" : "PP"))] == "") {
-		parIni[Form("N_Bkg_%s", (isPbPb ? "PbPb" : "PP"))] = Form("%s[%.10f,%.10f,%.10f]", Form("N_Bkg_%s", (isPbPb ? "PbPb" : "PP")), numEntries, -200, 2.0 * numEntries);
+		parIni[Form("N_Bkg_%s", (isPbPb ? "PbPb" : "PP"))] = Form("%s[%.10f,%d,%.10f]", Form("N_Bkg_%s", (isPbPb ? "PbPb" : "PP")), numEntries, -200, 2.0 * numEntries);
 	}
 
 	// DEFAULT SIGNAL MASS MODEL PARAMETERS
