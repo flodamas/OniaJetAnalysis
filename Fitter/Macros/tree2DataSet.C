@@ -30,6 +30,8 @@ TObjArray* fcorrArray = NULL; // Array with the 2D correction for weighting
 TH2F* corrHist = NULL;
 double drmin = 0.5;
 int matchGR = 0;
+double hiHF = 0; // to avoid reading useless branches...
+
 string findMyTree(string FileName);
 string findJetTree(string FileName, double jetR);
 string findSkimTree(string FileName);
@@ -38,13 +40,11 @@ void iniBranch(TChain* fChain, bool isMC = false);
 bool checkDS(RooDataSet* DS, string DSName);
 double deltaR(TLorentzVector* GenMuon, TLorentzVector* RecoMuon);
 bool isMatchedDiMuon(int iRecoDiMuon, double maxDeltaR = 0.03);
-double getNColl(int centr, bool isPP);
 double getCorr(Double_t rapidity, Double_t pt, Double_t mass, bool isPP, int cent);
 bool readCorrection(const char* file);
 float jecCorr(double jtPt, double rawPt, double jpsiPt);
 float zjecCorr(double jtPt, double rawPt, double z);
 float jeuCorr(double jtPt, double z, double jeu);
-bool jetsInHCALHole(double jtEta, double jtPhi);
 int getCentFromName(TString sName);
 
 bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string DSName, string OutputFileName, bool UpdateDS = false, bool DebugMode = false) {
@@ -59,8 +59,6 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 
 	int triggerIndex_PP = PP::HLT_HIL1DoubleMu0_v1;
 	int triggerIndex_PbPb = HI::HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1;
-	int CentFactor = 1;
-	double hiHF = 0; // to avoid reading useless branches...
 
 	bool applyWeight = false;
 	if (isMC) applyWeight = true;
@@ -137,9 +135,9 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 		RooRealVar* ctauNRes = new RooRealVar("ctauNRes", "c_{#tau}", -100000.0, 100000.0, "");
 		RooRealVar* ctauRes = new RooRealVar("ctauRes", "c_{#tau}", -100000.0, 100000.0, "");
 		RooRealVar* ctauErr = new RooRealVar("ctauErr", "#sigma_{c#tau}", -100000.0, 100000.0, "mm");
-		RooRealVar* ptQQ = new RooRealVar("pt", "#mu#mu p_{T}", -1.0, 10000.0, "GeV/c");
-		RooRealVar* rapQQ = new RooRealVar("rap", "#mu#mu y", -2.5, 2.5, "");
-		RooRealVar* ptJet = new RooRealVar("jetpt", "Jet p_{T}", -1.0, 10000.0, "GeV/c");
+		RooRealVar* ptQQ = new RooRealVar("pt", "#mu#mu p_{T}", -1.0, 500.0, "GeV/c");
+		RooRealVar* rapQQ = new RooRealVar("rap", "#mu#mu y", -2.4, 2.4, "");
+		RooRealVar* ptJet = new RooRealVar("jetpt", "Jet p_{T}", -1.0, 1000.0, "GeV/c");
 		RooRealVar* rapJet = new RooRealVar("jetrap", "Jet y", -2.5, 2.5, "");
 		RooRealVar* cent = new RooRealVar("cent", "centrality", -1.0, 201.0, "");
 		RooRealVar* weight = new RooRealVar("weight", "MC weight", 0.0, 10000000.0, "");
@@ -244,16 +242,6 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 		Float_t jt_rap;
 		Float_t jt_eta;
 		Float_t jt_phi;
-		Float_t jt_CHF;
-		Float_t jt_NHF;
-		Float_t jt_CEF;
-		Float_t jt_NEF;
-		Float_t jt_MUF;
-		Float_t jt_CHM;
-		Float_t jt_NHM;
-		Float_t jt_CEM;
-		Float_t jt_NEM;
-		Float_t jt_MUM;
 		Float_t jt_ref_pt;
 		Float_t jt_ref_rap;
 		Float_t jt_ref_eta;
@@ -330,9 +318,9 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 			}
 			theTree->GetEntry(jentry);
 
-			bool jetFound = false;
-
 			if (!(pPAprimaryVertexFilter && pBeamScrapingFilter)) continue;
+
+			bool jetFound = false;
 
 			// reco'ed dimuons
 			for (int iQQ = 0; iQQ < Reco_QQ_size; iQQ++) {
@@ -379,10 +367,10 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 				ptQQ->setVal(RecoQQ4mom->Pt());
 				rapQQ->setVal(RecoQQ4mom->Rapidity());
 				if (isMC) {
-					cent->setVal(HI::getMCHiBinFromhiHF(hiHF) * CentFactor);
+					cent->setVal(HI::getMCHiBinFromhiHF(hiHF));
 					centr = HI::getMCHiBinFromhiHF(hiHF); //hiBin;
 				} else {
-					cent->setVal(HI::getHiBinFromhiHF(hiHF) * CentFactor);
+					cent->setVal(HI::getHiBinFromhiHF(hiHF));
 					centr = HI::getHiBinFromhiHF(hiHF); //hiBin;
 				}
 				jp_pt = RecoQQ4mom->Pt();
@@ -808,25 +796,6 @@ bool isMatchedDiMuon(int iRecoDiMuon, double maxDeltaR) {
 	return false;
 };
 
-double getNColl(int cen, bool isPP) {
-	// Returns the corresponding Ncoll value to the "cen" centrality bin
-
-	if (isPP) return 1.;
-
-	int normCent = TMath::Nint(cen / 2.);
-
-	int lcent = 0;
-	int ucent = 0;
-	for (int i = 0; i < fCentBins; i++) {
-		ucent = fCentBinning[i];
-		if ((normCent >= lcent) && (normCent < ucent))
-			return fCentMap[ucent];
-		else
-			lcent = ucent;
-	}
-	return 1.;
-};
-
 bool readCorrection(const char* file) {
 	TFile* froot = new TFile(file, "READ");
 	if (!froot) {
@@ -975,11 +944,6 @@ float zjecCorr(double jtPt, double rawPt, double z) {
 
 float jeuCorr(double jtPt, double z, double jeu) {
 	return ((1 - z) * (1 + jeu) * jtPt + z * jtPt);
-}
-
-bool jetsInHCALHole(double jtEta, double jtPhi) {
-	if ((jtEta > -3.0) && (jtEta < -1.392) && (jtPhi > -1.57) && (jtPhi < -0.87)) return true;
-	return false;
 }
 
 int getCentFromName(TString sName) {

@@ -39,15 +39,12 @@ Float_t Reco_QQ_ctauErr3D[99]; //[Reco_QQ_size]
 Short_t Reco_QQ_whichGen[99];  //[Reco_QQ_size]
 Float_t Reco_QQ_VtxProb[99];   //[Reco_QQ_size]
 Float_t Reco_QQ_dca[99];       //[Reco_QQ_size]
-Float_t Reco_QQ_MassErr[99];   //[Reco_QQ_size]
-TClonesArray* Reco_QQ_vtx;
 Short_t Reco_mu_size;
 Short_t Reco_mu_type[99];        //[Reco_mu_size]
 Short_t Reco_mu_whichGen[99];    //[Reco_mu_size]
 Int_t Reco_mu_SelectionType[99]; //[Reco_mu_size]
 Short_t Reco_mu_charge[99];      //[Reco_mu_size]
 TClonesArray* Reco_mu_4mom;
-ULong64_t Reco_mu_trig[99];          //[Reco_mu_size]
 Bool_t Reco_mu_highPurity[99];       //[Reco_mu_size]
 Short_t Reco_mu_candType[99];        //[Reco_mu_size]
 Int_t Reco_mu_nPixValHits[99];       //[Reco_mu_size]
@@ -57,11 +54,8 @@ Float_t Reco_mu_normChi2_inner[99];  //[Reco_mu_size]
 Float_t Reco_mu_normChi2_global[99]; //[Reco_mu_size]
 Int_t Reco_mu_nPixWMea[99];          //[Reco_mu_size]
 Int_t Reco_mu_nTrkWMea[99];          //[Reco_mu_size]
-Int_t Reco_mu_StationsMatched[99];   //[Reco_mu_size]
 Float_t Reco_mu_dxy[99];             //[Reco_mu_size]
-Float_t Reco_mu_dxyErr[99];          //[Reco_mu_size]
 Float_t Reco_mu_dz[99];              //[Reco_mu_size]
-Float_t Reco_mu_dzErr[99];           //[Reco_mu_size]
 Float_t Gen_weight;
 Float_t Gen_pthat;
 Short_t Gen_QQ_size;
@@ -84,7 +78,6 @@ Float_t jtpt[99];    //[nref]
 Float_t jteta[99];   //[nref]
 Float_t jty[99];     //[nref]
 Float_t jtphi[99];   //[nref]
-Float_t jtpu[99];    //[nref]
 Float_t jtm[99];     //[nref]
 Float_t jtarea[99];  //[nref]
 Float_t jtPfCHF[99]; //[nref]
@@ -134,7 +127,6 @@ Float_t gendphijt[99];   //[ngen]
 Float_t gendrjt[99];     //[ngen]
 Int_t gensubid[99];      //[ngen]
 
-Int_t Onia2MuMuPAT;
 Int_t pclusterCompatibilityFilter;
 Int_t pprimaryVertexFilter;   // for PbPb
 Int_t pPAprimaryVertexFilter; // for pp
@@ -158,7 +150,6 @@ TBranch* b_Reco_QQ_ctauErr3D;       //!
 TBranch* b_Reco_QQ_whichGen;        //!
 TBranch* b_Reco_QQ_VtxProb;         //!
 TBranch* b_Reco_QQ_dca;             //!
-TBranch* b_Reco_QQ_MassErr;         //!
 TBranch* b_Reco_QQ_vtx;             //!
 TBranch* b_Reco_mu_size;            //!
 TBranch* b_Reco_mu_type;            //!
@@ -176,11 +167,8 @@ TBranch* b_Reco_mu_normChi2_inner;  //!
 TBranch* b_Reco_mu_normChi2_global; //!
 TBranch* b_Reco_mu_nPixWMea;        //!
 TBranch* b_Reco_mu_nTrkWMea;        //!
-TBranch* b_Reco_mu_StationsMatched; //!
 TBranch* b_Reco_mu_dxy;             //!
-TBranch* b_Reco_mu_dxyErr;          //!
 TBranch* b_Reco_mu_dz;              //!
-TBranch* b_Reco_mu_dzErr;           //!
 TBranch* b_Gen_weight;              //!
 TBranch* b_Gen_pthat;               //!
 TBranch* b_Gen_QQ_size;             //!
@@ -203,19 +191,8 @@ TBranch* b_jtpt;                 //!
 TBranch* b_jteta;                //!
 TBranch* b_jty;                  //!
 TBranch* b_jtphi;                //!
-TBranch* b_jtpu;                 //!
 TBranch* b_jtm;                  //!
 TBranch* b_jtarea;               //!
-TBranch* b_jtPfCHF;              //!
-TBranch* b_jtPfNHF;              //!
-TBranch* b_jtPfCEF;              //!
-TBranch* b_jtPfNEF;              //!
-TBranch* b_jtPfMUF;              //!
-TBranch* b_jtPfCHM;              //!
-TBranch* b_jtPfNHM;              //!
-TBranch* b_jtPfCEM;              //!
-TBranch* b_jtPfNEM;              //!
-TBranch* b_jtPfMUM;              //!
 TBranch* b_jttau1;               //!
 TBranch* b_jttau2;               //!
 TBranch* b_jttau3;               //!
@@ -253,7 +230,6 @@ TBranch* b_gendphijt;            //!
 TBranch* b_gendrjt;              //!
 TBranch* b_gensubid;             //!
 
-TBranch* b_Onia2MuMuPAT;                //!
 TBranch* b_pclusterCompatibilityFilter; //!
 TBranch* b_pprimaryVertexFilter;        //!
 TBranch* b_pPAprimaryVertexFilter;      //!
@@ -274,7 +250,6 @@ void initTree(TChain* tree) {
 
 	// Set object pointer
 	Reco_QQ_4mom = 0;
-	Reco_QQ_vtx = 0;
 	Reco_mu_4mom = 0;
 	Gen_QQ_4mom = 0;
 	Gen_mu_4mom = 0;
@@ -301,15 +276,12 @@ void initTree(TChain* tree) {
 	if (fChain->GetBranch("Reco_QQ_whichGen")) fChain->SetBranchAddress("Reco_QQ_whichGen", Reco_QQ_whichGen, &b_Reco_QQ_whichGen);
 	fChain->SetBranchAddress("Reco_QQ_VtxProb", Reco_QQ_VtxProb, &b_Reco_QQ_VtxProb);
 	fChain->SetBranchAddress("Reco_QQ_dca", Reco_QQ_dca, &b_Reco_QQ_dca);
-	fChain->SetBranchAddress("Reco_QQ_MassErr", Reco_QQ_MassErr, &b_Reco_QQ_MassErr);
-	fChain->SetBranchAddress("Reco_QQ_vtx", &Reco_QQ_vtx, &b_Reco_QQ_vtx);
 	fChain->SetBranchAddress("Reco_mu_size", &Reco_mu_size, &b_Reco_mu_size);
 	fChain->SetBranchAddress("Reco_mu_type", Reco_mu_type, &b_Reco_mu_type);
 	if (fChain->GetBranch("Reco_mu_whichGen")) fChain->SetBranchAddress("Reco_mu_whichGen", Reco_mu_whichGen, &b_Reco_mu_whichGen);
 	fChain->SetBranchAddress("Reco_mu_SelectionType", Reco_mu_SelectionType, &b_Reco_mu_SelectionType);
 	fChain->SetBranchAddress("Reco_mu_charge", Reco_mu_charge, &b_Reco_mu_charge);
 	fChain->SetBranchAddress("Reco_mu_4mom", &Reco_mu_4mom, &b_Reco_mu_4mom);
-	fChain->SetBranchAddress("Reco_mu_trig", Reco_mu_trig, &b_Reco_mu_trig);
 	fChain->SetBranchAddress("Reco_mu_highPurity", Reco_mu_highPurity, &b_Reco_mu_highPurity);
 	fChain->SetBranchAddress("Reco_mu_candType", Reco_mu_candType, &b_Reco_mu_candType);
 	fChain->SetBranchAddress("Reco_mu_nPixValHits", Reco_mu_nPixValHits, &b_Reco_mu_nPixValHits);
@@ -319,11 +291,8 @@ void initTree(TChain* tree) {
 	fChain->SetBranchAddress("Reco_mu_normChi2_global", Reco_mu_normChi2_global, &b_Reco_mu_normChi2_global);
 	fChain->SetBranchAddress("Reco_mu_nPixWMea", Reco_mu_nPixWMea, &b_Reco_mu_nPixWMea);
 	fChain->SetBranchAddress("Reco_mu_nTrkWMea", Reco_mu_nTrkWMea, &b_Reco_mu_nTrkWMea);
-	fChain->SetBranchAddress("Reco_mu_StationsMatched", Reco_mu_StationsMatched, &b_Reco_mu_StationsMatched);
 	fChain->SetBranchAddress("Reco_mu_dxy", Reco_mu_dxy, &b_Reco_mu_dxy);
-	fChain->SetBranchAddress("Reco_mu_dxyErr", Reco_mu_dxyErr, &b_Reco_mu_dxyErr);
 	fChain->SetBranchAddress("Reco_mu_dz", Reco_mu_dz, &b_Reco_mu_dz);
-	fChain->SetBranchAddress("Reco_mu_dzErr", Reco_mu_dzErr, &b_Reco_mu_dzErr);
 	if (fChain->GetBranch("Gen_weight")) fChain->SetBranchAddress("Gen_weight", &Gen_weight, &b_Gen_weight);
 	if (fChain->GetBranch("Gen_pthat")) fChain->SetBranchAddress("Gen_pthat", &Gen_pthat, &b_Gen_pthat);
 	if (fChain->GetBranch("Gen_QQ_size")) fChain->SetBranchAddress("Gen_QQ_size", &Gen_QQ_size, &b_Gen_QQ_size);
@@ -346,19 +315,8 @@ void initTree(TChain* tree) {
 	if (fChain->GetBranch("jteta")) fChain->SetBranchAddress("jteta", jteta, &b_jteta);
 	if (fChain->GetBranch("jty")) fChain->SetBranchAddress("jty", jty, &b_jty);
 	if (fChain->GetBranch("jtphi")) fChain->SetBranchAddress("jtphi", jtphi, &b_jtphi);
-	if (fChain->GetBranch("jtpu")) fChain->SetBranchAddress("jtpu", jtpu, &b_jtpu);
 	if (fChain->GetBranch("jtm")) fChain->SetBranchAddress("jtm", jtm, &b_jtm);
 	if (fChain->GetBranch("jtarea")) fChain->SetBranchAddress("jtarea", jtarea, &b_jtarea);
-	if (fChain->GetBranch("jtPfCHF")) fChain->SetBranchAddress("jtPfCHF", jtPfCHF, &b_jtPfCHF);
-	if (fChain->GetBranch("jtPfNHF")) fChain->SetBranchAddress("jtPfNHF", jtPfNHF, &b_jtPfNHF);
-	if (fChain->GetBranch("jtPfCEF")) fChain->SetBranchAddress("jtPfCEF", jtPfCEF, &b_jtPfCEF);
-	if (fChain->GetBranch("jtPfNEF")) fChain->SetBranchAddress("jtPfNEF", jtPfNEF, &b_jtPfNEF);
-	if (fChain->GetBranch("jtPfMUF")) fChain->SetBranchAddress("jtPfMUF", jtPfMUF, &b_jtPfMUF);
-	if (fChain->GetBranch("jtPfCHM")) fChain->SetBranchAddress("jtPfCHM", jtPfCHM, &b_jtPfCHM);
-	if (fChain->GetBranch("jtPfNHM")) fChain->SetBranchAddress("jtPfNHM", jtPfNHM, &b_jtPfNHM);
-	if (fChain->GetBranch("jtPfCEM")) fChain->SetBranchAddress("jtPfCEM", jtPfCEM, &b_jtPfCEM);
-	if (fChain->GetBranch("jtPfNEM")) fChain->SetBranchAddress("jtPfNEM", jtPfNEM, &b_jtPfNEM);
-	if (fChain->GetBranch("jtPfMUM")) fChain->SetBranchAddress("jtPfMUM", jtPfMUM, &b_jtPfMUM);
 	if (fChain->GetBranch("jttau1")) fChain->SetBranchAddress("jttau1", jttau1, &b_jttau1);
 	if (fChain->GetBranch("jttau2")) fChain->SetBranchAddress("jttau2", jttau2, &b_jttau2);
 	if (fChain->GetBranch("jttau3")) fChain->SetBranchAddress("jttau3", jttau3, &b_jttau3);
@@ -396,7 +354,6 @@ void initTree(TChain* tree) {
 	if (fChain->GetBranch("gendrjt")) fChain->SetBranchAddress("gendrjt", gendrjt, &b_gendrjt);
 	if (fChain->GetBranch("gensubid")) fChain->SetBranchAddress("gensubid", gensubid, &b_gensubid);
 
-	if (fChain->GetBranch("Onia2MuMuPAT")) fChain->SetBranchAddress("Onia2MuMuPAT", &Onia2MuMuPAT, &b_Onia2MuMuPAT);
 	if (fChain->GetBranch("pclusterCompatibilityFilter")) fChain->SetBranchAddress("pclusterCompatibilityFilter", &pclusterCompatibilityFilter, &b_pclusterCompatibilityFilter);
 	if (fChain->GetBranch("pprimaryVertexFilter")) fChain->SetBranchAddress("pprimaryVertexFilter", &pprimaryVertexFilter, &b_pprimaryVertexFilter);
 	if (fChain->GetBranch("pPAprimaryVertexFilter")) fChain->SetBranchAddress("pPAprimaryVertexFilter", &pPAprimaryVertexFilter, &b_pPAprimaryVertexFilter);
