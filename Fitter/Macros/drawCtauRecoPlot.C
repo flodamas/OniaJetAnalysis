@@ -48,11 +48,8 @@ void drawCtauRecoPlot(RooWorkspace& myws,         // Local workspace
 	else
 		applyCorr = false;
 
-	bool applyJEC = false;
-	if (plotLabel.find("_JEC") != std::string::npos)
-		applyJEC = true;
-	else
-		applyJEC = false;
+	bool applyJEC = (plotLabel.find("_JEC") != std::string::npos);
+
 	TString corrName = "";
 	if (applyCorr) {
 		if (plotLabel.find("AccEff") != std::string::npos)

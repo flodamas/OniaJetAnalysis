@@ -33,8 +33,7 @@ int matchGR = 0;
 string findMyTree(string FileName);
 string findJetTree(string FileName, double jetR);
 string findSkimTree(string FileName);
-string findCentTree(string FileName);
-bool getTChain(TChain* fChain, TChain* jChain, TChain* sChain, TChain* cChain, vector<string> FileNames);
+bool getTChain(TChain* fChain, TChain* jChain, TChain* sChain, vector<string> FileNames);
 void iniBranch(TChain* fChain, bool isMC = false);
 bool checkDS(RooDataSet* DS, string DSName);
 double deltaR(TLorentzVector* GenMuon, TLorentzVector* RecoMuon);
@@ -61,6 +60,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 	int triggerIndex_PP = PP::HLT_HIL1DoubleMu0_v1;
 	int triggerIndex_PbPb = HI::HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1;
 	int CentFactor = 1;
+	double hiHF = 0; // to avoid reading useless branches...
 
 	bool applyWeight = false;
 	if (isMC) applyWeight = true;
@@ -122,17 +122,14 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 		if (jetTreeName == "") { return false; }
 		skimTreeName = findSkimTree(InputFileNames[0]);
 		if (skimTreeName == "") { return false; }
-		centTreeName = findCentTree(InputFileNames[0]);
-		if (centTreeName == "") { return false; }
 		TChain* theTree = new TChain(TreeName.c_str(), "");
 		TChain* jetTree = new TChain(jetTreeName.c_str(), "");
 		TChain* skimTree = new TChain(skimTreeName.c_str(), "");
-		TChain* centTree = new TChain(centTreeName.c_str(), "");
-		if (!getTChain(theTree, jetTree, skimTree, centTree, InputFileNames)) { return false; } // Import files to TChain
-		initTree(theTree);                                                                      // Initialize the Tree
-		iniBranch(theTree, isMC);                                                               // Initialize the Branches
+		if (!getTChain(theTree, jetTree, skimTree, InputFileNames)) { return false; } // Import files to TChain
+		initTree(theTree);                                                            // Initialize the Tree
+		iniBranch(theTree, isMC);                                                     // Initialize the Branches
 
-		RooRealVar* mass = new RooRealVar("invMass", "#mu#mu mass", 1.0, 6.0, "GeV/c^{2}");
+		RooRealVar* mass = new RooRealVar("invMass", "#mu#mu mass", 2.0, 5.0, "GeV/c^{2}");
 		RooRealVar* zed = new RooRealVar("zed", "z_{J/#psi}", -0.1, 2);
 		RooRealVar* ctau = new RooRealVar("ctau", "c_{#tau}", -100000.0, 100000.0, "mm");
 		RooRealVar* ctauN = new RooRealVar("ctauN", "c_{#tau}", -100000.0, 100000.0, "");
@@ -144,7 +141,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 		RooRealVar* rapQQ = new RooRealVar("rap", "#mu#mu y", -2.5, 2.5, "");
 		RooRealVar* ptJet = new RooRealVar("jetpt", "Jet p_{T}", -1.0, 10000.0, "GeV/c");
 		RooRealVar* rapJet = new RooRealVar("jetrap", "Jet y", -2.5, 2.5, "");
-		RooRealVar* cent = new RooRealVar("cent", "centrality", -1.0, 1000.0, "");
+		RooRealVar* cent = new RooRealVar("cent", "centrality", -1.0, 201.0, "");
 		RooRealVar* weight = new RooRealVar("weight", "MC weight", 0.0, 10000000.0, "");
 		RooRealVar* weightCorr = new RooRealVar("weightCorr", "Data correction weight", 0.0, 10000000.0, "");
 		RooArgSet* cols = NULL;
@@ -335,7 +332,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 
 			bool jetFound = false;
 
-			if (!(isPbPb ? (pprimaryVertexFilter && pclusterCompatibilityFilter && phfCoincFilter2Th4) : (pPAprimaryVertexFilter && pBeamScrapingFilter))) continue;
+			if (!(pPAprimaryVertexFilter && pBeamScrapingFilter)) continue;
 
 			// reco'ed dimuons
 			for (int iQQ = 0; iQQ < Reco_QQ_size; iQQ++) {
@@ -400,7 +397,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 
 				for (Long64_t ijet = 0; ijet < nref; ijet++) {
 					if (jetFound) continue;
-					if (isPbPb && jetsInHCALHole(jteta[ijet], jtphi[ijet])) continue;
+
 					TLorentzVector v_jet;
 					JEC.SetJetPT(rawpt[ijet]);
 					JEC.SetJetEta(jteta[ijet]);
@@ -690,36 +687,18 @@ string findSkimTree(string FileName) {
 	return name;
 };
 
-string findCentTree(string FileName) {
-	TFile* f = TFile::Open(FileName.c_str(), "READ");
-	string name = "";
-	if (f->GetListOfKeys()->Contains("hiEvtAnalyzer"))
-		name = "hiEvtAnalyzer/HiTree";
-	else if (f->GetListOfKeys()->Contains("HltTree"))
-		name = "HiTree";
-	else {
-		cout << "[ERROR] HiTree was not found in: " << FileName << endl;
-	}
-	f->Close();
-	delete f;
-	return name;
-};
-
-bool getTChain(TChain* fChain, TChain* jChain, TChain* sChain, TChain* cChain, vector<string> FileNames) {
+bool getTChain(TChain* fChain, TChain* jChain, TChain* sChain, vector<string> FileNames) {
 	cout << "[INFO] Extrating TTree " << TreeName.c_str() << endl;
 	for (vector<string>::iterator FileName = FileNames.begin(); FileName != FileNames.end(); ++FileName) {
 		cout << "[INFO] Adding TFile " << FileName->c_str() << endl;
 		fChain->Add(Form("%s/%s", FileName->c_str(), TreeName.c_str()));
 		jChain->Add(Form("%s/%s", FileName->c_str(), jetTreeName.c_str()));
 		sChain->Add(Form("%s/%s", FileName->c_str(), skimTreeName.c_str()));
-		cChain->Add(Form("%s/%s", FileName->c_str(), centTreeName.c_str()));
 	}
 	if (jChain)
 		fChain->AddFriend(jChain);
 	if (sChain)
 		fChain->AddFriend(sChain);
-	if (cChain)
-		fChain->AddFriend(cChain);
 
 	if (!fChain) {
 		cout << "[ERROR] fChain was not created, some input files are missing" << endl;
@@ -738,7 +717,6 @@ void iniBranch(TChain* fChain, bool isMC) {
 	}
 	fChain->SetBranchStatus("*", 0);
 	RecoQQ::iniBranches(fChain);
-	if (fChain->GetBranch("runNb")) { fChain->SetBranchStatus("runNb", 1); }
 	if (fChain->GetBranch("Centrality")) { fChain->SetBranchStatus("Centrality", 1); }
 	if (fChain->GetBranch("Reco_QQ_size")) { fChain->SetBranchStatus("Reco_QQ_size", 1); }
 	if (fChain->GetBranch("Reco_QQ_sign")) { fChain->SetBranchStatus("Reco_QQ_sign", 1); }
@@ -772,9 +750,6 @@ void iniBranch(TChain* fChain, bool isMC) {
 	if (fChain->GetBranch("pBeamScrapingFilter")) { fChain->SetBranchStatus("pBeamScrapingFilter", 1); }
 	if (fChain->GetBranch("pprimaryVertexFilter")) { fChain->SetBranchStatus("pprimaryVertexFilter", 1); }
 	if (fChain->GetBranch("pclusterCompatibilityFilter")) { fChain->SetBranchStatus("pclusterCompatibilityFilter", 1); }
-	if (fChain->GetBranch("phfCoincFilter2Th4")) { fChain->SetBranchStatus("phfCoincFilter2Th4", 1); }
-	if (fChain->GetBranch("hiBin")) { fChain->SetBranchStatus("hiBin", 1); }
-	if (fChain->GetBranch("hiHF")) { fChain->SetBranchStatus("hiHF", 1); }
 
 	if (isMC) {
 		if (fChain->GetBranch("pthat")) { fChain->SetBranchStatus("pthat", 1); }

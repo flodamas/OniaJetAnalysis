@@ -221,8 +221,7 @@ void fitter(
 				continue; // If we find Prompt MC, check if the user wants to include Prompt
 			string dir = DIR["dataset"][0];
 
-			bool isPbPb = false;
-			if (FILETAG.find("PbPb") != std::string::npos) { isPbPb = true; }
+			bool isPbPb = (FILETAG.find("PbPb") != std::string::npos);
 
 			if (useExtDS == true && inputDataSet["MONTECARLO"] != "" && (existDir(inputDataSet["MONTECARLO"]) == true)) { dir = inputDataSet["MONTECARLO"]; }
 
@@ -502,7 +501,7 @@ bool addParameters(string InputFile, vector<struct KinCuts>& cutVector, vector<m
 bool setParameters(map<string, string> row, struct KinCuts& cut, map<string, string>& parIni, bool isPbPb, bool doConstrFit) {
 	// set initial parameters
 	cut.sMuon.Pt.Min = 0.0;
-	cut.sMuon.Pt.Max = 100000.0;
+	cut.sMuon.Pt.Max = 10000.0;
 	cut.sMuon.Eta.Min = -2.4;
 	cut.sMuon.Eta.Max = 2.4;
 	cut.dMuon.ctauErr.Min = -1000.0;
@@ -525,9 +524,9 @@ bool setParameters(map<string, string> row, struct KinCuts& cut, map<string, str
 	cut.dMuon.Pt.Min = 0.0;
 	cut.dMuon.Pt.Max = 1000.0;
 	cut.dMuon.Zed.Min = 0.0;
-	cut.dMuon.Zed.Max = 101.0;
+	cut.dMuon.Zed.Max = 2.0;
 	cut.jet.AbsRap.Min = 0.0;
-	cut.jet.AbsRap.Max = 100.0;
+	cut.jet.AbsRap.Max = 2.4;
 	cut.jet.Pt.Min = 0.0;
 	cut.jet.Pt.Max = 1000.0;
 	cut.Centrality.Start = 0;

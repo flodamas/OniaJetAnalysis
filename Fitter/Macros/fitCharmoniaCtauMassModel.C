@@ -11,7 +11,7 @@
 #include "drawCtauFrom2DPlot.C"
 #include "drawCtauMass2DPlot.C"
 
-void setCtauMassFileName(string& FileName, string outputDir, string TAG, string plotLabel, struct KinCuts cut, bool isPbPb);
+void setCtauMassFileName(string& FileName, string outputDir, string TAG, string plotLabel, struct KinCuts cut, bool isPbPb = false);
 
 bool fitCharmoniaCtauMassModel(RooWorkspace& myws,                 // Local Workspace
                                const RooWorkspace& inputWorkspace, // Workspace with all the input RooDatasets

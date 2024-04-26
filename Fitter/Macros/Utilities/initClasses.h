@@ -857,7 +857,7 @@ int importDataset(RooWorkspace& myws, const RooWorkspace& inputWS, struct KinCut
 		myws.var("ctauN")->setMax(cut.dMuon.ctauN.Max);
 	}
 
-	cout << "[INFO] Analyzing bin: " << Form("%.3f < z <= %.3f, %.3f < pt(Jpsi) < %.3f, %.3f < rap(Jpsi) < %.3f, %.3f < pt(jet) < %.3f, %.3f < rap(jet) < %.3f", cut.dMuon.Zed.Min, cut.dMuon.Zed.Max, cut.dMuon.Pt.Min, cut.dMuon.Pt.Max, cut.dMuon.AbsRap.Min, cut.dMuon.AbsRap.Max, cut.jet.Pt.Min, cut.jet.Pt.Max, cut.jet.AbsRap.Min, cut.jet.AbsRap.Max) << endl;
+	cout << "[INFO] Analyzing bin: " << Form("%.3f < z <= %.3f, %.3f < pt(Jpsi) < %.3f, %.1f < rap(Jpsi) < %.1f, %.3f < pt(jet) < %.3f, %.1f < rap(jet) < %.1f", cut.dMuon.Zed.Min, cut.dMuon.Zed.Max, cut.dMuon.Pt.Min, cut.dMuon.Pt.Max, cut.dMuon.AbsRap.Min, cut.dMuon.AbsRap.Max, cut.jet.Pt.Min, cut.jet.Pt.Max, cut.jet.AbsRap.Min, cut.jet.AbsRap.Max) << endl;
 
 	return 1;
 };
