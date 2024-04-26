@@ -446,7 +446,9 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 
 						// just read the jet pT branches for now, TO BE FIXED
 						jt_pt = jtpt[ijet]; // supposed to be corrected already, TBC by Matt
+						ptJet->setVal(jt_pt);
 						z = jp_pt / jt_pt;
+						zed->setVal(z);
 
 						if (DebugMode) cout << "\n[Debug] Jpsi-in-jet candidate: Jpsi pT = " << jp_pt << ", (raw) jet pT = (" << rawPt << ") " << jt_pt << ", z = " << z << endl;
 
