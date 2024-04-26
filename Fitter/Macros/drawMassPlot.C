@@ -286,7 +286,7 @@ void drawMassPlot(RooWorkspace& myws,         // Local workspace
 			t->DrawLatex(0.20, 0.86 - dy, "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1");
 			dy += 2.0 * 0.045;
 		} else {
-			t->DrawLatex(0.20, 0.86 - dy, "HLT_HIL1DoubleMuOpen_v1");
+			//t->DrawLatex(0.20, 0.86 - dy, "HLT_HIL1DoubleMuOpen_v1");
 			dy += 2.0 * 0.045;
 		}
 	}
@@ -376,7 +376,7 @@ void drawMassPlot(RooWorkspace& myws,         // Local workspace
 		else
 			lumiLabel += " #psi(2S)";
 	}
-	CMS_lumi(pad1, isPbPb ? fc * 108 : fc * 107, 33, lumiLabel.Data());
+	CMS_lumi(pad1, isPbPb ? fc * 108 : fc * 109, 33, lumiLabel.Data());
 	if (!paperStyle) gStyle->SetTitleFontSize(0.05);
 
 	pad1->Update();
@@ -454,8 +454,7 @@ void setMassRange(RooWorkspace& myws, RooPlot* frame, string dsName, bool setLog
 	for (int i = 1; i <= h->GetNbinsX(); i++)
 		if (h->GetBinContent(i) > 0) YMin = min(YMin, h->GetBinContent(i));
 
-	bool isMC = false;
-	if (dsName.find("MC") != std::string::npos) isMC = true;
+	bool isMC = (dsName.find("MC") != std::string::npos);
 
 	Double_t Yup(0.), Ydown(0.);
 	if (setLogScale) {
@@ -574,7 +573,7 @@ void printMassParameters(RooWorkspace myws, TPad* Pad, bool isPbPb, string pdfNa
 			t->DrawLatex(0.20, 0.76 - dy, Form("%s = %.4f#pm%.4f %s", label.c_str(), it->getValV(), it->getError(), (limClose ? "T-T" : "")));
 			dy += 0.045;
 		} else if (s1.find("m") != std::string::npos) {
-			t->DrawLatex(0.20, 0.76 - dy, Form("%s = %.5f#pm%.5f GeV/c^{2} %s", label.c_str(), it->getValV(), it->getError(), (limClose ? "T-T" : "")));
+			t->DrawLatex(0.20, 0.76 - dy, Form("%s = %.4f#pm%.4f GeV/c^{2} %s", label.c_str(), it->getValV(), it->getError(), (limClose ? "T-T" : "")));
 			dy += 0.045;
 		} else {
 			t->DrawLatex(0.20, 0.76 - dy, Form("%s = %.4f#pm%.4f %s", label.c_str(), it->getValV(), it->getError(), (limClose ? "T-T" : "")));
