@@ -36,8 +36,7 @@ bool buildCharmoniaCtauModel(RooWorkspace& ws, struct CharmModel model, map<stri
 
 	// C r e a t e   m o d e l
 
-	bool fitMass = false;
-	if (ws.pdf(Form("pdfMASS_Tot_%s", (isPbPb ? "PbPb" : "PP"))) && incBkg && (incJpsi || incPsi2S)) { fitMass = true; }
+	bool fitMass = (ws.pdf(Form("pdfMASS_Tot_%s", (isPbPb ? "PbPb" : "PP"))) && incBkg && (incJpsi || incPsi2S));
 
 	string pdfName = "pdfCTAU";
 	if (fitMass) { pdfName = "pdfCTAUMASS"; }
