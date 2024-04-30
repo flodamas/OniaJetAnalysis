@@ -55,6 +55,7 @@
 #include "RooProdPdf.h"
 #include "RooAbsPdf.h"
 #include "RooCBShape.h"
+#include "RooCrystalBall.h"
 #include "RooGaussian.h"
 #include "RooChebychev.h"
 #include "RooPolynomial.h"

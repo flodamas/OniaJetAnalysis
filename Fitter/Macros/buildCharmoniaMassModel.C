@@ -3,7 +3,7 @@
 #define buildCharmoniaMassModel_C
 
 #include "Utilities/initClasses.h"
-#include "Utilities/RooExtCBShape.h"
+//#include "Utilities/RooExtCBShape.h"
 
 void fixMassParPsi2StoJpsi(map<string, string>& parIni, bool isPbPb);
 void fixPbPbtoPP(map<string, string>& parIni);
@@ -675,9 +675,9 @@ bool addSignalMassModel(RooWorkspace& ws, string object, MassModel model, map<st
 			cout << Form("[INFO] %s Single Crystal Ball PDF in %s included", object.c_str(), (isPbPb ? "PbPb" : "PP")) << endl;
 			break;
 
-		case (MassModel::ExtendedCrystalBall):
+		case (MassModel::ExtendedCrystalBall): // double-sided Crystal Ball, see RooCrystalBall documentation
 
-			gROOT->ProcessLine(".L ./Macros/Utilities/RooExtCBShape.cxx+");
+			//gROOT->ProcessLine(".L ./Macros/Utilities/RooExtCBShape.cxx+");
 			// check that all input parameters are defined
 			if (!(
 			      parIni.count(Form("m_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP"))) &&
@@ -699,6 +699,16 @@ bool addSignalMassModel(RooWorkspace& ws, string object, MassModel model, map<st
 			ws.factory(parIni[Form("n2_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP"))].c_str());
 
 			// create the PDF
+			ws.factory(Form("CrystalBall::%s(%s, %s, %s, %s, %s, %s, %s)", Form("pdfMASS_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP")), "invMass",
+			                Form("m_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP")),
+			                Form("sigma1_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP")),
+			                Form("alpha_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP")),
+			                Form("n_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP")),
+			                Form("alpha2_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP")),
+			                Form("n2_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP"))));
+
+			// create the PDF
+			/*
 			pdf = new RooExtCBShape(("pdfMASS" + lb).c_str(), ("pdfMASS" + lb).c_str(),
 			                        *ws.var("invMass"),
 			                        *ws.var(("m" + lb).c_str()),
@@ -708,6 +718,7 @@ bool addSignalMassModel(RooWorkspace& ws, string object, MassModel model, map<st
 			                        *ws.var(("alpha2" + lb).c_str()),
 			                        *ws.var(("n2" + lb).c_str()));
 			if (pdf) { ws.import(*pdf); }
+      */
 			ws.factory(Form("RooExtendPdf::%s(%s,%s)", Form("pdfMASSTot_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP")),
 			                Form("pdfMASS_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP")),
 			                Form("N_%s_%s", object.c_str(), (isPbPb ? "PbPb" : "PP"))));

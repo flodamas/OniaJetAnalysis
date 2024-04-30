@@ -66,7 +66,7 @@ void fitter(
 	bool fitPbPb = false;                                   // Fits PbPb datasets
 	bool fitPP = true;                                      // Fits PP datasets
 
-	gROOT->ProcessLine(".L ./Macros/Utilities/RooExtCBShape.cxx+");
+	//gROOT->ProcessLine(".L ./Macros/Utilities/RooExtCBShape.cxx+");
 
 	map<string, double> binWidth;
 	binWidth["MASS"] = 0.025;
