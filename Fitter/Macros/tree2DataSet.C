@@ -127,7 +127,7 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 		initTree(theTree);                                                            // Initialize the Tree
 		iniBranch(theTree, isMC);                                                     // Initialize the Branches
 
-		RooRealVar* mass = new RooRealVar("invMass", "#mu#mu mass", 2.0, 5.0, "GeV/c^{2}");
+		RooRealVar* mass = new RooRealVar("invMass", "#mu#mu mass", 2.0, 4.0, "GeV/c^{2}");
 		RooRealVar* zed = new RooRealVar("zed", "z_{J/#psi}", -0.1, 2);
 		RooRealVar* ctau = new RooRealVar("ctau", "c_{#tau}", -100000.0, 100000.0, "mm");
 		RooRealVar* ctauN = new RooRealVar("ctauN", "c_{#tau}", -100000.0, 100000.0, "");
@@ -208,10 +208,10 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 		vector<string> jecFileName;
 		string jeuFileName;
 
-		jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2Relative_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
-		jeuFileName = Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_Uncertainty_AK%dPF.txt", /*isMC?"MC":*/ "DATA", /*isMC?"MC":*/ "DATA", (int)(jetR * 10));
+		jecFileName.push_back(Form("/data_CMS/cms/mnguyen/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2Relative_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
+		jeuFileName = Form("/data_CMS/cms/mnguyen/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_Uncertainty_AK%dPF.txt", /*isMC?"MC":*/ "DATA", /*isMC?"MC":*/ "DATA", (int)(jetR * 10));
 		if (!isMC)
-			jecFileName.push_back(Form("/home/llr/cms/diab/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2L3Residual_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
+			jecFileName.push_back(Form("/data_CMS/cms/mnguyen/JpsiInJetsPbPb/Fitter/Input/JECDatabase/textFiles/Spring18_ppRef5TeV_V4_%s/Spring18_ppRef5TeV_V4_%s_L2L3Residual_AK%dPF.txt", isMC ? "MC" : "DATA", isMC ? "MC" : "DATA", (int)(jetR * 10)));
 
 		JetCorrector JEC(jecFileName);
 		JetUncertainty JEU(jeuFileName);
@@ -428,12 +428,6 @@ bool tree2DataSet(RooWorkspace& Workspace, vector<string> InputFileNames, string
 						jt_eta = jteta[ijet];
 						jt_phi = jtphi[ijet];
 						rawPt = rawpt[ijet];
-
-						// just read the jet pT branches for now, TO BE FIXED
-						jt_pt = jtpt[ijet]; // supposed to be corrected already, TBC by Matt
-						ptJet->setVal(jt_pt);
-						z = jp_pt / jt_pt;
-						zed->setVal(z);
 
 						if (DebugMode) cout << "\n[Debug] Jpsi-in-jet candidate: Jpsi pT = " << jp_pt << ", (raw) jet pT = (" << rawPt << ") " << jt_pt << ", z = " << z << endl;
 
