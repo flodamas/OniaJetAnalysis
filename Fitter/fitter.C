@@ -44,7 +44,7 @@ void fitter(
   bool doSimulFit = false,        // Do simultaneous fit
   bool wantPureSMC = false,       // Flag to indicate if we want to fit pure signal MC
   const char* applyCorr = "",     // Apply weight to data for correction (Acceptance & Ef , l_J/psi eff...). No correction if empty variable.
-  bool applyJEC = false,          // Apply Jet Energy Correction
+  bool applyJEC = true,           // Apply Jet Energy Correction
   int numCores = 8,               // Number of cores used for fitting
   // Select the drawing options
   bool setLogScale = true, // Draw plot with log scale
